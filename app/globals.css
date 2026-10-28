@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --surface: #f0f2f5;
+  --text: #1c1e21;
+  --text-muted: #606770;
+  --accent: #0866ff;
+  --border: #ccd0d5;
+  --dot: rgba(28, 30, 33, 0.14);
+  --hm-1: #e3edff;
+  --hm-2: #9dbeff;
+  --hm-3: #0866ff;
+  --divergence: #e7f0ff;
+}
+
+.dark {
+  --background: #0b0b0c;
+  --surface: #161617;
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+  --accent: #0866ff;
+  --border: #2e2e30;
+  --dot: rgba(255, 255, 255, 0.13);
+  --hm-1: rgba(8, 102, 255, 0.22);
+  --hm-2: rgba(8, 102, 255, 0.48);
+  --hm-3: #0866ff;
+  --divergence: rgba(8, 102, 255, 0.16);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--text);
+  }
+  .dark .katex {
+    color: var(--text);
+  }
+}
+
+@layer utilities {
+  .text-hollow {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--text);
+  }
+  @supports not (-webkit-text-stroke: 1px black) {
+    .text-hollow {
+      color: var(--text);
+    }
+  }
+  .bg-dots {
+    background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+  .hm-0,
+  .hm-1,
+  .hm-2,
+  .hm-3 {
+    border-radius: 4px;
+    padding: 0 2px;
+  }
+  .hm-0 {
+    background: transparent;
+    color: inherit;
+  }
+  .hm-1 {
+    background: var(--hm-1);
+    color: inherit;
+  }
+  .hm-2 {
+    background: var(--hm-2);
+    color: inherit;
+  }
+  .hm-3 {
+    background: var(--hm-3);
+    color: #ffffff;
+  }
+  .panel-divergence {
+    background: var(--divergence);
+  }
+}

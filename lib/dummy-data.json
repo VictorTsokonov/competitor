@@ -1,0 +1,104 @@
+{
+  "problem": "Prove that among any n+1 distinct integers chosen from the set {1, 2, ..., 2n}, there are two that are coprime.",
+  "expert": {
+    "problem_spans": [
+      { "text": "n+1", "weight": 3, "reason": "One more pick than n boxes: the classic pigeonhole count." },
+      { "text": "distinct", "weight": 2, "reason": "No repeats, so each pick occupies its own slot." },
+      { "text": "{1, 2, ..., 2n}", "weight": 3, "reason": "Universe of size 2n splits into n natural pairs." },
+      { "text": "two", "weight": 1, "reason": "Only one pair is needed, not a full structure." },
+      { "text": "coprime", "weight": 2, "reason": "Goal is gcd 1, which consecutive integers always satisfy." }
+    ],
+    "cues": [
+      { "id": "c1", "span": "n+1", "type": "quantifier", "why_it_matters": "Count exceeds the number of pairs, forcing a collision.", "how_spotted": "Noticed n+1 picks against a universe built for n boxes." },
+      { "id": "c2", "span": "{1, 2, ..., 2n}", "type": "constraint", "why_it_matters": "Range 1..2n partitions into n consecutive pairs {2k-1, 2k}.", "how_spotted": "Even endpoint 2n suggests pairing odds with evens." },
+      { "id": "c3", "span": "distinct", "type": "constraint", "why_it_matters": "Distinct picks cannot share a slot, so pigeonhole applies.", "how_spotted": "Adjective restricting how the n+1 numbers are chosen." },
+      { "id": "c4", "span": "coprime", "type": "definition", "why_it_matters": "Goal gcd(a,b)=1 is automatic for consecutive integers.", "how_spotted": "Defined term in the claim; unpacked to gcd." },
+      { "id": "c5", "span": "two", "type": "quantifier", "why_it_matters": "Existential pair: one forced collision is enough.", "how_spotted": "Small quantity word in the conclusion." }
+    ],
+    "relations": [
+      {
+        "cue_ids": ["c4"],
+        "statement": "Consecutive integers are coprime.",
+        "maths": "\\gcd(k, k+1) = 1"
+      },
+      {
+        "cue_ids": ["c1", "c2"],
+        "statement": "Choosing n+1 numbers from n pairs forces both halves of some pair.",
+        "maths": "|S| = n+1 > n \\Rightarrow \\exists k: \\{2k-1, 2k\\} \\subseteq S"
+      }
+    ],
+    "model": {
+      "objects": [
+        "S \\subseteq \\{1, 2, \\dots, 2n\\},\\ |S| = n+1",
+        "P_k = \\{2k-1, 2k\\},\\ k = 1, \\dots, n"
+      ],
+      "definitions": [
+        "\\gcd(a,b) = 1 \\text{ means } a \\text{ and } b \\text{ are coprime}",
+        "\\{P_1, \\dots, P_n\\} \\text{ partitions } \\{1, \\dots, 2n\\}"
+      ],
+      "formal_statement": "\\forall S \\subseteq \\{1,\\dots,2n\\},\\ |S| = n+1 \\Rightarrow \\exists a,b \\in S:\\ \\gcd(a,b) = 1"
+    },
+    "selection": {
+      "method": "Pigeonhole on the n pairs P_k = {2k-1, 2k}: n+1 picks force a whole pair, which is consecutive hence coprime.",
+      "deciding_cue_ids": ["c1", "c2"],
+      "rejected": [
+        { "method": "Induction on n", "why": "No clean reduction step; deleting elements destroys the pairing structure." },
+        { "method": "Prime-factor contradiction", "why": "Too heavy: one coprime pair needs no global analysis of primes." }
+      ],
+      "unlocking_observation": "2n numbers form n consecutive pairs, so n+1 picks must take both halves of some pair."
+    },
+    "pass_2": {
+      "new_cues": [],
+      "reweighted": [{ "text": "coprime", "weight": 3 }],
+      "what_changed": "Second reading confirms the n boxes are the consecutive pairs and the goal is automatic once a pair lands."
+    },
+    "domain": "maths"
+  },
+  "student": {
+    "problem_spans": [
+      { "text": "n+1", "weight": 0, "reason": "Skimmed as background counting." },
+      { "text": "distinct", "weight": 1, "reason": "Numbers cannot repeat." },
+      { "text": "{1, 2, ..., 2n}", "weight": 1, "reason": "The set to pick from." },
+      { "text": "two", "weight": 1, "reason": "Need to find a pair." },
+      { "text": "coprime", "weight": 3, "reason": "The thing to prove; focused here first." }
+    ],
+    "cues": [
+      { "id": "s1", "span": "coprime", "type": "definition", "why_it_matters": "Must show two numbers share no common factor.", "how_spotted": "It is the goal word of the sentence." },
+      { "id": "s2", "span": "distinct", "type": "constraint", "why_it_matters": "Picks cannot repeat, so brute force is finite.", "how_spotted": "Adjective before integers." },
+      { "id": "s3", "span": "{1, 2, ..., 2n}", "type": "constraint", "why_it_matters": "Bounds the search to small cases.", "how_spotted": "The only explicit set in the problem." }
+    ],
+    "relations": [
+      {
+        "cue_ids": ["s1"],
+        "statement": "Coprime means no shared prime factor.",
+        "maths": "\\gcd(a,b) = 1"
+      }
+    ],
+    "model": {
+      "objects": [
+        "S \\subseteq \\{1, 2, \\dots, 2n\\},\\ |S| = n+1"
+      ],
+      "definitions": [
+        "\\gcd(a,b) = 1 \\text{ means } a \\text{ and } b \\text{ are coprime}"
+      ],
+      "formal_statement": "\\exists a,b \\in S:\\ \\gcd(a,b) = 1"
+    },
+    "selection": {
+      "method": "Try small cases: test n = 1, 2, 3 by hand and look for a pattern.",
+      "deciding_cue_ids": ["s1"],
+      "rejected": [],
+      "unlocking_observation": "Small examples might show which pairs end up coprime."
+    },
+    "pass_2": {
+      "new_cues": [],
+      "reweighted": [],
+      "what_changed": "Re-reading did not surface new structure; still anchored on the goal word."
+    },
+    "domain": "maths"
+  },
+  "comparison": {
+    "first_divergence": "You weighted 'n+1' at 0; the expert weighted it 3. Together with '2n' it is the cue for pigeonhole with n boxes.",
+    "missed_cues": ["c1", "c2"],
+    "unused_cues": ["s2"]
+  }
+}
