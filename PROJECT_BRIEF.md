@@ -1,31 +1,29 @@
 # Competitor — PROJECT_BRIEF.md (single source of truth, read at the start of every task)
 
 ## Product
-Competitor is a maths tutor for Putnam/ICMC students that never gives the solution first. It shows how an expert read the problem versus how the student read it, cue by cue. Not a chatbot: the dashboard is a workflow, not a message box. Protocol name inside the product: ProofReader.
-
-## The workflow
-Student: assume you will get this wrong. On paper: (1) mark phrases in the problem and write what each suggests, (2) say what the problem is about before any maths, (3) define objects, given and wanted, (4) list 2-3 methods with the phrase that triggered each and why kept/dropped, (5) attempt. Photograph the pages, upload.
-AI (Muse Spark 1.3): forced through the same stages before solving: weighted problem spans, typed cues, relations, formal model, method selection with deciding cue and rejected alternatives, second reading. Every thought anchored to an exact substring of the problem text.
-Comparison: plain TypeScript set difference on cues, method comparison, first point of divergence. Never a verdict on who did better.
+Maths tutor for Putnam/ICMC students that never gives the solution first. It compares HOW the expert reads a problem versus HOW the student reads it, cue by cue, through one shared schema anchored to phrases of the problem text. Protocol name: ProofReader. Not a chatbot: the dashboard is a workflow document, never a message box. Never a verdict on who did better.
 
 ## Pages (3, nothing else)
-- `/` Landing: dramatic hero. "COMPETITOR". Tagline "Stop solving. Start reading." Sub: for Putnam/ICMC competitors who get the maths but miss the cues. CTAs: Try the demo (-> /dashboard), How it works (-> /guide). One heatmap teaser.
-- `/dashboard` Main app, 3 columns. Left: "Analyses" list (past problems, static for now) + "New analysis". Centre: problem text, photo upload area, then the expert chain revealed stage by stage. Right: two heatmaps (Expert / You) over the problem text, first-divergence sentence, missed cues, "Reveal solution" button.
-- `/guide` The student protocol: the mindset line and the five headings, as a clean static page.
+- `/` Landing: dark hero, glyph-sphere canvas, "Stop solving. Start reading." (`reading` hollow), expert heatmap teaser, Read/Compare/Learn accordion, one-line protocol card, hackathon footer.
+- `/dashboard` Main app: 3 columns separated by 1px rules. Left: collapsible Sets tree (live item: ICMC 2020 / Problem 1). Centre: problem block (highlighted text, inline KaTeX, preserved lines) + 8 stage sections as a ruled document. Right: First divergence, Missed cues, collapsed Expert/Your readings, Legend, Reveal solution placeholder.
+- `/guide` Student protocol: "Assume you will get this wrong.", five steps, photograph-and-upload card, "Why this works".
 
 ## Visual style
-Meta-clean and mathematically minimal. White background, near-black text, Meta blue #0866FF for accents and CTAs only, light grey #F0F2F5 for panels, 16px card radius, generous whitespace, Inter or the Next default font. All maths rendered with KaTeX. No gradients, no illustrations, no dark mode for now.
+Meta-clean, mathematically minimal. Light/dark themes (class strategy, system default, toggle in localStorage with try/catch). Tokens: background, surface, text, text-muted, accent #0866FF (both), border. Dark: #0B0B0C / #161617 / white / #A1A1AA. Span categories: setting green, definition amber, rule red, goal violet, informal grey. 16px card radius where cards exist. KaTeX for all maths (no `$` support — use `\text{}` + bare math). No gradients, shadows, logos, or wordmarks.
 
 ## Data (mock for now)
-`USE_MOCK=true` in .env.local -> `/api/analyse` returns `lib/dummy-data.json`. Later `false` -> real call via openai SDK to https://api.meta.ai/v1, model muse-spark-1.3, key MODEL_API_KEY. Browser never calls Meta directly.
+`USE_MOCK=true` in .env.local -> `/api/analyse` returns `lib/dummy-data.json` (hand-written ICMC 2020 P1 analysis; also the model's quality target). Later `false` -> real calls via openai SDK to https://api.meta.ai/v1, model muse-spark-1.3, key MODEL_API_KEY. Browser never calls Meta directly.
+
+## Pipeline (real calls, pending)
+Call A: expert pass 1 (high effort). Call C: student extraction from photos (medium) — faithful, not charitable; every cue carries the student's own words. Call B: expert second reading, given A. `lib/compare.ts` computes the comparison (no model call). Call D behind Reveal: solution + used cue ids. Render progressively (expert heatmap, then student, then comparison); never one long spinner. Stretch: call E ablation, one deciding cue removed at a time.
+Honest framing the UI keeps: "how spotted" is a plausible expert narrative, not the model's cognition; ablation is the measured counterpart.
 
 ## Schema (shared by expert and student chains)
-problem_spans[{text, weight 0-3, reason}], cues[{id, span, type, why_it_matters, how_spotted}], relations[{cue_ids, statement, maths}], model{objects, definitions, formal_statement}, selection{method, deciding_cue_ids, rejected[{method, why}], unlocking_observation}, pass_2{new_cues, reweighted, what_changed}, domain "maths"|"not_maths".
-Cue types: quantifier | constraint | symmetry | extremal | parity_divisibility | boundary | definition.
-Rules: every span is an exact substring of the problem text, checked in code. zod validates every model response. Maths fields are LaTeX strings.
+problem{text,latex}, spans[{id,text,category,weight 0-100,reason}], reading{cues[{id,span_id,why_it_matters,how_spotted}],definitions[{term,meaning_latex}]}, goal{asked,answer_form,final_line_would_say}, informal_cues[{span_id,bearing}], abstraction{underneath[{object,really_is,implies}],deeper_properties[]}, simplification{instance,instance_latex,what_to_try,notice_prompt}, method{candidates[{name,deciding_span_ids,from_first_principles,kept,why}],chosen}, prerequisites[{name,needed_for,flag assumed|needed}], second_reading{new_spans,reweighted[{span_id,old,new,why}],what_changed}, domain "maths"|"not_maths".
+Rules: every span is an exact substring of problem.text, checked in code; zod validates every model response; comparison is TypeScript set difference (currently hard-coded in dummy data — `lib/compare.ts` pending).
 
 ## Stack and rules
-Next.js 15 App Router, TypeScript strict, Tailwind, zod, openai, katex. API routes only, no DB, no auth. Files under ~150 lines. Prefer boring, readable code. Run `npm run build` after every change and fix errors. Commit after each working slice.
+Next.js 15 App Router, TypeScript strict, Tailwind, zod, openai, katex. API routes only, no DB, no auth. Files under ~150 lines. Boring readable code; validate at the boundary; explicit loading/error states; no fetch-on-mount for user work. After every change: build, lint, verify, report. See WORKFLOW.md for the vocabulary, crew, and slice loop.
 
 ## Status
-Scaffold done. Next: mock UI for all 3 pages.
+Mock UI for all 3 pages done. Next, in order: (1) real call A vs dummy, (2) photo upload + call C, (3) compare.ts, (4) calls B + D, (5) deploy/README/video, (6) ablation if time. Submit by Wed 4 Nov 20:00 UK. Judging: impact 30 / Meta tooling 25 / demo+video 25 / depth 20 — demo-first, scope creep is the risk.
