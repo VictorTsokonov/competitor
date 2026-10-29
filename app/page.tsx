@@ -2,7 +2,10 @@ import Link from "next/link";
 import Heatmap from "@/components/Heatmap";
 import Accordion from "@/components/Accordion";
 import GlyphSphere from "@/components/GlyphSphere";
-import dummyData from "@/lib/dummy-data.json";
+import { AnalysisSchema } from "@/lib/schema";
+import dummyDataJson from "@/lib/dummy-data.json";
+
+const dummyData = AnalysisSchema.parse(dummyDataJson);
 
 const ITEMS = [
   {
@@ -61,8 +64,8 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-[16px] bg-surface p-6">
             <Heatmap
-              text={dummyData.problem}
-              spans={dummyData.expert.problem_spans}
+              text={dummyData.problem.text}
+              spans={dummyData.expert.spans}
               label="Expert reading"
             />
           </div>

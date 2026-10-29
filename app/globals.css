@@ -14,6 +14,11 @@
   --hm-2: #9dbeff;
   --hm-3: #0866ff;
   --divergence: #e7f0ff;
+  --cat-setting: 22, 163, 74;
+  --cat-definition: 217, 119, 6;
+  --cat-rule: 220, 38, 38;
+  --cat-goal: 124, 58, 237;
+  --cat-informal: 107, 114, 128;
 }
 
 .dark {
@@ -28,6 +33,11 @@
   --hm-2: rgba(8, 102, 255, 0.48);
   --hm-3: #0866ff;
   --divergence: rgba(8, 102, 255, 0.16);
+  --cat-setting: 74, 222, 128;
+  --cat-definition: 251, 191, 36;
+  --cat-rule: 248, 113, 113;
+  --cat-goal: 167, 139, 250;
+  --cat-informal: 156, 163, 175;
 }
 
 @layer base {

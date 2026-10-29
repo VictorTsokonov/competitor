@@ -1,100 +1,96 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Analysis } from "@/lib/schema";
-import Heatmap from "@/components/Heatmap";
-import ExpertChain from "@/components/ExpertChain";
+import SetsPanel from "@/components/SetsPanel";
+import ComparisonPanel from "@/components/ComparisonPanel";
+import ProblemText from "@/components/ProblemText";
+import ResponseCard from "@/components/ResponseCard";
+import ResponseReading from "@/components/ResponseReading";
+import ResponseGoal from "@/components/ResponseGoal";
+import ResponseInformalCues from "@/components/ResponseInformalCues";
+import ResponseAbstraction from "@/components/ResponseAbstraction";
+import ResponseSimplification from "@/components/ResponseSimplification";
+import ResponseMethod from "@/components/ResponseMethod";
+import ResponsePrerequisites from "@/components/ResponsePrerequisites";
+import ResponseSecondReading from "@/components/ResponseSecondReading";
 
 export default function Dashboard() {
   const [data, setData] = useState<Analysis | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [showSolution, setShowSolution] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
-  useEffect(() => {
+  function load() {
+    setStatus("Loading analysis…");
     fetch("/api/analyse", { method: "POST" })
       .then(async (res) => {
         if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
         return res.json();
       })
-      .then(setData)
-      .catch((e: Error) => setError(e.message));
-  }, []);
+      .then((d: Analysis) => {
+        setData(d);
+        setStatus(null);
+      })
+      .catch((e: Error) => setStatus(`Failed to load: ${e.message}`));
+  }
 
-  if (error)
-    return <main className="p-8 text-ink">Failed to load: {error}</main>;
-  if (!data) return <main className="p-8 text-ink">Loading analysis…</main>;
-
-  const expert = data.expert;
-  const cueLabel = (id: string) =>
-    expert.cues.find((c) => c.id === id)?.span ?? id;
+  const expert = data?.expert;
 
   return (
     <main className="min-h-screen bg-background text-ink">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 p-6 lg:grid-cols-12">
-        <aside className="lg:col-span-3">
-          <div className="rounded-[16px] bg-surface p-5">
-            <h2 className="mb-4 text-lg font-semibold">Analyses</h2>
-            <p className="mb-4 rounded-[16px] bg-background p-3 text-sm">
-              {data.problem}
+      <div className="mx-auto flex max-w-[1440px] items-stretch">
+        <div className="shrink-0 border-r border-line">
+          <SetsPanel onSelectProblem={load} />
+        </div>
+
+        <div className="min-w-0 flex-1 px-6 py-10">
+          <div className="mx-auto w-full max-w-[760px] leading-[1.6]">
+            {data && expert ? (
+              <>
+                <div className="border-b border-line pb-12">
+                  <ProblemText text={data.problem.text} spans={expert.spans} />
+                </div>
+                <ResponseCard label="Stage 1 · Reading" title="Reading" divider={false}>
+                  <ResponseReading reading={expert.reading} spans={expert.spans} />
+                </ResponseCard>
+                <ResponseCard label="Stage 2 · Goal" title="Goal">
+                  <ResponseGoal goal={expert.goal} />
+                </ResponseCard>
+                <ResponseCard label="Stage 3 · Informal cues" title="Informal cues">
+                  <ResponseInformalCues informal_cues={expert.informal_cues} spans={expert.spans} />
+                </ResponseCard>
+                <ResponseCard label="Stage 4 · Abstraction" title="Abstraction">
+                  <ResponseAbstraction abstraction={expert.abstraction} />
+                </ResponseCard>
+                <ResponseCard label="Stage 5 · Simplification" title="Simplification">
+                  <ResponseSimplification simplification={expert.simplification} />
+                </ResponseCard>
+                <ResponseCard label="Stage 6 · Method" title="Method">
+                  <ResponseMethod method={expert.method} spans={expert.spans} />
+                </ResponseCard>
+                <ResponseCard label="Stage 7 · Prerequisites" title="Prerequisites">
+                  <ResponsePrerequisites prerequisites={expert.prerequisites} />
+                </ResponseCard>
+                <ResponseCard label="Stage 8 · Second reading" title="Second reading">
+                  <ResponseSecondReading second_reading={expert.second_reading} spans={expert.spans} />
+                </ResponseCard>
+              </>
+            ) : (
+              <p className="py-20 text-center text-muted">
+                {status ?? "Select ICMC 2020 / Problem 1 from your sets to begin."}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="shrink-0 border-l border-line">
+          {data ? (
+            <ComparisonPanel data={data} />
+          ) : (
+            <p className="w-80 px-5 py-8 text-sm text-muted">
+              Comparison will appear here.
             </p>
-            <button className="w-full rounded-[16px] bg-accent px-4 py-2 text-sm font-semibold text-white">
-              New analysis
-            </button>
-          </div>
-        </aside>
-
-        <section className="space-y-6 lg:col-span-6">
-          <h1 className="text-xl font-semibold">{data.problem}</h1>
-          <div className="rounded-[16px] border-2 border-dashed border-line p-6 text-center text-sm">
-            <p className="font-semibold">Upload your written attempt</p>
-            <p className="mt-1">Photo upload coming soon</p>
-            <input type="file" disabled className="mt-3 text-sm" />
-          </div>
-
-          <ExpertChain expert={expert} />
-        </section>
-
-        <aside className="space-y-6 lg:col-span-3">
-          <div className="rounded-[16px] bg-surface p-5">
-            <Heatmap
-              text={data.problem}
-              spans={expert.problem_spans}
-              label="Expert"
-            />
-          </div>
-          <div className="rounded-[16px] bg-surface p-5">
-            <Heatmap
-              text={data.problem}
-              spans={data.student.problem_spans}
-              label="You"
-            />
-          </div>
-          <div className="panel-divergence rounded-[16px] p-5">
-            <h2 className="mb-2 text-sm font-semibold">First divergence</h2>
-            <p className="text-sm">{data.comparison.first_divergence}</p>
-          </div>
-          <div className="rounded-[16px] bg-surface p-5">
-            <h2 className="mb-2 text-sm font-semibold">Missed cues</h2>
-            <ul className="list-disc pl-5 text-sm">
-              {data.comparison.missed_cues.map((id) => (
-                <li key={id}>
-                  {id} — <span className="font-mono">“{cueLabel(id)}”</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <button
-            onClick={() => setShowSolution((v) => !v)}
-            className="w-full rounded-[16px] bg-accent px-4 py-2 text-sm font-semibold text-white"
-          >
-            Reveal solution
-          </button>
-          {showSolution && (
-            <div className="rounded-[16px] bg-surface p-5 text-sm">
-              Full solution reveal coming soon.
-            </div>
           )}
-        </aside>
+        </div>
       </div>
     </main>
   );

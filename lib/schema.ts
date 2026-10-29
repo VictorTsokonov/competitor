@@ -1,72 +1,123 @@
 import { z } from "zod";
 
-export const ProblemSpanSchema = z.object({
+export const ProblemSchema = z.object({
   text: z.string().min(1),
-  weight: z.number().int().min(0).max(3),
+  latex: z.string(),
+});
+
+export const SpanCategorySchema = z.enum([
+  "setting",
+  "definition",
+  "rule",
+  "goal",
+  "informal",
+]);
+
+export const SpanSchema = z.object({
+  id: z.string().min(1),
+  text: z.string().min(1),
+  category: SpanCategorySchema,
+  weight: z.number().int().min(0).max(100),
   reason: z.string(),
 });
 
-export const CueTypeSchema = z.enum([
-  "quantifier",
-  "constraint",
-  "symmetry",
-  "extremal",
-  "parity_divisibility",
-  "boundary",
-  "definition",
-]);
-
-export const CueSchema = z.object({
-  id: z.string().min(1),
-  span: z.string().min(1),
-  type: CueTypeSchema,
-  why_it_matters: z.string(),
-  how_spotted: z.string(),
+export const ReadingSchema = z.object({
+  cues: z.array(
+    z.object({
+      id: z.string().min(1),
+      span_id: z.string().min(1),
+      why_it_matters: z.string(),
+      how_spotted: z.string(),
+    })
+  ),
+  definitions: z.array(z.object({ term: z.string(), meaning_latex: z.string() })),
 });
 
-export const RelationSchema = z.object({
-  cue_ids: z.array(z.string()),
-  statement: z.string(),
-  maths: z.string(),
+export const GoalSchema = z.object({
+  asked: z.string(),
+  answer_form: z.string(),
+  final_line_would_say: z.string(),
 });
 
-export const ModelSchema = z.object({
-  objects: z.array(z.string()),
-  definitions: z.array(z.string()),
-  formal_statement: z.string(),
+export const InformalCuesSchema = z.array(
+  z.object({ span_id: z.string().min(1), bearing: z.string() })
+);
+
+export const AbstractionSchema = z.object({
+  underneath: z.array(
+    z.object({ object: z.string(), really_is: z.string(), implies: z.string() })
+  ),
+  deeper_properties: z.array(z.string()),
 });
 
-export const RejectedSchema = z.object({
-  method: z.string(),
-  why: z.string(),
+export const SimplificationSchema = z.object({
+  instance: z.string(),
+  instance_latex: z.string(),
+  what_to_try: z.string(),
+  notice_prompt: z.string(),
 });
 
-export const SelectionSchema = z.object({
-  method: z.string(),
-  deciding_cue_ids: z.array(z.string()),
-  rejected: z.array(RejectedSchema),
-  unlocking_observation: z.string(),
+export const MethodSchema = z.object({
+  candidates: z.array(
+    z.object({
+      name: z.string(),
+      deciding_span_ids: z.array(z.string()),
+      from_first_principles: z.string(),
+      kept: z.boolean(),
+      why: z.string(),
+    })
+  ),
+  chosen: z.string(),
 });
 
-export const Pass2Schema = z.object({
-  new_cues: z.array(z.string()),
+export const PrerequisitesSchema = z.array(
+  z.object({
+    name: z.string(),
+    needed_for: z.string(),
+    flag: z.enum(["assumed", "needed"]),
+  })
+);
+
+export const SecondReadingSchema = z.object({
+  new_spans: z.array(z.string()),
   reweighted: z.array(
-    z.object({ text: z.string(), weight: z.number().int().min(0).max(3) })
+    z.object({
+      span_id: z.string().min(1),
+      old: z.number().int().min(0).max(100),
+      new: z.number().int().min(0).max(100),
+      why: z.string(),
+    })
   ),
   what_changed: z.string(),
 });
 
 export const DomainSchema = z.enum(["maths", "not_maths"]);
 
-export const ChainSchema = z.object({
-  problem_spans: z.array(ProblemSpanSchema),
-  cues: z.array(CueSchema),
-  relations: z.array(RelationSchema),
-  model: ModelSchema,
-  selection: SelectionSchema,
-  pass_2: Pass2Schema,
-  domain: DomainSchema,
-});
+export const ChainSchema = z
+  .object({
+    problem: ProblemSchema,
+    spans: z.array(SpanSchema),
+    reading: ReadingSchema,
+    goal: GoalSchema,
+    informal_cues: InformalCuesSchema,
+    abstraction: AbstractionSchema,
+    simplification: SimplificationSchema,
+    method: MethodSchema,
+    prerequisites: PrerequisitesSchema,
+    second_reading: SecondReadingSchema,
+    domain: DomainSchema,
+  })
+  .superRefine((chain, ctx) => {
+    chain.spans.forEach((s, i) => {
+      if (!chain.problem.text.includes(s.text)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `spans[${i}].text is not an exact substring`,
+          path: ["spans", i, "text"],
+        });
+      }
+    });
+  });
 
 export const ComparisonSchema = z.object({
   first_divergence: z.string(),
@@ -76,33 +127,23 @@ export const ComparisonSchema = z.object({
 
 export const AnalysisSchema = z
   .object({
-    problem: z.string().min(1),
+    problem: ProblemSchema,
     expert: ChainSchema,
     student: ChainSchema,
     comparison: ComparisonSchema,
   })
   .superRefine((val, ctx) => {
     (["expert", "student"] as const).forEach((side) => {
-      val[side].problem_spans.forEach((s, i) => {
-        if (!val.problem.includes(s.text)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `${side}.problem_spans[${i}].text is not an exact substring`,
-            path: [side, "problem_spans", i, "text"],
-          });
-        }
-      });
-      val[side].cues.forEach((c, i) => {
-        if (!val.problem.includes(c.span)) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `${side}.cues[${i}].span is not an exact substring`,
-            path: [side, "cues", i, "span"],
-          });
-        }
-      });
+      if (val[side].problem.text !== val.problem.text) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${side}.problem.text must match the analysis problem`,
+          path: [side, "problem", "text"],
+        });
+      }
     });
   });
 
 export type Chain = z.infer<typeof ChainSchema>;
 export type Analysis = z.infer<typeof AnalysisSchema>;
+export type SpanCategory = z.infer<typeof SpanCategorySchema>;

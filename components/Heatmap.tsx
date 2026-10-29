@@ -1,6 +1,30 @@
-type Span = { text: string; weight: number; reason: string };
+import type { SpanCategory } from "@/lib/schema";
+import { HighlightedText, type HighlightSpan } from "./SpanHighlight";
 
-const WEIGHT_CLASS = ["hm-0", "hm-1", "hm-2", "hm-3"];
+const CATEGORIES: SpanCategory[] = [
+  "setting",
+  "definition",
+  "rule",
+  "goal",
+  "informal",
+];
+
+export function CategoryLegend() {
+  return (
+    <div className="flex flex-wrap gap-3">
+      {CATEGORIES.map((c) => (
+        <span key={c} className="flex items-center gap-1 text-xs text-muted">
+          <span
+            aria-hidden="true"
+            className="inline-block h-3 w-3 rounded-full"
+            style={{ backgroundColor: `rgb(var(--cat-${c}))` }}
+          />
+          {c}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function Heatmap({
   text,
@@ -8,32 +32,15 @@ export default function Heatmap({
   label,
 }: {
   text: string;
-  spans: Span[];
+  spans: HighlightSpan[];
   label: string;
 }) {
-  const marks = spans
-    .map((s) => ({ ...s, start: text.indexOf(s.text) }))
-    .filter((m) => m.start >= 0)
-    .sort((a, b) => a.start - b.start);
-
-  const parts: React.ReactNode[] = [];
-  let cursor = 0;
-  marks.forEach((m, i) => {
-    if (m.start < cursor) return;
-    if (m.start > cursor) parts.push(text.slice(cursor, m.start));
-    parts.push(
-      <mark key={i} className={WEIGHT_CLASS[m.weight] ?? "hm-0"} title={m.reason}>
-        {text.slice(m.start, m.start + m.text.length)}
-      </mark>
-    );
-    cursor = m.start + m.text.length;
-  });
-  if (cursor < text.length) parts.push(text.slice(cursor));
-
   return (
     <div>
       <p className="mb-1 text-sm font-semibold">{label}</p>
-      <p className="leading-relaxed">{parts}</p>
+      <p className="leading-relaxed">
+        <HighlightedText text={text} spans={spans} />
+      </p>
     </div>
   );
 }

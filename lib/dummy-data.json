@@ -1,104 +1,140 @@
 {
-  "problem": "Prove that among any n+1 distinct integers chosen from the set {1, 2, ..., 2n}, there are two that are coprime.",
+  "problem": {
+    "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
+    "latex": "\\text{Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:} \\quad \\text{- On Alice's move, she counts the number of marked points on the sphere, } n \\text{. She then marks another } n+1 \\text{ points on the sphere.} \\quad \\text{- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.} \\quad \\text{Can Bob always guarantee that after a finite number of moves, the sphere contains no marked points?} \\quad \\text{(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)}"
+  },
   "expert": {
-    "problem_spans": [
-      { "text": "n+1", "weight": 3, "reason": "One more pick than n boxes: the classic pigeonhole count." },
-      { "text": "distinct", "weight": 2, "reason": "No repeats, so each pick occupies its own slot." },
-      { "text": "{1, 2, ..., 2n}", "weight": 3, "reason": "Universe of size 2n splits into n natural pairs." },
-      { "text": "two", "weight": 1, "reason": "Only one pair is needed, not a full structure." },
-      { "text": "coprime", "weight": 2, "reason": "Goal is gcd 1, which consecutive integers always satisfy." }
+    "problem": {
+      "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
+      "latex": "\\text{Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:} \\quad \\text{- On Alice's move, she counts the number of marked points on the sphere, } n \\text{. She then marks another } n+1 \\text{ points on the sphere.} \\quad \\text{- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.} \\quad \\text{Can Bob always guarantee that after a finite number of moves, the sphere contains no marked points?} \\quad \\text{(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)}"
+    },
+    "spans": [
+      { "id": "s1", "text": "a sphere", "category": "setting", "weight": 60, "reason": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre." },
+      { "id": "s2", "text": "finite number of points", "category": "setting", "weight": 55, "reason": "Finite means we can count, so a termination argument on the count is available." },
+      { "id": "s3", "text": "Alice going first", "category": "informal", "weight": 35, "reason": "Fixes the order inside a round: Alice adds, then Bob removes. Track the count after Bob's move." },
+      { "id": "s4", "text": "counts the number of marked points on the sphere, n", "category": "rule", "weight": 50, "reason": "Alice's move depends on the current count, so the count is the state of the game." },
+      { "id": "s5", "text": "marks another n+1 points", "category": "rule", "weight": 85, "reason": "n becomes 2n+1: slightly more than doubling. Bob must remove more than half each round or the count never falls." },
+      { "id": "s6", "text": "chooses one hemisphere", "category": "rule", "weight": 70, "reason": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes." },
+      { "id": "s7", "text": "including any marked points on the boundary of the hemisphere", "category": "rule", "weight": 95, "reason": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever." },
+      { "id": "s8", "text": "always guarantee", "category": "goal", "weight": 80, "reason": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks." },
+      { "id": "s9", "text": "after a finite number of moves", "category": "goal", "weight": 80, "reason": "Termination: we need a quantity that strictly decreases each round." },
+      { "id": "s10", "text": "the sphere contains no marked points", "category": "goal", "weight": 65, "reason": "The target state is count zero." },
+      { "id": "s11", "text": "any plane passing through the centre", "category": "definition", "weight": 75, "reason": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary." }
     ],
-    "cues": [
-      { "id": "c1", "span": "n+1", "type": "quantifier", "why_it_matters": "Count exceeds the number of pairs, forcing a collision.", "how_spotted": "Noticed n+1 picks against a universe built for n boxes." },
-      { "id": "c2", "span": "{1, 2, ..., 2n}", "type": "constraint", "why_it_matters": "Range 1..2n partitions into n consecutive pairs {2k-1, 2k}.", "how_spotted": "Even endpoint 2n suggests pairing odds with evens." },
-      { "id": "c3", "span": "distinct", "type": "constraint", "why_it_matters": "Distinct picks cannot share a slot, so pigeonhole applies.", "how_spotted": "Adjective restricting how the n+1 numbers are chosen." },
-      { "id": "c4", "span": "coprime", "type": "definition", "why_it_matters": "Goal gcd(a,b)=1 is automatic for consecutive integers.", "how_spotted": "Defined term in the claim; unpacked to gcd." },
-      { "id": "c5", "span": "two", "type": "quantifier", "why_it_matters": "Existential pair: one forced collision is enough.", "how_spotted": "Small quantity word in the conclusion." }
-    ],
-    "relations": [
-      {
-        "cue_ids": ["c4"],
-        "statement": "Consecutive integers are coprime.",
-        "maths": "\\gcd(k, k+1) = 1"
-      },
-      {
-        "cue_ids": ["c1", "c2"],
-        "statement": "Choosing n+1 numbers from n pairs forces both halves of some pair.",
-        "maths": "|S| = n+1 > n \\Rightarrow \\exists k: \\{2k-1, 2k\\} \\subseteq S"
-      }
-    ],
-    "model": {
-      "objects": [
-        "S \\subseteq \\{1, 2, \\dots, 2n\\},\\ |S| = n+1",
-        "P_k = \\{2k-1, 2k\\},\\ k = 1, \\dots, n"
+    "reading": {
+      "cues": [
+        { "id": "c1", "span_id": "s1", "why_it_matters": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre.", "how_spotted": "The stage is named before anything happens; symmetry lives here." },
+        { "id": "c2", "span_id": "s2", "why_it_matters": "Finite means we can count, so a termination argument on the count is available.", "how_spotted": "'Finite' next to 'counts' later means the count is the state." },
+        { "id": "c3", "span_id": "s5", "why_it_matters": "n becomes 2n+1: slightly more than doubling. Bob must remove more than half each round or the count never falls.", "how_spotted": "The growth rule is exact arithmetic, so do the arithmetic: n to 2n+1." },
+        { "id": "c4", "span_id": "s6", "why_it_matters": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes.", "how_spotted": "Bob's only verb is 'chooses': his power is a choice to optimise." },
+        { "id": "c5", "span_id": "s7", "why_it_matters": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever.", "how_spotted": "A clause that only matters in edge cases is usually there because the edge case is the point." },
+        { "id": "c6", "span_id": "s8", "why_it_matters": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks.", "how_spotted": "'Always' quantifies over all of Alice's play: worst case, not typical case." },
+        { "id": "c7", "span_id": "s9", "why_it_matters": "Termination: we need a quantity that strictly decreases each round.", "how_spotted": "'Finite' as a goal word calls for a descent argument." },
+        { "id": "c8", "span_id": "s11", "why_it_matters": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary.", "how_spotted": "The definition is spelled out in full, so the proof must use every word of it." }
       ],
       "definitions": [
-        "\\gcd(a,b) = 1 \\text{ means } a \\text{ and } b \\text{ are coprime}",
-        "\\{P_1, \\dots, P_n\\} \\text{ partitions } \\{1, \\dots, 2n\\}"
-      ],
-      "formal_statement": "\\forall S \\subseteq \\{1,\\dots,2n\\},\\ |S| = n+1 \\Rightarrow \\exists a,b \\in S:\\ \\gcd(a,b) = 1"
+        { "term": "hemisphere", "meaning_latex": "\\text{closed half of the sphere cut by a plane through the centre; its boundary is a great circle}" },
+        { "term": "round", "meaning_latex": "\\text{one move by Alice followed by one move by Bob}" },
+        { "term": "count after a round", "meaning_latex": "c_{k}, \\text{the number of marked points after Bob's } k \\text{-th move}" }
+      ]
     },
-    "selection": {
-      "method": "Pigeonhole on the n pairs P_k = {2k-1, 2k}: n+1 picks force a whole pair, which is consecutive hence coprime.",
-      "deciding_cue_ids": ["c1", "c2"],
-      "rejected": [
-        { "method": "Induction on n", "why": "No clean reduction step; deleting elements destroys the pairing structure." },
-        { "method": "Prime-factor contradiction", "why": "Too heavy: one coprime pair needs no global analysis of primes." }
-      ],
-      "unlocking_observation": "2n numbers form n consecutive pairs, so n+1 picks must take both halves of some pair."
+    "goal": {
+      "asked": "Whether Bob has a strategy that empties the sphere against every possible play by Alice.",
+      "answer_form": "Yes or no, with proof. If yes: a strategy for Bob plus a proof that it terminates. If no: a strategy for Alice that keeps at least one point forever.",
+      "final_line_would_say": "After every round the number of marked points strictly decreases, so after finitely many rounds it is zero."
     },
-    "pass_2": {
-      "new_cues": [],
-      "reweighted": [{ "text": "coprime", "weight": 3 }],
-      "what_changed": "Second reading confirms the n boxes are the consecutive pairs and the goal is automatic once a pair lands."
+    "informal_cues": [
+      { "span_id": "s3", "bearing": "Alice moves first, so each round is add-then-remove. The quantity to control is the count left after Bob." },
+      { "span_id": "s8", "bearing": "'Always' means Bob cannot rely on Alice placing points badly; the strategy must beat the worst case." },
+      { "span_id": "s2", "bearing": "'Finite' at the start means the count is a natural number from the first move, so induction and descent are available." }
+    ],
+    "abstraction": {
+      "underneath": [
+        { "object": "sphere", "really_is": "a closed surface with central symmetry and no boundary", "implies": "every great circle passes through antipodal pairs; there is no edge for points to hide at" },
+        { "object": "hemisphere", "really_is": "the intersection of the sphere with a closed half-space whose boundary plane contains the centre", "implies": "its boundary is a great circle, and because the region is closed, points on that circle are removed" },
+        { "object": "choosing a hemisphere", "really_is": "choosing a plane through the centre, then a side", "implies": "for any plane the two closed hemispheres cover every point, so one side contains at least half of them" }
+      ],
+      "deeper_properties": [
+        "Through the centre and any two points on the sphere there is a plane, so Bob can always place two marked points on the boundary.",
+        "Count argument: if $m$ points remain and the plane passes through two of them, one closed hemisphere contains at least $2 + \\lceil (m-2)/2 \\rceil = \\lceil (m+2)/2 \\rceil > m/2$ points.",
+        "'At least half' only stops growth; 'more than half' forces decrease. The boundary clause is what upgrades one to the other."
+      ]
+    },
+    "simplification": {
+      "instance": "Play the same game on a circle. Alice adds n+1 points; Bob removes a closed semicircle (a diameter through the centre and one side).",
+      "instance_latex": "\\text{Start with one point. Alice adds } 2 \\text{, giving } 3 \\text{ points. Can Bob remove all } 3 \\text{?}",
+      "what_to_try": "Place the three points $120^\\circ$ apart. Check whether any closed semicircle contains all three. Then ask how many marked points a diameter can pass through.",
+      "notice_prompt": "In two dimensions a diameter passes through one marked point and its antipode at most, and Bob cannot clear three spread-out points. On a sphere, how many marked points can a plane through the centre pass through, and what does the boundary clause let Bob do with that?"
+    },
+    "method": {
+      "candidates": [
+        { "name": "Monovariant: show the count strictly decreases every round", "deciding_span_ids": ["s9", "s5", "s7"], "from_first_principles": "The goal is termination, and termination arguments need a quantity in the natural numbers that strictly decreases. The count after Bob's move is the obvious quantity. Alice takes it from $n$ to $2n+1$, so Bob must remove at least $n+2$ to leave at most $n-1$. Putting the plane through two marked points guarantees removing $\\lceil (2n+3)/2 \\rceil = n+2$.", "kept": true, "why": "It answers the exact question asked and every step is forced by a span." },
+        { "name": "Induction on the number of points", "deciding_span_ids": ["s2", "s9"], "from_first_principles": "Finite initial count suggests induction on $n$.", "kept": false, "why": "It is the same argument as the monovariant in different clothing; the monovariant is cleaner to state." },
+        { "name": "Find an Alice strategy that keeps points forever", "deciding_span_ids": ["s8"], "from_first_principles": "If the answer were no, we would need a configuration Bob cannot shrink. Spreading points evenly is the natural try.", "kept": false, "why": "Any configuration is beaten by a plane through two of its points, so no such strategy exists." },
+        { "name": "Potential function on positions of points", "deciding_span_ids": ["s1"], "from_first_principles": "Geometric spread of points could be measured.", "kept": false, "why": "Far heavier than needed; the count alone suffices." }
+      ],
+      "chosen": "Monovariant with the two-point plane lemma: after each round at most $n-1$ points remain, so Bob wins."
+    },
+    "prerequisites": [
+      { "name": "Pigeonhole / averaging", "needed_for": "One of two closed hemispheres contains at least half the points.", "flag": "needed" },
+      { "name": "Monovariant and termination arguments", "needed_for": "A strictly decreasing natural number reaches zero.", "flag": "needed" },
+      { "name": "Great circles and antipodal points", "needed_for": "Understanding that hemisphere boundaries are great circles through the centre.", "flag": "assumed" },
+      { "name": "Closed versus open regions", "needed_for": "Why boundary points count as removed.", "flag": "needed" }
+    ],
+    "second_reading": {
+      "new_spans": ["any plane passing through the centre"],
+      "reweighted": [
+        { "span_id": "s7", "old": 60, "new": 95, "why": "After the circle experiment it is clear the boundary clause is the whole difference between 2D and 3D." },
+        { "span_id": "s11", "old": 40, "new": 75, "why": "The definition is what lets two marked points be placed on the boundary." }
+      ],
+      "what_changed": "The method moved from 'remove at least half' (which only prevents growth) to 'remove more than half' (which forces descent), and the boundary clause became the key cue."
     },
     "domain": "maths"
   },
   "student": {
-    "problem_spans": [
-      { "text": "n+1", "weight": 0, "reason": "Skimmed as background counting." },
-      { "text": "distinct", "weight": 1, "reason": "Numbers cannot repeat." },
-      { "text": "{1, 2, ..., 2n}", "weight": 1, "reason": "The set to pick from." },
-      { "text": "two", "weight": 1, "reason": "Need to find a pair." },
-      { "text": "coprime", "weight": 3, "reason": "The thing to prove; focused here first." }
+    "problem": {
+      "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
+      "latex": "\\text{Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:} \\quad \\text{- On Alice's move, she counts the number of marked points on the sphere, } n \\text{. She then marks another } n+1 \\text{ points on the sphere.} \\quad \\text{- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.} \\quad \\text{Can Bob always guarantee that after a finite number of moves, the sphere contains no marked points?} \\quad \\text{(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)}"
+    },
+    "spans": [
+      { "id": "t1", "text": "a sphere", "category": "setting", "weight": 50, "reason": "3D shape, symmetric" },
+      { "id": "t2", "text": "finite number of points", "category": "setting", "weight": 40, "reason": "we can count them" },
+      { "id": "t3", "text": "marks another n+1 points", "category": "rule", "weight": 70, "reason": "more than doubles" },
+      { "id": "t4", "text": "chooses one hemisphere", "category": "rule", "weight": 60, "reason": "Bob removes half" },
+      { "id": "t5", "text": "the sphere contains no marked points", "category": "goal", "weight": 80, "reason": "need to reach zero" }
     ],
-    "cues": [
-      { "id": "s1", "span": "coprime", "type": "definition", "why_it_matters": "Must show two numbers share no common factor.", "how_spotted": "It is the goal word of the sentence." },
-      { "id": "s2", "span": "distinct", "type": "constraint", "why_it_matters": "Picks cannot repeat, so brute force is finite.", "how_spotted": "Adjective before integers." },
-      { "id": "s3", "span": "{1, 2, ..., 2n}", "type": "constraint", "why_it_matters": "Bounds the search to small cases.", "how_spotted": "The only explicit set in the problem." }
-    ],
-    "relations": [
-      {
-        "cue_ids": ["s1"],
-        "statement": "Coprime means no shared prime factor.",
-        "maths": "\\gcd(a,b) = 1"
-      }
-    ],
-    "model": {
-      "objects": [
-        "S \\subseteq \\{1, 2, \\dots, 2n\\},\\ |S| = n+1"
+    "reading": {
+      "cues": [
+        { "id": "d1", "span_id": "t1", "why_it_matters": "3D shape, symmetric", "how_spotted": "underlined while reading" },
+        { "id": "d2", "span_id": "t2", "why_it_matters": "we can count them", "how_spotted": "underlined while reading" },
+        { "id": "d3", "span_id": "t3", "why_it_matters": "more than doubles", "how_spotted": "underlined while reading" },
+        { "id": "d4", "span_id": "t4", "why_it_matters": "Bob removes half", "how_spotted": "underlined while reading" },
+        { "id": "d5", "span_id": "t5", "why_it_matters": "need to reach zero", "how_spotted": "underlined while reading" }
       ],
       "definitions": [
-        "\\gcd(a,b) = 1 \\text{ means } a \\text{ and } b \\text{ are coprime}"
+        { "term": "hemisphere", "meaning_latex": "\\text{half the sphere}" }
+      ]
+    },
+    "goal": { "asked": "Does Bob win?", "answer_form": "yes or no", "final_line_would_say": "" },
+    "informal_cues": [],
+    "abstraction": { "underneath": [], "deeper_properties": [] },
+    "simplification": { "instance": "Try with 1 point.", "instance_latex": "", "what_to_try": "Alice adds 2, Bob removes some.", "notice_prompt": "" },
+    "method": {
+      "candidates": [
+        { "name": "Play small cases", "deciding_span_ids": ["t2"], "from_first_principles": "See what happens.", "kept": true, "why": "Did not find a pattern." },
+        { "name": "Find an invariant", "deciding_span_ids": [], "from_first_principles": "", "kept": false, "why": "Could not find one." }
       ],
-      "formal_statement": "\\exists a,b \\in S:\\ \\gcd(a,b) = 1"
+      "chosen": "Play small cases"
     },
-    "selection": {
-      "method": "Try small cases: test n = 1, 2, 3 by hand and look for a pattern.",
-      "deciding_cue_ids": ["s1"],
-      "rejected": [],
-      "unlocking_observation": "Small examples might show which pairs end up coprime."
-    },
-    "pass_2": {
-      "new_cues": [],
-      "reweighted": [],
-      "what_changed": "Re-reading did not surface new structure; still anchored on the goal word."
-    },
+    "prerequisites": [
+      { "name": "Pigeonhole", "needed_for": "removing half", "flag": "needed" }
+    ],
+    "second_reading": { "new_spans": [], "reweighted": [], "what_changed": "" },
     "domain": "maths"
   },
   "comparison": {
-    "first_divergence": "You weighted 'n+1' at 0; the expert weighted it 3. Together with '2n' it is the cue for pigeonhole with n boxes.",
-    "missed_cues": ["c1", "c2"],
-    "unused_cues": ["s2"]
+    "first_divergence": "You never marked 'including any marked points on the boundary of the hemisphere'. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns 'at least half' into 'more than half' and makes the count fall every round.",
+    "missed_cues": ["including any marked points on the boundary of the hemisphere", "any plane passing through the centre", "always guarantee", "after a finite number of moves"],
+    "unused_cues": ["finite number of points"]
   }
 }
