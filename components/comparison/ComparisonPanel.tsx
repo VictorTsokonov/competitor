@@ -8,7 +8,6 @@ import UnusedCues from "@/components/comparison/UnusedCues";
 import StudentMethod from "@/components/comparison/StudentMethod";
 import StudentSecondReading from "@/components/comparison/StudentSecondReading";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
-import RevealButton from "@/components/comparison/RevealButton";
 
 function Section({
   title,
@@ -39,7 +38,23 @@ function Section({
   );
 }
 
-export default function ComparisonPanel({ data }: { data: Analysis }) {
+// data null is the unsolved state: the heading stays so the layout does
+// not jump when the comparison arrives after the first submitted attempt.
+export default function ComparisonPanel({ data }: { data: Analysis | null }) {
+  if (!data) {
+    return (
+      <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
+        <div className="flex min-h-[36px] items-center pr-[46px]">
+          <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
+            Comparison
+          </span>
+        </div>
+        <p className="mt-3 text-[1.0625rem] text-muted">
+          The comparison appears here after you submit your attempt.
+        </p>
+      </div>
+    );
+  }
   const missed = data.comparison.missed_cues;
   const unused = data.comparison.unused_cues;
   return (
@@ -49,6 +64,10 @@ export default function ComparisonPanel({ data }: { data: Analysis }) {
           Comparison
         </span>
       </div>
+      <p className="mt-1 text-[0.9375rem] text-muted">
+        The expert reading is a plausible narrative, not a trace of the
+        model&apos;s thinking.
+      </p>
       <div className="h-3" />
       <Section title="First divergence" defaultOpen={true} first>
         <FirstDivergence text={data.comparison.first_divergence} />
@@ -72,7 +91,6 @@ export default function ComparisonPanel({ data }: { data: Analysis }) {
       <Section title="Your pages" defaultOpen={true}>
         <PageThumbnails />
       </Section>
-      <RevealButton />
     </div>
   );
 }

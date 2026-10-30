@@ -3,9 +3,9 @@ import type { Analysis, Chain } from "../schema";
 import type { AnalysisInput } from "../analysis";
 
 // Real pipeline (pending): call A expert pass, call C student extraction
-// from photos, call B expert second reading, TS set-difference compare,
-// call D behind Reveal. SDK: openai -> https://api.meta.ai/v1,
-// model muse-spark-1.3, key MODEL_API_KEY. Browser never calls Meta directly.
+// from photos, call B expert second reading, TS set-difference compare.
+// SDK: openai -> https://api.meta.ai/v1, model muse-spark-1.3,
+// key MODEL_API_KEY. Browser never calls Meta directly.
 
 export async function requestExpertPass(
   _problemText: string
