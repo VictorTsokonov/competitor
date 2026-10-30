@@ -1,13 +1,9 @@
 import type { Analysis } from "./schema";
+import type { AnalysisInput } from "./providers/types";
 import { fetchMockAnalysis } from "./providers/mock";
 import { fetchMetaAnalysis } from "./providers/meta";
 
-export type AnalysisInput = {
-  problemText: string;
-  // Set for problems from the library; lets the mock serve bundled analyses.
-  problemId?: string;
-  studentMarks?: string;
-};
+export type { AnalysisInput } from "./providers/types";
 
 export async function fetchAnalysis(input: AnalysisInput): Promise<Analysis> {
   if (process.env.USE_MOCK === "true") return fetchMockAnalysis(input);

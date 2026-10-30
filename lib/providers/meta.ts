@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- stub seam: params used once calls A/C are wired */
 import type { Analysis, Chain } from "../schema";
-import type { AnalysisInput } from "../analysis";
+import type { AnalysisInput } from "./types";
 
 // Real pipeline (pending): call A expert pass, call C student extraction
 // from photos, call B expert second reading, TS set-difference compare.

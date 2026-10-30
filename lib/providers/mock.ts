@@ -1,5 +1,5 @@
 import { AnalysisSchema, type Analysis } from "../schema";
-import type { AnalysisInput } from "../analysis";
+import type { AnalysisInput } from "./types";
 import { DUMMY_ANALYSES } from "../dummy";
 
 export async function fetchMockAnalysis(
