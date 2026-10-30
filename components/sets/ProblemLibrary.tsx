@@ -3,9 +3,9 @@
 import { useState } from "react";
 import type { LibraryState } from "@/lib/problems";
 import { moveProblem, moveFolder } from "@/lib/problems";
-import ProblemRow from "@/components/ProblemRow";
-import { FolderTree } from "@/components/FolderTree";
-import type { DragPayload, TreeCallbacks } from "@/components/TreeRow";
+import ProblemRow from "@/components/sets/ProblemRow";
+import { FolderTree } from "@/components/sets/FolderTree";
+import type { DragPayload, TreeCallbacks } from "@/components/sets/TreeRow";
 
 export default function ProblemLibrary({
   state,
@@ -56,9 +56,9 @@ export default function ProblemLibrary({
           setDropTarget(null);
           setDragPayload(null);
         }}
-        className={`py-1 ${rootActive ? "rounded-lg bg-surface" : ""}`}
+        className={`py-1 ${rootActive ? "rounded-lg bg-ink/10" : ""}`}
       >
-        <hr className="border-line" />
+        <hr className="border-rule" />
         <div className="mt-1">
           {ungrouped.map((p) => (
             <ProblemRow key={p.id} problem={p} depth={0} cb={cb} />

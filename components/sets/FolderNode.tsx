@@ -8,17 +8,17 @@ import {
   descendants,
   renameFolder,
 } from "@/lib/problems";
-import ProblemRow from "@/components/ProblemRow";
+import ProblemRow from "@/components/sets/ProblemRow";
 import {
   ActionButton,
   RenameInput,
   RowChevron,
   dropOnto,
   rowClass,
+  rowIndent,
   type TreeCallbacks,
-} from "@/components/TreeRow";
+} from "@/components/sets/TreeRow";
 import {
-  FolderIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -80,13 +80,10 @@ export default function FolderNode({ folder, depth, cb }: {
         }}
         aria-expanded={open}
         title={folder.name}
-        style={{ paddingLeft: depth * 16 }}
-        className={`${rowClass(false)} cursor-pointer ${active ? "bg-surface" : ""}`}
+        style={{ paddingLeft: rowIndent(depth) }}
+        className={`${rowClass({ bold: true })} cursor-pointer ${active ? "bg-ink/10" : ""}`}
       >
         <RowChevron open={open} />
-        <span aria-hidden="true" className="text-muted">
-          <FolderIcon />
-        </span>
         {editing ? (
           <RenameInput
             initial={folder.name}
@@ -134,7 +131,7 @@ export default function FolderNode({ folder, depth, cb }: {
                 }}
                 placeholder="Subfolder name"
                 aria-label="New subfolder name"
-                className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm"
+                className="mt-1 w-full rounded border border-rule bg-card px-2 py-1 text-[1rem]"
               />
             </div>
           )}

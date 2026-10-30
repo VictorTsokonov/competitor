@@ -7,11 +7,11 @@ export default function IconButton({
 }: {
   label: string;
   onClick?: () => void;
-  size?: "md" | "lg";
+  size?: "sm" | "md" | "lg";
   className?: string;
   children: React.ReactNode;
 }) {
-  const dims = size === "lg" ? "h-11 w-11" : "h-9 w-9";
+  const dims = size === "lg" ? "h-11 w-11" : size === "sm" ? "h-8 w-8" : "h-9 w-9";
   return (
     <button
       type="button"

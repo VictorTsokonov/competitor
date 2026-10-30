@@ -62,7 +62,9 @@ export default function ResizeHandle({
     >
       <div
         className={`mx-auto h-full ${
-          dragging ? "w-[2px] bg-accent" : "w-px bg-line group-hover:w-[2px] group-hover:bg-accent"
+          dragging
+            ? "w-[2px] bg-accent"
+            : "w-[2px] bg-rule group-hover:bg-accent"
         }`}
       />
     </div>

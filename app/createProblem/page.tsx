@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import CreateProblemForm from "@/components/CreateProblemForm";
 import LatexCheatsheet from "@/components/LatexCheatsheet";
-import WorkspaceShell from "@/components/WorkspaceShell";
+import AppShell from "@/components/layout/AppShell";
 import { SELECT_INTENT_KEY } from "@/lib/problems";
 
 export default function CreateProblem() {
@@ -21,14 +21,16 @@ export default function CreateProblem() {
   }
 
   return (
-    <WorkspaceShell
+    <AppShell
       onSelectProblem={selectFromLibrary}
+      rightLabel="LaTeX reference"
+      centre={
+        <div className="mx-auto w-full max-w-[48rem]">
+          <h1 className="text-3xl font-bold tracking-tight">New problem</h1>
+          <CreateProblemForm onSaved={() => router.push("/dashboard")} />
+        </div>
+      }
       right={<LatexCheatsheet />}
-    >
-      <div className="mx-auto w-full max-w-[760px]">
-        <h1 className="text-3xl font-bold tracking-tight">New problem</h1>
-        <CreateProblemForm onSaved={() => router.push("/dashboard")} />
-      </div>
-    </WorkspaceShell>
+    />
   );
 }

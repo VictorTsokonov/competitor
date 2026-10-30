@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ArchiveTree from "@/components/ArchiveTree";
-import ProblemLibrary from "@/components/ProblemLibrary";
-import { PlusIcon } from "@/components/TreeIcons";
+import ArchiveTree from "@/components/sets/ArchiveTree";
+import ProblemLibrary from "@/components/sets/ProblemLibrary";
+import IconButton from "@/components/ui/IconButton";
 import {
   createFolder,
   loadLibrary,
@@ -14,9 +14,11 @@ import {
 export default function SetsPanel({
   onSelectProblem,
   selectedProblemId,
+  footer,
 }: {
   onSelectProblem: (problemId?: string) => void;
   selectedProblemId?: string | null;
+  footer?: React.ReactNode;
 }) {
   const [library, setLibrary] = useState<LibraryState>({ problems: [], folders: [] });
   const [newFolder, setNewFolder] = useState(false);
@@ -45,20 +47,25 @@ export default function SetsPanel({
   }
 
   return (
-    <div className="px-2 pb-4 pt-3">
-      <div className="flex h-8 items-center gap-1 pl-[44px] pr-1">
-        <h2 className="min-w-0 flex-1 text-[13px] font-semibold uppercase text-muted">
+    <div className="flex h-full flex-col gap-[2px] overflow-y-auto px-[0.875rem] pb-7 pt-[0.875rem]">
+      <div className="flex min-h-[2.25rem] items-center justify-between pl-[46px]">
+        <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
           Sets
-        </h2>
-        <button
-          onClick={() => setNewFolder(true)}
-          title="New set"
-          aria-label="New set"
-          className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink"
-        >
-          <PlusIcon />
-        </button>
+        </span>
+        <IconButton size="sm" label="New set" onClick={() => setNewFolder(true)}>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            style={{ width: "0.875rem", height: "0.875rem" }}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </IconButton>
       </div>
+      <div className="h-[10px]" />
       {newFolder && (
         <input
           autoFocus
@@ -71,7 +78,7 @@ export default function SetsPanel({
           }}
           placeholder="Folder name"
           aria-label="New folder name"
-          className="mb-2 w-full rounded border border-line bg-background px-2 py-1 text-sm"
+          className="mb-2 w-full rounded border border-rule bg-card px-2 py-1 text-[1rem]"
         />
       )}
       <ArchiveTree onSelectProblem={onSelectProblem} />
@@ -81,6 +88,12 @@ export default function SetsPanel({
         onChange={update}
         onSelectProblem={(id) => onSelectProblem(id)}
       />
+      {footer && (
+        <>
+          <div className="min-h-4 flex-1" />
+          {footer}
+        </>
+      )}
     </div>
   );
 }

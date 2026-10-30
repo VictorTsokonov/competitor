@@ -34,10 +34,19 @@ export function dropOnto(cb: TreeCallbacks, folderId: string | null, e: React.Dr
   cb.setDragPayload(null);
 }
 
-export function rowClass(selected: boolean): string {
-  return `group flex h-8 w-full items-center gap-1 rounded-lg border-l-2 pr-1 text-left text-[13.5px] hover:bg-surface ${
-    selected ? "border-accent bg-surface" : "border-transparent"
-  }`;
+/** Left-edge indent per tree depth, from design/dashboard.html rows. */
+export function rowIndent(depth: number): number {
+  if (depth <= 0) return 8;
+  if (depth === 1) return 26;
+  return 58 + (depth - 2) * 16;
+}
+
+export function rowClass(opts: { selected?: boolean; bold?: boolean }): string {
+  const base =
+    "group flex min-h-[34px] w-full items-center gap-2 rounded-md py-1 pr-2 text-left text-[1.125rem] hover:bg-ink/[0.06] max-[60rem]:min-h-[2.75rem]";
+  const sel = opts.selected ? " bg-accent/10 shadow-[inset_3px_0_0_0_var(--accent)]" : "";
+  const bold = opts.bold ? " font-bold" : "";
+  return `${base}${sel}${bold}`;
 }
 
 export function RenameInput({ initial, onCommit, onCancel }: {
@@ -58,7 +67,7 @@ export function RenameInput({ initial, onCommit, onCancel }: {
       }}
       onClick={(e) => e.stopPropagation()}
       aria-label="Rename"
-      className="w-full rounded border border-line bg-background px-1 py-0.5 text-[13.5px]"
+      className="w-full rounded border border-rule bg-card px-1 py-0.5 text-[1.125rem]"
     />
   );
 }
@@ -67,13 +76,19 @@ export function RowChevron({ open }: { open: boolean }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex w-4 shrink-0 items-center justify-center text-muted transition-transform duration-200 ${
+      className={`inline-block w-[14px] shrink-0 text-center transition-transform ${
         open ? "rotate-90" : ""
       }`}
     >
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M6 4l4 4-4 4" />
-      </svg>
+      ▸
+    </span>
+  );
+}
+
+export function RowLabel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <span className="min-w-0 flex-1 truncate" title={title}>
+      {children}
     </span>
   );
 }
@@ -92,7 +107,7 @@ export function ActionButton({ label, title, onClick, children }: {
       }}
       aria-label={label}
       title={title}
-      className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink"
+      className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted hover:bg-ink/10 hover:text-ink"
     >
       {children}
     </button>

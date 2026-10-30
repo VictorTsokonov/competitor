@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Analysis } from "@/lib/schema";
 import { loadLibrary, SELECT_INTENT_KEY, type StoredProblem } from "@/lib/problems";
-import WorkspaceShell from "@/components/WorkspaceShell";
+import AppShell from "@/components/layout/AppShell";
+import Pill from "@/components/ui/Pill";
 import ComparisonPanel from "@/components/ComparisonPanel";
 import CreateProblemForm from "@/components/CreateProblemForm";
 import LatexCheatsheet from "@/components/LatexCheatsheet";
@@ -91,10 +92,17 @@ export default function Dashboard() {
 
   const expert = data?.expert;
 
+  const comparing = !!(data || stored);
   return (
-    <WorkspaceShell
+    <AppShell
       onSelectProblem={select}
       selectedProblemId={stored?.id}
+      rightLabel={comparing ? "comparison" : "LaTeX reference"}
+      leftFooter={
+        <Pill href="/createProblem" className="min-h-[42px] w-full text-[1.0625rem]">
+          + New problem
+        </Pill>
+      }
       right={
         data || stored ? (
           data ? (
@@ -108,10 +116,10 @@ export default function Dashboard() {
           <LatexCheatsheet />
         )
       }
-    >
-      <div className="mx-auto w-full max-w-[760px] leading-[1.6]">
-            {stored && !data ? (
-              <div className="border-b border-line pb-12">
+      centre={
+      <div className="mx-auto w-full max-w-[48rem] leading-[1.6]">
+        {stored && !data ? (
+          <div className="border-b border-rule pb-12">
                 <h2 className="text-2xl font-bold tracking-tight">{stored.name}</h2>
                 <div className="mt-4 leading-[1.6]">
                   <RichTex tex={stored.latex} />
@@ -119,7 +127,7 @@ export default function Dashboard() {
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <button
                     onClick={analyseStored}
-                    className="rounded-full bg-accent px-6 py-2 text-sm font-semibold text-white"
+                    className="rounded-full bg-accent px-6 py-2 text-sm font-semibold text-cream"
                   >
                     Analyse problem
                   </button>
@@ -129,7 +137,7 @@ export default function Dashboard() {
                         "Photo upload for your solutions arrives with call C — nothing to submit through yet."
                       )
                     }
-                    className="rounded-full bg-surface px-6 py-2 text-sm font-semibold"
+                    className="rounded-full border-2 border-ink bg-transparent px-6 py-2 text-sm font-semibold"
                   >
                     Submit solution
                   </button>
@@ -140,7 +148,7 @@ export default function Dashboard() {
               </div>
             ) : data && expert ? (
               <>
-                <div className="border-b border-line pb-12">
+                <div className="border-b border-rule pb-12">
                   <ProblemText text={data.problem.text} spans={expert.spans} />
                 </div>
                 <ResponseCard label="Stage 1 · Reading" sourceKey="reading" title="Reading" divider={false}>
@@ -160,7 +168,7 @@ export default function Dashboard() {
                 </ResponseCard>
                 <ResponseCard label="Stage 6 · Method" sourceKey="method" title="Method">
                   <ResponseMethod method={expert.method} spans={expert.spans} />
-                  <div className="border-t border-line pt-4">
+                  <div className="border-t border-rule pt-4">
                     <p className="text-sm font-semibold">Prerequisites</p>
                     <div className="mt-2">
                       <ResponsePrerequisites
@@ -184,6 +192,7 @@ export default function Dashboard() {
               </>
             )}
       </div>
-    </WorkspaceShell>
+      }
+    />
   );
 }

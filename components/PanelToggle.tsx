@@ -1,20 +1,19 @@
 "use client";
 
+import IconButton from "@/components/ui/IconButton";
+
 function PanelGlyph({ mirror }: { mirror: boolean }) {
-  // Rounded rectangle, vertical divider at one third (mirrored per side).
-  const x = mirror ? 10.5 : 5.5;
   return (
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      style={{ width: "1rem", height: "1rem" }}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
-      aria-hidden="true"
+      strokeWidth="2"
     >
-      <rect x="1.5" y="2.5" width="13" height="11" rx="2" />
-      <line x1={x} y1="2.5" x2={x} y2="13.5" />
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d={mirror ? "M15 4v16" : "M9 4v16"} />
     </svg>
   );
 }
@@ -24,23 +23,24 @@ export default function PanelToggle({
   open,
   onToggle,
   label,
+  className,
 }: {
   side: "left" | "right";
   open: boolean;
   onToggle: () => void;
   label: string;
+  className?: string;
 }) {
   const text = `${open ? "Hide" : "Show"} ${label}`;
   return (
-    <button
-      onClick={onToggle}
-      aria-label={text}
-      title={text}
-      className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted hover:bg-surface hover:text-ink ${
-        side === "left" ? "absolute left-3 top-3 z-30" : "absolute right-3 top-3 z-30"
-      }`}
+    <div
+      className={`absolute top-[14px] z-[2] ${
+        side === "left" ? "left-[14px]" : "right-[14px]"
+      }${className ? ` ${className}` : ""}`}
     >
-      <PanelGlyph mirror={side === "right"} />
-    </button>
+      <IconButton label={text} onClick={onToggle}>
+        <PanelGlyph mirror={side === "right"} />
+      </IconButton>
+    </div>
   );
 }

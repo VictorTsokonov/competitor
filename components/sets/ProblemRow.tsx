@@ -2,9 +2,9 @@
 
 import type { StoredProblem } from "@/lib/problems";
 import { deleteProblem, renameProblem } from "@/lib/problems";
-import { FileIcon, PencilIcon, TrashIcon } from "@/components/TreeIcons";
-import { ActionButton, RenameInput, rowClass } from "@/components/TreeRow";
-import type { TreeCallbacks } from "@/components/TreeRow";
+import { PencilIcon, TrashIcon } from "@/components/TreeIcons";
+import { ActionButton, RenameInput, rowClass, rowIndent } from "@/components/sets/TreeRow";
+import type { TreeCallbacks } from "@/components/sets/TreeRow";
 
 export default function ProblemRow({
   problem,
@@ -34,13 +34,10 @@ export default function ProblemRow({
         if (e.key === "Enter") cb.onSelectProblem(problem.id);
       }}
       title={problem.name}
-      style={{ paddingLeft: depth * 16 }}
-      className={`${rowClass(cb.selectedId === problem.id)} cursor-pointer`}
+      style={{ paddingLeft: rowIndent(depth) }}
+      className={`${rowClass({ selected: cb.selectedId === problem.id })} cursor-pointer`}
     >
       <span className="w-4 shrink-0" />
-      <span aria-hidden="true" className="text-muted">
-        <FileIcon />
-      </span>
       {editing ? (
         <RenameInput
           initial={problem.name}

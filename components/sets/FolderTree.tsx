@@ -1,7 +1,7 @@
 "use client";
 
-import FolderNode from "@/components/FolderNode";
-import type { TreeCallbacks } from "@/components/TreeRow";
+import FolderNode from "@/components/sets/FolderNode";
+import type { TreeCallbacks } from "@/components/sets/TreeRow";
 
 export function FolderTree({ cb }: { cb: TreeCallbacks }) {
   const roots = cb.state.folders.filter((f) => f.parentId === null);
