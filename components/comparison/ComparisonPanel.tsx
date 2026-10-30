@@ -38,10 +38,17 @@ function Section({
   );
 }
 
-// data null is the unsolved state: the heading stays so the layout does
-// not jump when the comparison arrives after the first submitted attempt.
+// data null is the unsolved state; an analysis whose student chain is the
+// empty placeholder (expert wired, call C pending) keeps the same empty
+// state with the comparison's own message. The heading stays either way so
+// the layout does not jump when the full comparison arrives.
 export default function ComparisonPanel({ data }: { data: Analysis | null }) {
-  if (!data) {
+  const emptyText = !data
+    ? "The comparison appears here after you submit your attempt."
+    : data.student.spans.length === 0 && data.comparison.missed_cues.length === 0
+      ? data.comparison.first_divergence || "Submit your attempt to see the comparison."
+      : null;
+  if (emptyText || !data) {
     return (
       <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
         <div className="flex min-h-[36px] items-center pr-[46px]">
@@ -49,9 +56,7 @@ export default function ComparisonPanel({ data }: { data: Analysis | null }) {
             Comparison
           </span>
         </div>
-        <p className="mt-3 text-[1.0625rem] text-muted">
-          The comparison appears here after you submit your attempt.
-        </p>
+        <p className="mt-3 text-[1.0625rem] text-muted">{emptyText}</p>
       </div>
     );
   }
