@@ -6,8 +6,8 @@ import { loadLibrary, SELECT_INTENT_KEY, type StoredProblem } from "@/lib/proble
 import AppShell from "@/components/layout/AppShell";
 import Pill from "@/components/ui/Pill";
 import ComparisonPanel from "@/components/comparison/ComparisonPanel";
-import CreateProblemForm from "@/components/CreateProblemForm";
-import LatexCheatsheet from "@/components/LatexCheatsheet";
+import CreateProblemForm from "@/components/create/CreateProblemForm";
+import LatexReference from "@/components/latex/LatexReference";
 import ProblemReading from "@/components/reading/ProblemReading";
 import StageSection from "@/components/reading/StageSection";
 import Reading from "@/components/reading/Reading";
@@ -113,7 +113,7 @@ export default function Dashboard() {
             </p>
           )
         ) : (
-          <LatexCheatsheet />
+          <LatexReference />
         )
       }
       centre={
@@ -190,11 +190,11 @@ export default function Dashboard() {
             </>
           ) : (
             <>
-              <h1 className="text-3xl font-bold tracking-tight">New problem</h1>
-              <p className="mt-2 text-muted">
-                {status ??
-                  "Create your first problem here, or pick one from the library."}
-              </p>
+              {status && (
+                <p role="status" className="mb-4 text-muted">
+                  {status}
+                </p>
+              )}
               <CreateProblemForm onSaved={handleCreated} />
             </>
           )}

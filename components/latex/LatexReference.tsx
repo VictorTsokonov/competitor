@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Tex } from "@/components/reading/Tex";
+import Field from "@/components/ui/Field";
+import LatexPreview from "@/components/latex/LatexPreview";
 
 const ROWS: { command: string; sample: string }[] = [
   { command: "\\frac{a}{b}", sample: "\\frac{a}{b}" },
@@ -9,8 +10,12 @@ const ROWS: { command: string; sample: string }[] = [
   { command: "x^{2}, a_{n}", sample: "x^{2}, a_{n}" },
   { command: "\\sum_{i=1}^{n}", sample: "\\sum_{i=1}^{n}" },
   { command: "\\prod_{i=1}^{n}", sample: "\\prod_{i=1}^{n}" },
-  { command: "\\int_{0}^{1}", sample: "\\int_{0}^{1}" },
-  { command: "\\infty", sample: "\\infty" },
+  { command: "\\int_{0}^{1} f(x)\\,dx", sample: "\\int_{0}^{1} f(x)\\,dx" },
+  { command: "\\{1, 2, \\dots, 2n\\}", sample: "\\{1, 2, \\dots, 2n\\}" },
+  { command: "\\leq, \\geq, \\neq, \\equiv", sample: "\\leq, \\geq, \\neq, \\equiv" },
+  { command: "\\forall, \\exists, \\in, \\subseteq", sample: "\\forall, \\exists, \\in, \\subseteq" },
+  { command: "\\alpha, \\beta, \\pi, \\infty", sample: "\\alpha, \\beta, \\pi, \\infty" },
+  { command: "\\gcd(a,b), \\binom{n}{k}", sample: "\\gcd(a,b), \\binom{n}{k}" },
   { command: "\\alpha, \\beta, \\theta, \\pi", sample: "\\alpha, \\beta, \\theta, \\pi" },
   { command: "\\leq, \\geq, \\neq, \\approx", sample: "\\leq, \\geq, \\neq, \\approx" },
   { command: "\\times, \\div, \\pm", sample: "\\times, \\div, \\pm" },
@@ -36,7 +41,7 @@ const ROWS: { command: string; sample: string }[] = [
   { command: "\\triangle ABC, 90^\\circ", sample: "\\triangle ABC, 90^\\circ" },
 ];
 
-export default function LatexCheatsheet() {
+export default function LatexReference() {
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const visible = ROWS.filter((r) =>
@@ -53,46 +58,55 @@ export default function LatexCheatsheet() {
   }
 
   return (
-    <div className="w-full px-2 pb-4 pt-3">
-      <div className="flex h-8 items-center pl-2 pr-[44px]">
-        <h2 className="min-w-0 flex-1 truncate text-[13px] font-semibold uppercase text-muted">
+    <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
+      <div className="flex min-h-[36px] items-center pr-[46px]">
+        <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
           LaTeX reference
-        </h2>
+        </span>
       </div>
-      <p className="mt-1 px-2 text-sm text-muted">
-        Click a row to copy its command.
+      <p className="mb-3 mt-1 text-[1rem] text-muted">
+        New to LaTeX? Each row shows the command and how it renders. Copy
+        and paste it into the statement.
       </p>
-      <div className="px-2">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search, e.g. frac"
-          aria-label="Search LaTeX reference"
-          className="mt-3 w-full rounded-[16px] border border-line bg-background px-4 py-2 text-sm"
-        />
-      </div>
-      <ul className="mt-3 space-y-3 px-2">
-        {visible.map((r) => (
-          <li key={r.command} className="border-b border-line pb-3">
+      <Field
+        id="refq"
+        value={query}
+        onChange={setQuery}
+        placeholder="Search, e.g. frac"
+        ariaLabel="Search commands"
+      />
+      <div className="mt-2">
+        {visible.map((r, i) => (
+          <div
+            key={r.command}
+            className={`flex items-center justify-between gap-2 py-3 ${
+              i > 0 ? "border-t-2 border-dashed border-rule" : ""
+            }`}
+          >
+            <div className="min-w-0">
+              <code className="rounded-md bg-card px-[0.4rem] py-[0.1rem] font-mono text-[0.9375rem]">
+                {r.command}
+              </code>
+              <div className="mt-1 overflow-x-auto text-[1.25rem]">
+                <LatexPreview tex={`$${r.sample}$`} emptyText="" bare />
+              </div>
+            </div>
             <button
+              type="button"
               onClick={() => copy(r.command)}
-              title="Copy command"
-              className="block w-full text-left"
+              aria-live="polite"
+              className="shrink-0 cursor-pointer rounded-lg border-2 border-ink bg-transparent px-[0.6rem] py-[0.1rem] text-[0.875rem]"
             >
-              <code className="block overflow-x-auto text-xs">{r.command}</code>
-              <span className="mt-1 block overflow-x-auto text-[15px]">
-                <Tex tex={r.sample} />
-              </span>
-              <span className="mt-1 block text-xs text-muted" aria-live="polite">
-                {copied === r.command ? "Copied." : "Copy"}
-              </span>
+              {copied === r.command ? "Copied." : "Copy"}
             </button>
-          </li>
+          </div>
         ))}
         {visible.length === 0 && (
-          <li className="text-sm text-muted">No matches — try “frac” or “sum”.</li>
+          <p className="py-3 text-[1rem] text-muted">
+            No matches — try “frac” or “sum”.
+          </p>
         )}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -15,6 +15,7 @@ export default function Pill({
   onClick,
   type,
   className,
+  pressed,
   children,
 }: {
   variant?: "primary" | "secondary";
@@ -22,6 +23,7 @@ export default function Pill({
   onClick?: () => void;
   type?: "button" | "submit";
   className?: string;
+  pressed?: boolean;
   children: React.ReactNode;
 }) {
   // Mockup default: min-height 3.25rem, 1.25rem type; callers shrink via className.
@@ -34,7 +36,12 @@ export default function Pill({
     );
   }
   return (
-    <button type={type ?? "button"} onClick={onClick} className={cls}>
+    <button
+      type={type ?? "button"}
+      onClick={onClick}
+      className={cls}
+      aria-pressed={pressed}
+    >
       {children}
     </button>
   );
