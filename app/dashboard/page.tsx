@@ -3,16 +3,19 @@
 import { useEffect, useState } from "react";
 import type { Analysis } from "@/lib/schema";
 import {
-  ARCHIVE_PROBLEM_ID,
   LAST_VIEW_KEY,
   loadLibrary,
+  problemLabel,
+  saveLibrary,
   SELECT_INTENT_KEY,
+  setProblemState,
   type StoredProblem,
 } from "@/lib/problems";
 import AppShell from "@/components/layout/AppShell";
 import Pill from "@/components/ui/Pill";
 import ComparisonPanel from "@/components/comparison/ComparisonPanel";
 import CreateProblemForm from "@/components/create/CreateProblemForm";
+import AttemptSection from "@/components/create/AttemptSection";
 import LatexReference from "@/components/latex/LatexReference";
 import ProblemReading from "@/components/reading/ProblemReading";
 import StageSection from "@/components/reading/StageSection";
@@ -30,6 +33,7 @@ export default function Dashboard() {
   const [data, setData] = useState<Analysis | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [stored, setStored] = useState<StoredProblem | null>(null);
+  const [label, setLabel] = useState<string>("");
   const [actionStatus, setActionStatus] = useState<string | null>(null);
 
   function rememberView(problemId: string | null) {
@@ -39,6 +43,17 @@ export default function Dashboard() {
     } catch {
       /* private mode: view resets on navigation */
     }
+  }
+
+  function requestAnalysis(problem: StoredProblem): Promise<Analysis> {
+    return fetch("/api/analyse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ problemId: problem.id, problemText: problem.latex }),
+    }).then(async (res) => {
+      if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
+      return res.json() as Promise<Analysis>;
+    });
   }
 
   function select(problemId?: string) {
@@ -53,9 +68,18 @@ export default function Dashboard() {
     const lib = loadLibrary(localStorage);
     const problem = lib.problems.find((p) => p.id === problemId) ?? null;
     setStored(problem);
+    setLabel(problem ? problemLabel(lib, problem) : "");
     rememberView(problem?.id ?? null);
-    // The archive problem ships with the expert reading: load it straight away.
-    if (problem?.id === ARCHIVE_PROBLEM_ID) fetchAnalysis();
+    // Analysed problems ship or persist with a reading: load it straight away.
+    if (problem && problem.state === "analysed") {
+      setStatus("Loading analysis…");
+      requestAnalysis(problem)
+        .then((d) => {
+          setData(d);
+          setStatus(null);
+        })
+        .catch((e: Error) => setStatus(`Failed to load: ${e.message}`));
+    }
   }
 
   function handleCreated(id: string) {
@@ -80,38 +104,24 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function analyseStored() {
+  // Bundled problems have a mock reading and switch to Analysed; anything
+  // else gets the honest mock-mode message in place, never a crash.
+  function submitAttempt() {
     if (!stored) return;
     setActionStatus("Analysing…");
-    fetch("/api/analyse", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemText: stored.latex }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
-        return res.json();
+    requestAnalysis(stored)
+      .then((d) => {
+        const lib = setProblemState(loadLibrary(localStorage), stored.id, "analysed");
+        saveLibrary(localStorage, lib);
+        window.dispatchEvent(new Event("competitor:library-changed"));
+        setStored({ ...stored, state: "analysed" });
+        setData(d);
+        setActionStatus(null);
       })
-      .then(() => setActionStatus(null))
       .catch((e: Error) => setActionStatus(e.message));
   }
 
-  function fetchAnalysis() {
-    setStatus("Loading analysis…");
-    fetch("/api/analyse", { method: "POST" })
-      .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
-        return res.json();
-      })
-      .then((d: Analysis) => {
-        setData(d);
-        setStatus(null);
-      })
-      .catch((e: Error) => setStatus(`Failed to load: ${e.message}`));
-  }
-
   const expert = data?.expert;
-  const isArchive = stored?.id === ARCHIVE_PROBLEM_ID;
 
   const comparing = !!(data || stored);
   return (
@@ -125,17 +135,7 @@ export default function Dashboard() {
         </Pill>
       }
       right={
-        data || stored ? (
-          data ? (
-            <ComparisonPanel data={data} />
-          ) : (
-            <p className="w-full px-[1.375rem] pb-7 pt-[0.875rem] text-[1.0625rem] text-muted">
-              Comparison will appear here.
-            </p>
-          )
-        ) : (
-          <LatexReference />
-        )
+        data || stored ? <ComparisonPanel data={data} /> : <LatexReference />
       }
       centre={
         <div className="mx-auto w-full max-w-[48rem] text-[1.1875rem] leading-[1.65]">
@@ -144,50 +144,34 @@ export default function Dashboard() {
               <h2 className="font-display text-[2.5rem] font-bold leading-none">
                 {stored.name}
               </h2>
-              <div className="mt-4">
+              <div className="mb-[30px] mt-4">
                 <RichTex tex={stored.latex} />
               </div>
-              {isArchive ? (
-                <p role="status" className="mt-6 text-[1.0625rem] text-muted">
+              {stored.state === "analysed" ? (
+                <p role="status" className="text-[1.0625rem] text-muted">
                   {status ?? "Loading analysis…"}
                 </p>
               ) : (
-                <div className="mt-6 flex flex-wrap items-center gap-3">
+                <>
+                  <AttemptSection />
                   <Pill
                     variant="primary"
-                    onClick={analyseStored}
+                    onClick={submitAttempt}
                     className="min-h-[42px] text-[1.0625rem]"
                   >
-                    Analyse problem
+                    Submit attempt
                   </Pill>
-                  <Pill
-                    onClick={() =>
-                      setActionStatus(
-                        "Photo upload for your solutions arrives with call C — nothing to submit through yet."
-                      )
-                    }
-                    className="min-h-[42px] text-[1.0625rem]"
-                  >
-                    Submit solution
-                  </Pill>
-                </div>
-              )}
-              {actionStatus && (
-                <p role="status" className="mt-3 text-[1.0625rem] text-muted">
-                  {actionStatus}
-                </p>
+                  {actionStatus && (
+                    <p role="status" className="mt-3 text-[1.0625rem] text-muted">
+                      {actionStatus}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           ) : data && expert ? (
             <>
-              <ProblemReading
-                data={data}
-                label={
-                  isArchive
-                    ? "ICMC 2020 · Problem 1"
-                    : stored?.name ?? "ICMC 2020 · Problem 1"
-                }
-              />
+              <ProblemReading data={data} label={label || stored?.name || ""} />
               <StageSection index="1" title="Reading" sourceKey="reading">
                 <Reading reading={expert.reading} spans={expert.spans} />
               </StageSection>

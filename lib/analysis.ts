@@ -4,6 +4,8 @@ import { fetchMetaAnalysis } from "./providers/meta";
 
 export type AnalysisInput = {
   problemText: string;
+  // Set for problems from the library; lets the mock serve bundled analyses.
+  problemId?: string;
   studentMarks?: string;
 };
 

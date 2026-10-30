@@ -26,7 +26,7 @@ export default function CreateProblem() {
       rightLabel="LaTeX reference"
       centre={
         <div className="mx-auto w-full max-w-[48rem]">
-          <CreateProblemForm onSaved={() => router.push("/dashboard")} />
+          <CreateProblemForm onSaved={selectFromLibrary} />
         </div>
       }
       right={<LatexReference />}
