@@ -1,98 +1,71 @@
+import Header from "@/components/layout/Header";
+import Pill from "@/components/ui/Pill";
 import Link from "next/link";
-import Heatmap from "@/components/Heatmap";
-import Accordion from "@/components/Accordion";
-import GlyphSphere from "@/components/GlyphSphere";
-import { AnalysisSchema } from "@/lib/schema";
-import dummyDataJson from "@/lib/dummy-data.json";
-
-const dummyData = AnalysisSchema.parse(dummyDataJson);
-
-const ITEMS = [
-  {
-    title: "Read before you solve",
-    body: "Every phrase is weighted by how much thinking it drew.",
-  },
-  {
-    title: "Compare cue by cue",
-    body: "Your reading beside the expert's, down to the first divergence.",
-  },
-  {
-    title: "Learn your blind spots",
-    body: "Missed cues logged by type, so patterns surface.",
-  },
-];
 
 export default function Home() {
   return (
-    <main>
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden text-center">
-        <GlyphSphere />
-        <div className="relative z-10 mx-auto max-w-4xl px-6 py-20">
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted">
-            For Putnam and ICMC competitors
-          </p>
-          <h1 className="mt-4 text-6xl font-bold leading-none tracking-tight md:text-8xl">
+    <div className="min-h-screen">
+      <Header />
+
+      <section className="mx-auto max-w-[72rem] px-[clamp(1.25rem,6vw,5.5rem)] pb-[clamp(3rem,8vw,6.5rem)] pt-[clamp(3rem,9vw,7rem)] text-center">
+        <h1 className="m-0 font-display text-[clamp(4.5rem,13vw,11.5rem)] font-bold leading-none tracking-[0.02em]">
+          C<span className="text-accent">∅</span>mpetitor
+        </h1>
+        <p className="mx-auto mb-0 mt-2 font-display text-[clamp(2rem,4.5vw,3.75rem)] font-bold leading-[1.15]">
+          <span className="line-through decoration-accent decoration-4">
             Stop solving.
-            <br />
-            Start <span className="text-hollow">reading</span>.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
-            A maths tutor that never gives the solution. It compares how you
-            read a problem with how an expert reads it, cue by cue.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Link
-              href="/dashboard"
-              className="rounded-full bg-accent px-6 py-3 font-semibold text-white"
-            >
-              Try the demo
-            </Link>
-            <Link
-              href="/guide"
-              className="rounded-full bg-surface px-6 py-3 font-semibold"
-            >
-              How it works
-            </Link>
-          </div>
+          </span>{" "}
+          Start <span className="text-accent">reading.</span>
+        </p>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 600 30"
+          preserveAspectRatio="none"
+          className="mx-auto mb-0 mt-1 block h-5 w-[min(26rem,70%)]"
+        >
+          <path
+            d="M8 20 C 120 6, 260 26, 380 12 S 560 10, 592 16"
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
+        </svg>
+        <div className="mt-11 flex flex-wrap justify-center gap-4">
+          <Pill variant="primary" href="/dashboard">
+            Try the demo
+          </Pill>
+          <Pill href="#how">How it works</Pill>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <h2 className="mb-8 text-3xl font-bold tracking-tight">
-          How Competitor reads a problem
+      <section
+        id="how"
+        className="mx-auto max-w-[72rem] px-[clamp(1.25rem,6vw,5.5rem)] pb-[clamp(4rem,9vw,7.5rem)]"
+      >
+        <h2 className="mb-3 mt-0 text-center font-display text-[clamp(2.25rem,4vw,2.875rem)] font-bold">
+          How it works
         </h2>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-[16px] bg-surface p-6">
-            <Heatmap
-              text={dummyData.problem.text}
-              spans={dummyData.expert.spans}
-              label="Expert reading"
-            />
-          </div>
-          <Accordion items={ITEMS} />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 pb-20">
-        <h2 className="mb-8 text-3xl font-bold tracking-tight">
-          The protocol in one line
-        </h2>
-        <div className="rounded-[16px] bg-surface p-8 text-center">
-          <p className="text-xl font-semibold">
-            Assume you will get this wrong. Then explain every step.
-          </p>
-          <Link
-            href="/guide"
-            className="mt-3 inline-block font-semibold text-accent hover:underline"
-          >
-            Read the guide
+        <p className="mx-auto mb-5 mt-0 max-w-[40rem] text-center text-[1.25rem] leading-[1.55]">
+          Competitor trains the part of problem-solving that happens{" "}
+          <em>before</em> any calculation or proof: reading the statement,
+          noticing which phrases carry the weight, and deciding what
+          mathematics they point to.
+        </p>
+        <p className="m-0 text-center text-[1.1875rem]">
+          <Link href="/guide" className="font-bold">
+            Read the full guide →
           </Link>
-        </div>
+        </p>
       </section>
 
-      <footer className="border-t border-line px-6 py-8 text-center text-sm text-muted">
-        Competitor, built for the Meta Global AI Developer Hackathon 2026.
+      <footer className="mx-auto flex max-w-[72rem] flex-wrap justify-end gap-4 border-t-2 border-dashed border-rule px-[clamp(1.25rem,6vw,5.5rem)] pb-12 pt-8 text-[1.0625rem] text-muted">
+        <span className="flex gap-6">
+          <Link href="/guide">Guide</Link>
+          <a href="#">About</a>
+          <a href="#">Privacy</a>
+        </span>
       </footer>
-    </main>
+    </div>
   );
 }

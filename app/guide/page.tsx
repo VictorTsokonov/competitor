@@ -1,172 +1,110 @@
-import Image from "next/image";
-import Link from "next/link";
+import Header from "@/components/layout/Header";
+import Pill from "@/components/ui/Pill";
 
-const EXAMPLE_SRC = "/guide/example.jpg";
-
-function Crop({
-  position,
-  alt,
-}: {
-  position: string;
-  alt: string;
-}) {
-  return (
-    <div className="relative mt-3 h-36 overflow-hidden rounded-[16px] bg-surface">
-      <Image
-        src={EXAMPLE_SRC}
-        alt={alt}
-        fill
-        sizes="(max-width: 768px) 100vw, 672px"
-        style={{ objectFit: "none", objectPosition: position }}
-      />
-    </div>
-  );
-}
+const WRAP = "mx-auto max-w-[900px] px-8 pl-[clamp(1.25rem,6vw,5.5rem)]";
 
 const STEPS = [
   {
-    n: "1",
+    numeral: "(i)",
     title: "Mark the phrases",
-    body: "Underline each phrase that makes you pause, then number every mark in order. Pen only, one mark per phrase, and keep marks from crossing.",
-    example: "Marks ① ② ③ in the example: each underline sits under one load-bearing phrase.",
-    crop: { position: "30% 35%", alt: "Close-up of numbered underlines 1, 2 and 3" },
+    body: "Copy the problem. Underline every phrase that seems to matter and write one line beside it: what does this suggest?",
+    example: 'Circling "n+1" and noting "one more than the number of boxes".',
   },
   {
-    n: "2",
+    numeral: "(ii)",
     title: "Say what it is about",
-    body: "In one sentence, say what the problem is about before any maths. This is the sentence the analysis compares against the expert's goal.",
-    example: "Mark ③ in the example doubles as the goal: one colour reaches 15.",
-    crop: { position: "30% 46%", alt: "Close-up of the goal phrase" },
+    body: "One sentence, before any maths. What kind of problem is this, and what shape does it have?",
+    example: '"This is about forcing a pair, not finding one."',
   },
   {
-    n: "3",
+    numeral: "(iii)",
     title: "Define the objects",
-    body: "Write down what is given and what is wanted in the margin, in your own words. Short notes beat full sentences.",
-    example: "The “Definitions” box in the example: guarantee and worst case in the student's own words.",
-    crop: { position: "72% 50%", alt: "Close-up of the definitions box" },
+    body: "Name what is given and what is wanted. Write the definitions you are relying on.",
+    example: '"Given S of size n+1; wanted a, b in S with gcd 1."',
   },
   {
-    n: "4",
+    numeral: "(iv)",
     title: "List candidate methods",
-    body: "List 2-3 methods with the phrase that triggered each and why you keep or drop it. Name the trigger, not just the method.",
-    example: "The “Methods” list in the example: each method names its trigger phrase and a keep/drop verdict.",
-    crop: { position: "45% 85%", alt: "Close-up of the method list" },
+    body: "Two or three. For each, which phrase made you think of it and why you kept or dropped it. This is the stage the comparison cares about most.",
+    example: '"Pigeonhole, triggered by n+1 against n pairs; kept."',
   },
   {
-    n: "5",
-    title: "Attempt, then photograph",
-    body: "Attempt the problem with your chosen method. Try small cases, box the final answer, then photograph the whole page lying flat in even light with every number readable.",
-    example: "This whole page is the photo: flat, fully in frame, every number readable.",
-    crop: { position: "50% 50%", alt: "Wide view of the whole example page" },
+    numeral: "(v)",
+    title: "Attempt",
+    body: "Work the problem with your chosen method, a line of reasoning beside each step. Twenty to thirty minutes, then stop.",
+    example: "Dark pen, one page per photo, good light.",
   },
-];
-
-const TRANSCRIPT = [
-  "A box contains 28 red, 20 green, 19 yellow, 13 blue, 11 white and 9 black balls. Minimum drawn without replacement to guarantee at least 15 of a single color? (2019 AMC 12A #3.)",
-  "① “minimum number drawn without replacement” — how many draws are we counting?",
-  "② “to guarantee” — the strategy must survive the worst draw order.",
-  "③ “at least 15 of a single color” — the goal: one colour reaches 15.",
-  "Definitions: guarantee = works against the worst draw; worst case = avoid 15 as long as possible.",
-  "Trap note: only 9 black exist, so black can never reach 15.",
-  "Methods: worst-case construction (triggered by “guarantee”), KEEP; 14-of-each-plus-one (triggered by “15”), DROP — black caps at 9.",
-  "No answer on the page: the reading stops at method setup.",
 ];
 
 export default function Guide() {
   return (
-    <main>
-      <div className="mx-auto max-w-3xl px-6">
-        <header className="py-16 text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted">
-            The protocol
-          </p>
-          <h1 className="mt-4 text-5xl font-bold leading-tight tracking-tight md:text-6xl">
-            Assume you will get this <span className="text-hollow">wrong</span>.
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted">
-            Most attempts fail at the reading, not the maths. This protocol
-            makes every idea anchor to a phrase in the problem.
-          </p>
-        </header>
+    <div className="min-h-screen">
+      <Header />
 
-        <section aria-label="Worked example" className="rounded-[16px] bg-surface p-6">
-          <h2 className="text-xl font-bold">What a good page looks like</h2>
-          <p className="mt-1 text-muted">
-            A real AMC problem, prepared the way the analysis expects:
-            numbered marks, written-out definitions, interpretation notes,
-            and a method list — stopping before any solving.
-          </p>
-          <div className="relative mt-4 overflow-hidden rounded-[16px]">
-            <Image
-              src={EXAMPLE_SRC}
-              alt="Handwritten reading-phase example for an AMC counting problem: three numbered underlines, a definitions box, a trap note about the black balls, and a method list with keep and drop verdicts"
-              width={1920}
-              height={1280}
-              sizes="(max-width: 768px) 100vw, 672px"
-              className="h-auto w-full"
-            />
-          </div>
-          <p className="mt-2 text-xs text-muted">
-            Problem © Mathematical Association of America, 2019 AMC 12A #3.
-          </p>
-          <details className="mt-4">
-            <summary className="cursor-pointer text-sm font-semibold">
-              Read a transcript of the example
-            </summary>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted">
-              {TRANSCRIPT.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </details>
-        </section>
+      <section className={`${WRAP} pb-6 pt-[clamp(2.5rem,7vw,4.5rem)] text-center`}>
+        <p className="mb-2 mt-0 text-[1.125rem] uppercase tracking-[2px] text-muted">
+          the protocol
+        </p>
+        <h1 className="m-0 font-display text-[clamp(3rem,6.5vw,5.75rem)] font-bold leading-[1.05]">
+          Work the problem as if you{" "}
+          <span className="text-accent underline decoration-[5px] underline-offset-[0.4rem]">
+            won&apos;t
+          </span>{" "}
+          solve it.
+        </h1>
+        <p className="mx-auto mb-0 mt-5 max-w-[38rem] text-[1.25rem] leading-[1.55] text-muted">
+          Then the goal is no longer the answer. It is a record of how you
+          read the problem, which Competitor lays next to an expert&apos;s.
+        </p>
+      </section>
 
-        <div className="mt-6 space-y-4">
-          {STEPS.map((s) => (
-            <div
-              key={s.n}
-              className="rounded-[16px] bg-surface p-6"
-            >
-              <div className="flex gap-5">
-                <span className="text-4xl font-bold text-accent">{s.n}</span>
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-semibold">{s.title}</h2>
-                  <p className="mt-1">{s.body}</p>
-                  <p className="mt-1 text-sm text-muted">
-                    In the example: {s.example}
-                  </p>
-                </div>
-              </div>
-              <Crop position={s.crop.position} alt={s.crop.alt} />
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-6 rounded-[16px] bg-surface bg-dots p-8 text-center">
-          <p className="text-xl font-semibold">Then photograph your pages</p>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-            Whole page flat in the frame, even light, every mark number
-            readable. The analysis reads mark positions, not colours.
-          </p>
-          <Link
-            href="/dashboard"
-            className="mt-4 inline-block rounded-full bg-accent px-6 py-3 font-semibold text-white"
+      <section className={`${WRAP} pt-6`}>
+        {STEPS.map((s, i) => (
+          <div
+            key={s.numeral}
+            className={`grid grid-cols-[3.5rem_minmax(0,1fr)] gap-4 border-t-2 border-dashed border-rule py-[1.875rem] min-[40rem]:grid-cols-[5.5rem_minmax(0,1fr)] ${
+              i === STEPS.length - 1 ? "border-b-2" : ""
+            }`}
           >
-            Start an analysis
-          </Link>
-        </div>
+            <div className="font-display text-[2.75rem] font-bold leading-none">
+              {s.numeral}
+            </div>
+            <div>
+              <h3 className="mb-1.5 mt-0 text-[1.5rem]">{s.title}</h3>
+              <p className="m-0 text-[1.1875rem] leading-[1.6]">{s.body}</p>
+              <div className="mt-2 text-[1.0625rem] italic text-muted">{s.example}</div>
+            </div>
+          </div>
+        ))}
+      </section>
 
-        <section className="py-12">
-          <h2 className="text-2xl font-bold tracking-tight">Why this works</h2>
-          <p className="mt-3">
-            Explaining each step in your own words forces you to notice what
-            you actually used and what you merely skimmed. Reading the whole
-            problem before solving stops the first idea from swallowing the
-            constraints. Over time the phrases you once ignored become the
-            cues you check first.
-          </p>
-        </section>
-      </div>
-    </main>
+      <section className={`${WRAP} pb-5 pt-14`}>
+        <article className="relative rotate-[-0.4deg] bg-card p-10 text-center shadow-[2px_3px_0_rgba(43,38,34,0.12)]">
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-[-14px] ml-[-60px] h-7 w-[120px] rotate-[2deg] bg-[rgba(214,196,150,0.7)]"
+          />
+          <div className="mb-[1.125rem] font-display text-[2.5rem] font-bold leading-none">
+            Then photograph your pages
+          </div>
+          <Pill variant="primary" href="/createProblem">
+            Start an analysis
+          </Pill>
+        </article>
+      </section>
+
+      <section className={`${WRAP} pb-24 pt-10`}>
+        <h2 className="mb-2.5 mt-0 font-display text-[2.5rem] font-bold leading-none">
+          Why this works
+        </h2>
+        <p className="m-0 text-[1.1875rem] leading-[1.65]">
+          Explaining each step in your own words forces you to notice what you
+          actually used and what you merely skimmed. Reading the whole problem
+          before solving stops the first idea from swallowing the constraints.
+          Over time the phrases you once ignored become the cues you check
+          first.
+        </p>
+      </section>
+    </div>
   );
 }
