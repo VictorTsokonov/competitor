@@ -1,6 +1,8 @@
 import type { Chain, MissedCue } from "@/lib/schema";
 import Card from "@/components/ui/Card";
 import Highlight from "@/components/ui/Highlight";
+import { RichTex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 export default function MissedCueCard({
   expert,
@@ -16,15 +18,17 @@ export default function MissedCueCard({
         <span className="font-bold text-accent">✗</span>{" "}
         {span ? (
           <Highlight category={span.category} weight={span.weight}>
-            {span.text}
+            <SpanText text={span.text} />
           </Highlight>
         ) : (
           <span className="font-bold">{cue.span_id}</span>
         )}
       </div>
-      <div className="mt-1">{cue.what_it_unlocks}</div>
+      <div className="mt-1">
+        <RichTex tex={cue.what_it_unlocks} />
+      </div>
       <div className="mt-1 text-[0.9375rem] text-muted">
-        <strong>Self-check:</strong> {cue.self_check}
+        <strong>Self-check:</strong> <RichTex tex={cue.self_check} />
       </div>
     </Card>
   );

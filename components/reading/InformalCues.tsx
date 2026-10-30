@@ -1,5 +1,7 @@
 import type { Chain } from "@/lib/schema";
 import Highlight from "@/components/ui/Highlight";
+import { RichTex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 export default function InformalCues({
   informal_cues,
@@ -17,12 +19,12 @@ export default function InformalCues({
           <li key={i}>
             {span ? (
               <Highlight category={span.category} weight={span.weight}>
-                {span.text}
+                <SpanText text={span.text} />
               </Highlight>
             ) : (
               <span className="font-bold">“{c.span_id}”</span>
             )}
-            : {c.bearing}
+            : <RichTex tex={c.bearing} />
           </li>
         );
       })}

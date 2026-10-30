@@ -1,6 +1,7 @@
 import type { Chain } from "@/lib/schema";
 import Tag from "@/components/ui/Tag";
-import { Tex } from "@/components/reading/Tex";
+import { RichTex, Tex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 // Cue tags light up only for the highest weights; the mockup shows
 // rule · 95 on and rule · 85 off.
@@ -21,15 +22,19 @@ export default function Reading({
         return (
           <div key={c.id}>
             <div className="font-bold">
-              “{span?.text ?? c.span_id}”{" "}
+              “{span ? <SpanText text={span.text} /> : c.span_id}”{" "}
               {span && (
                 <Tag on={span.weight >= TAG_ON_AT}>
                   {span.category} · {span.weight}
                 </Tag>
               )}
             </div>
-            <div>{c.why_it_matters}</div>
-            <div className="text-[1.0625rem] text-muted">{c.how_spotted}</div>
+            <div>
+              <RichTex tex={c.why_it_matters} />
+            </div>
+            <div className="text-[1.0625rem] text-muted">
+              <RichTex tex={c.how_spotted} />
+            </div>
           </div>
         );
       })}

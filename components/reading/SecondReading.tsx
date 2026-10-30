@@ -1,5 +1,7 @@
 import type { Chain } from "@/lib/schema";
 import Highlight from "@/components/ui/Highlight";
+import { RichTex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 export default function SecondReading({
   second_reading,
@@ -21,7 +23,7 @@ export default function SecondReading({
                 {i > 0 && "; "}
                 {span ? (
                   <Highlight category={span.category} weight={r.new}>
-                    {span.text}
+                    <SpanText text={span.text} />
                   </Highlight>
                 ) : (
                   <span className="font-bold">“{r.span_id}”</span>
@@ -39,14 +41,14 @@ export default function SecondReading({
           {second_reading.new_spans.map((s, i) => (
             <span key={i}>
               {i > 0 && "; "}
-              “{s}”
+              “<SpanText text={s} />”
             </span>
           ))}
           .
         </p>
       )}
       <p className={second_reading.reweighted.length > 0 || second_reading.new_spans.length > 0 ? "" : "mt-3"}>
-        {second_reading.what_changed}
+        <RichTex tex={second_reading.what_changed} />
       </p>
     </div>
   );

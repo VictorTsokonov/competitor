@@ -1,5 +1,6 @@
 import type { Chain } from "@/lib/schema";
 import Highlight from "@/components/ui/Highlight";
+import SpanText from "@/components/reading/SpanText";
 
 export default function UnusedCues({
   cues,
@@ -22,10 +23,12 @@ export default function UnusedCues({
             <span className="font-bold">✓</span>{" "}
             {span ? (
               <Highlight category={span.category} weight={span.weight}>
-                {span.text}
+                <SpanText text={span.text} />
               </Highlight>
             ) : (
-              <span className="font-bold">{cue}</span>
+              <span className="font-bold">
+                <SpanText text={cue} />
+              </span>
             )}{" "}
             <span className="text-muted">
               you marked it, then your method never used it.

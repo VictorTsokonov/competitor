@@ -2,6 +2,7 @@ import type { Chain } from "@/lib/schema";
 import Highlight from "@/components/ui/Highlight";
 import Tag from "@/components/ui/Tag";
 import { RichTex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 export default function Method({
   method,
@@ -17,7 +18,9 @@ export default function Method({
         <div key={c.name} className="flex items-start gap-[14px]">
           <Tag on={c.kept}>{c.kept ? "kept" : "dropped"}</Tag>
           <div>
-            <strong>{c.name}.</strong>{" "}
+            <strong>
+              <RichTex tex={c.name} />.
+            </strong>{" "}
             {c.kept ? (
               <>
                 Deciding cues:{" "}
@@ -28,7 +31,7 @@ export default function Method({
                       {i > 0 && ", "}
                       {span ? (
                         <Highlight category={span.category} weight={span.weight}>
-                          {span.text}
+                          <SpanText text={span.text} />
                         </Highlight>
                       ) : (
                         `“${id}”`
@@ -40,13 +43,19 @@ export default function Method({
               </>
             ) : (
               <>
-                {c.why}{" "}
+                <RichTex tex={c.why} />{" "}
                 {c.deciding_span_ids.length > 0 && (
                   <span className="text-muted">
                     Decided by:{" "}
-                    {c.deciding_span_ids
-                      .map((id) => `“${spanOf(id)?.text ?? id}”`)
-                      .join(", ")}
+                    {c.deciding_span_ids.map((id, i) => {
+                      const span = spanOf(id);
+                      return (
+                        <span key={id}>
+                          {i > 0 && ", "}“
+                          {span ? <SpanText text={span.text} /> : id}”
+                        </span>
+                      );
+                    })}
                     .
                   </span>
                 )}
