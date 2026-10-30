@@ -11,12 +11,14 @@ export type PanelState = {
   rightWidth: number;
 };
 
-const STORAGE_KEY = "competitor.panels.v1";
+// v2: defaults re-anchored to design/dashboard.html (17rem / 21.25rem);
+// the key bump discards widths persisted under the old defaults.
+const STORAGE_KEY = "competitor.panels.v2";
 
 export const PANEL_MIN = 220;
 export const PANEL_MAX = 420;
-export const DEFAULT_LEFT_WIDTH = 260;
-export const DEFAULT_RIGHT_WIDTH = 320;
+export const DEFAULT_LEFT_WIDTH = 272;
+export const DEFAULT_RIGHT_WIDTH = 340;
 
 function clampWidth(px: number): number {
   if (!Number.isFinite(px)) return DEFAULT_LEFT_WIDTH;

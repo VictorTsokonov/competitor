@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import type { Analysis } from "@/lib/schema";
-import { loadLibrary, SELECT_INTENT_KEY, type StoredProblem } from "@/lib/problems";
+import {
+  ARCHIVE_PROBLEM_ID,
+  LAST_VIEW_KEY,
+  loadLibrary,
+  SELECT_INTENT_KEY,
+  type StoredProblem,
+} from "@/lib/problems";
 import AppShell from "@/components/layout/AppShell";
 import Pill from "@/components/ui/Pill";
 import ComparisonPanel from "@/components/comparison/ComparisonPanel";
@@ -26,16 +32,30 @@ export default function Dashboard() {
   const [stored, setStored] = useState<StoredProblem | null>(null);
   const [actionStatus, setActionStatus] = useState<string | null>(null);
 
+  function rememberView(problemId: string | null) {
+    try {
+      if (problemId) sessionStorage.setItem(LAST_VIEW_KEY, problemId);
+      else sessionStorage.removeItem(LAST_VIEW_KEY);
+    } catch {
+      /* private mode: view resets on navigation */
+    }
+  }
+
   function select(problemId?: string) {
-    if (problemId) {
-      const lib = loadLibrary(localStorage);
-      setStored(lib.problems.find((p) => p.id === problemId) ?? null);
-      setData(null);
-      setStatus(null);
-      setActionStatus(null);
+    setData(null);
+    setStatus(null);
+    setActionStatus(null);
+    if (!problemId) {
+      setStored(null);
+      rememberView(null);
       return;
     }
-    load();
+    const lib = loadLibrary(localStorage);
+    const problem = lib.problems.find((p) => p.id === problemId) ?? null;
+    setStored(problem);
+    rememberView(problem?.id ?? null);
+    // The archive problem ships with the expert reading: load it straight away.
+    if (problem?.id === ARCHIVE_PROBLEM_ID) fetchAnalysis();
   }
 
   function handleCreated(id: string) {
@@ -43,16 +63,17 @@ export default function Dashboard() {
     select(id);
   }
 
-  // Selection intent handed off from /createProblem: consume once, then
-  // clear. A missing problem means staying on creation, never a crash.
+  // Selection intent handed off from /createProblem wins; otherwise the
+  // last viewed problem is restored so navigating away and back returns
+  // here, not to the default creation state. Missing problems mean
+  // staying on creation, never a crash.
   useEffect(() => {
     try {
-      const id = sessionStorage.getItem(SELECT_INTENT_KEY);
-      if (id) {
-        sessionStorage.removeItem(SELECT_INTENT_KEY);
-        const lib = loadLibrary(localStorage);
-        if (lib.problems.some((p) => p.id === id)) select(id);
-      }
+      const lib = loadLibrary(localStorage);
+      const intent = sessionStorage.getItem(SELECT_INTENT_KEY);
+      if (intent) sessionStorage.removeItem(SELECT_INTENT_KEY);
+      const id = intent ?? sessionStorage.getItem(LAST_VIEW_KEY);
+      if (id && lib.problems.some((p) => p.id === id)) select(id);
     } catch {
       /* private mode: stay on creation */
     }
@@ -75,8 +96,7 @@ export default function Dashboard() {
       .catch((e: Error) => setActionStatus(e.message));
   }
 
-  function load() {
-    setStored(null);
+  function fetchAnalysis() {
     setStatus("Loading analysis…");
     fetch("/api/analyse", { method: "POST" })
       .then(async (res) => {
@@ -91,6 +111,7 @@ export default function Dashboard() {
   }
 
   const expert = data?.expert;
+  const isArchive = stored?.id === ARCHIVE_PROBLEM_ID;
 
   const comparing = !!(data || stored);
   return (
@@ -126,25 +147,31 @@ export default function Dashboard() {
               <div className="mt-4">
                 <RichTex tex={stored.latex} />
               </div>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Pill
-                  variant="primary"
-                  onClick={analyseStored}
-                  className="min-h-[42px] text-[1.0625rem]"
-                >
-                  Analyse problem
-                </Pill>
-                <Pill
-                  onClick={() =>
-                    setActionStatus(
-                      "Photo upload for your solutions arrives with call C — nothing to submit through yet."
-                    )
-                  }
-                  className="min-h-[42px] text-[1.0625rem]"
-                >
-                  Submit solution
-                </Pill>
-              </div>
+              {isArchive ? (
+                <p role="status" className="mt-6 text-[1.0625rem] text-muted">
+                  {status ?? "Loading analysis…"}
+                </p>
+              ) : (
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <Pill
+                    variant="primary"
+                    onClick={analyseStored}
+                    className="min-h-[42px] text-[1.0625rem]"
+                  >
+                    Analyse problem
+                  </Pill>
+                  <Pill
+                    onClick={() =>
+                      setActionStatus(
+                        "Photo upload for your solutions arrives with call C — nothing to submit through yet."
+                      )
+                    }
+                    className="min-h-[42px] text-[1.0625rem]"
+                  >
+                    Submit solution
+                  </Pill>
+                </div>
+              )}
               {actionStatus && (
                 <p role="status" className="mt-3 text-[1.0625rem] text-muted">
                   {actionStatus}
@@ -155,7 +182,11 @@ export default function Dashboard() {
             <>
               <ProblemReading
                 data={data}
-                label={stored?.name ?? "ICMC 2020 · Problem 1"}
+                label={
+                  isArchive
+                    ? "ICMC 2020 · Problem 1"
+                    : stored?.name ?? "ICMC 2020 · Problem 1"
+                }
               />
               <StageSection index="1" title="Reading" sourceKey="reading">
                 <Reading reading={expert.reading} spans={expert.spans} />

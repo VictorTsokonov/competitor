@@ -62,16 +62,38 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// A few text-mode commands users paste; everything else shows literally
-// so nothing is silently swallowed.
+function unescapeHtml(s: string): string {
+  return s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+}
+
+// Commands with their own HTML or math rendering; any command still
+// unmatched goes through KaTeX, which shows unknown ones in place so
+// nothing is silently swallowed.
 function renderText(value: string): string {
   let out = escapeHtml(value);
   out = out.replace(/\\\\/g, "<br/>");
+  out = out.replace(
+    /\\section\*?\{([^{}]*)\}/g,
+    '<strong style="display:block;font-size:1.35em;margin:0.6em 0 0.2em">$1</strong>'
+  );
+  out = out.replace(
+    /\\subsection\*?\{([^{}]*)\}/g,
+    '<strong style="display:block;font-size:1.15em;margin:0.5em 0 0.2em">$1</strong>'
+  );
   out = out.replace(/\\textbf\{([^{}]*)\}/g, "<strong>$1</strong>");
   out = out.replace(/\\textit\{([^{}]*)\}/g, "<em>$1</em>");
   out = out.replace(/\\emph\{([^{}]*)\}/g, "<em>$1</em>");
   out = out.replace(/\\noindent/g, "");
   out = out.replace(/\\vspace\{[^{}]*\}/g, "");
+  // Bare commands outside $…$, e.g. \frac{a}{b}: render inline via KaTeX.
+  out = out.replace(
+    /\\[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^{}]*\})*/g,
+    (cmd) =>
+      katex.renderToString(unescapeHtml(cmd), {
+        throwOnError: false,
+        displayMode: false,
+      })
+  );
   out = out.replace(/\n/g, "<br/>");
   return out;
 }

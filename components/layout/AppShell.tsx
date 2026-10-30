@@ -103,7 +103,7 @@ export default function AppShell({
 
       <div className="relative min-h-0 flex-1">
         <div
-          className="mx-auto grid h-full max-w-[1440px]"
+          className="grid h-full"
           style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }}
         >
           <Panel
