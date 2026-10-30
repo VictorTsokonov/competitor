@@ -10,8 +10,13 @@ export default function Abstraction({
     <div className="mt-3 grid gap-3">
       {abstraction.underneath.map((u, i) => (
         <div key={i}>
-          <strong>{u.object}</strong> is really {u.really_is}{" "}
-          <span className="text-muted">→ {u.implies}.</span>
+          <strong>
+            <RichTex tex={u.object} />
+          </strong>{" "}
+          is really <RichTex tex={u.really_is} />{" "}
+          <span className="text-muted">
+            → <RichTex tex={u.implies} />.
+          </span>
         </div>
       ))}
       {abstraction.deeper_properties.map((d, i) => (

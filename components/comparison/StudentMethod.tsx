@@ -1,5 +1,7 @@
 import type { Chain } from "@/lib/schema";
 import Highlight from "@/components/ui/Highlight";
+import { RichTex } from "@/components/reading/Tex";
+import SpanText from "@/components/reading/SpanText";
 
 export default function StudentMethod({ student }: { student: Chain }) {
   const spanOf = (id: string) => student.spans.find((s) => s.id === id);
@@ -12,7 +14,7 @@ export default function StudentMethod({ student }: { student: Chain }) {
     <div className="mt-2 text-[1.0625rem]">
       {kept.map((c) => (
         <p key={c.name}>
-          {c.name}
+          <RichTex tex={c.name} />
           {c.deciding_span_ids.length > 0 && (
             <>
               , triggered by{" "}
@@ -23,7 +25,7 @@ export default function StudentMethod({ student }: { student: Chain }) {
                     {i > 0 && ", "}
                     {span ? (
                       <Highlight category={span.category} weight={span.weight}>
-                        {span.text}
+                        <SpanText text={span.text} />
                       </Highlight>
                     ) : (
                       `“${id}”`
@@ -38,7 +40,8 @@ export default function StudentMethod({ student }: { student: Chain }) {
       ))}
       {dropped.map((c) => (
         <p key={c.name}>
-          “{c.name}” was considered and dropped: {c.why}
+          “<RichTex tex={c.name} />” was considered and dropped:{" "}
+          <RichTex tex={c.why} />
         </p>
       ))}
     </div>

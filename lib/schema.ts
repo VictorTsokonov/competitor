@@ -1,8 +1,9 @@
 import { z } from "zod";
 
+// The statement exactly as typed: prose with $…$ / $$…$$ maths. This is
+// the single source string that spans quote and the dashboard renders.
 export const ProblemSchema = z.object({
   text: z.string().min(1),
-  latex: z.string(),
 });
 
 export const SpanCategorySchema = z.enum([

@@ -1,28 +1,26 @@
 {
   "problem": {
-    "text": "Let ε < 1/2 be a positive real number and let U_ε denote the set of real numbers that differ from their nearest integer by at most ε. Prove that there exists a positive integer m such that for any real number x, the sets {x, 2x, 3x, …, mx} and U_ε have at least one element in common.",
-    "latex": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
+    "text": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
   },
   "expert": {
     "problem": {
-      "text": "Let ε < 1/2 be a positive real number and let U_ε denote the set of real numbers that differ from their nearest integer by at most ε. Prove that there exists a positive integer m such that for any real number x, the sets {x, 2x, 3x, …, mx} and U_ε have at least one element in common.",
-      "latex": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
+      "text": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
     },
     "spans": [
-      { "id": "s1", "text": "there exists a positive integer m such that for any real number x", "category": "goal", "weight": 95, "reason": "Quantifier order: m is chosen before x and may depend only on ε. The bound must be uniform in x, which kills any argument that picks m after seeing x." },
-      { "id": "s2", "text": "differ from their nearest integer by at most ε", "category": "definition", "weight": 85, "reason": "This is the distance to the nearest integer, ‖t‖ ≤ ε. U_ε is periodic with period 1, so the whole problem lives on the circle ℝ/ℤ, where it is an arc of length 2ε around 0." },
-      { "id": "s3", "text": "{x, 2x, 3x, …, mx}", "category": "rule", "weight": 80, "reason": "Consecutive multiples of one number: their fractional parts are a constant-step walk on the circle, and the difference of two of them is again a multiple of x." },
-      { "id": "s4", "text": "ε < 1/2", "category": "setting", "weight": 45, "reason": "Only there to keep U_ε from being all of ℝ; it does not drive the argument." },
-      { "id": "s5", "text": "at least one element in common", "category": "goal", "weight": 60, "reason": "Existence of one good k, which is the shape pigeonhole produces." },
-      { "id": "s6", "text": "for any real number x", "category": "informal", "weight": 70, "reason": "Includes irrational x, so no periodicity of the multiples can be assumed; whatever works must work for a dense walk too." }
+      { "id": "s1", "text": "there exists a positive integer $m$ such that for any real number $x$", "category": "goal", "weight": 95, "reason": "Quantifier order: $m$ is chosen before $x$ and may depend only on $\\varepsilon$. The bound must be uniform in $x$, which kills any argument that picks $m$ after seeing $x$." },
+      { "id": "s2", "text": "differ from their nearest integer by at most $\\varepsilon$", "category": "definition", "weight": 85, "reason": "This is the distance to the nearest integer, $\\lVert t \\rVert \\le \\varepsilon$. $U_\\varepsilon$ is periodic with period 1, so the whole problem lives on the circle $\\mathbb{R}/\\mathbb{Z}$, where it is an arc of length $2\\varepsilon$ around 0." },
+      { "id": "s3", "text": "$\\{x, 2x, 3x, \\dots, mx\\}$", "category": "rule", "weight": 80, "reason": "Consecutive multiples of one number: their fractional parts are a constant-step walk on the circle, and the difference of two of them is again a multiple of $x$." },
+      { "id": "s4", "text": "$\\varepsilon < \\tfrac12$", "category": "setting", "weight": 45, "reason": "Only there to keep $U_\\varepsilon$ from being all of $\\mathbb{R}$; it does not drive the argument." },
+      { "id": "s5", "text": "at least one element in common", "category": "goal", "weight": 60, "reason": "Existence of one good $k$, which is the shape pigeonhole produces." },
+      { "id": "s6", "text": "for any real number $x$", "category": "informal", "weight": 70, "reason": "Includes irrational $x$, so no periodicity of the multiples can be assumed; whatever works must work for a dense walk too." }
     ],
     "reading": {
       "cues": [
-        { "id": "c1", "span_id": "s1", "why_it_matters": "Quantifier order: m is chosen before x and may depend only on ε. The bound must be uniform in x, which kills any argument that picks m after seeing x.", "how_spotted": "Read the quantifiers before the objects: whichever variable is introduced first is not allowed to peek at the later ones." },
-        { "id": "c2", "span_id": "s2", "why_it_matters": "This is the distance to the nearest integer, ‖t‖ ≤ ε. U_ε is periodic with period 1, so the whole problem lives on the circle ℝ/ℤ, where it is an arc of length 2ε around 0.", "how_spotted": "'Nearest integer' names a distance, and distances to the nearest integer live on the circle of fractional parts." },
-        { "id": "c3", "span_id": "s3", "why_it_matters": "Consecutive multiples of one number: their fractional parts are a constant-step walk on the circle, and the difference of two of them is again a multiple of x.", "how_spotted": "Multiples of one number step by a constant, and the family is closed under differences — that closure is what counting arguments feed on." },
-        { "id": "c4", "span_id": "s5", "why_it_matters": "Existence of one good k, which is the shape pigeonhole produces.", "how_spotted": "'At least one' asks for bare existence, and existence from finitely many candidates is what pigeonhole delivers." },
-        { "id": "c5", "span_id": "s6", "why_it_matters": "Includes irrational x, so no periodicity of the multiples can be assumed; whatever works must work for a dense walk too.", "how_spotted": "'Any real' is a warning label: the argument must survive irrational x, where the walk never repeats." }
+        { "id": "c1", "span_id": "s1", "why_it_matters": "Quantifier order: $m$ is chosen before $x$ and may depend only on $\\varepsilon$. The bound must be uniform in $x$, which kills any argument that picks $m$ after seeing $x$.", "how_spotted": "Read the quantifiers before the objects: whichever variable is introduced first is not allowed to peek at the later ones." },
+        { "id": "c2", "span_id": "s2", "why_it_matters": "This is the distance to the nearest integer, $\\lVert t \\rVert \\le \\varepsilon$. $U_\\varepsilon$ is periodic with period 1, so the whole problem lives on the circle $\\mathbb{R}/\\mathbb{Z}$, where it is an arc of length $2\\varepsilon$ around 0.", "how_spotted": "'Nearest integer' names a distance, and distances to the nearest integer live on the circle of fractional parts." },
+        { "id": "c3", "span_id": "s3", "why_it_matters": "Consecutive multiples of one number: their fractional parts are a constant-step walk on the circle, and the difference of two of them is again a multiple of $x$.", "how_spotted": "Multiples of one number step by a constant, and the family is closed under differences — that closure is what counting arguments feed on." },
+        { "id": "c4", "span_id": "s5", "why_it_matters": "Existence of one good $k$, which is the shape pigeonhole produces.", "how_spotted": "'At least one' asks for bare existence, and existence from finitely many candidates is what pigeonhole delivers." },
+        { "id": "c5", "span_id": "s6", "why_it_matters": "Includes irrational $x$, so no periodicity of the multiples can be assumed; whatever works must work for a dense walk too.", "how_spotted": "'Any real' is a warning label: the argument must survive irrational $x$, where the walk never repeats." }
       ],
       "definitions": [
         { "term": "‖t‖", "meaning_latex": "\\lVert t \\rVert = \\min_{n \\in \\mathbb{Z}} \\lvert t - n \\rvert, \\text{ the distance from } t \\text{ to the nearest integer}" },
@@ -31,113 +29,112 @@
       ]
     },
     "goal": {
-      "asked": "A positive integer m, depending on ε only, such that some multiple kx with 1 ≤ k ≤ m is within ε of an integer, for every real x.",
-      "answer_form": "A construction of m from ε plus a proof.",
-      "final_line_would_say": "Hence some kx with 1 ≤ k ≤ m satisfies ‖kx‖ ≤ ε."
+      "asked": "A positive integer $m$, depending on $\\varepsilon$ only, such that some multiple $kx$ with $1 \\le k \\le m$ is within $\\varepsilon$ of an integer, for every real $x$.",
+      "answer_form": "A construction of $m$ from $\\varepsilon$ plus a proof.",
+      "final_line_would_say": "Hence some $kx$ with $1 \\le k \\le m$ satisfies $\\lVert kx \\rVert \\le \\varepsilon$."
     },
     "informal_cues": [
-      { "span_id": "s6", "bearing": "'Any real' includes irrational x, where the multiples never repeat; nothing periodic can be assumed, so the argument must be a count, not a cycle." },
-      { "span_id": "s4", "bearing": "ε < 1/2 only stops U_ε from being everything; no step of the proof uses more of it." }
+      { "span_id": "s6", "bearing": "'Any real' includes irrational $x$, where the multiples never repeat; nothing periodic can be assumed, so the argument must be a count, not a cycle." },
+      { "span_id": "s4", "bearing": "$\\varepsilon < \\tfrac12$ only stops $U_\\varepsilon$ from being everything; no step of the proof uses more of it." }
     ],
     "abstraction": {
       "underneath": [
-        { "object": "U_ε", "really_is": "an arc of length 2ε around 0 on the circle ℝ/ℤ", "implies": "'kx ∈ U_ε' is the one-line statement ‖kx‖ ≤ ε" },
-        { "object": "{x, 2x, …, mx}", "really_is": "m points on the circle, plus the point 0 for free", "implies": "m + 1 points against ⌈1/ε⌉ arcs of length at most ε forces two points into one arc" },
-        { "object": "the difference of two multiples", "really_is": "jx − ix = (j−i)x, a multiple with a smaller index", "implies": "two walk points landing close together hands us one multiple close to an integer" }
+        { "object": "$U_\\varepsilon$", "really_is": "an arc of length $2\\varepsilon$ around 0 on the circle $\\mathbb{R}/\\mathbb{Z}$", "implies": "'$kx \\in U_\\varepsilon$' is the one-line statement $\\lVert kx \\rVert \\le \\varepsilon$" },
+        { "object": "$\\{x, 2x, \\dots, mx\\}$", "really_is": "$m$ points on the circle, plus the point 0 for free", "implies": "$m + 1$ points against $\\lceil 1/\\varepsilon \\rceil$ arcs of length at most $\\varepsilon$ forces two points into one arc" },
+        { "object": "the difference of two multiples", "really_is": "$jx - ix = (j-i)x$, a multiple with a smaller index", "implies": "two walk points landing close together hands us one multiple close to an integer" }
       ],
       "deeper_properties": [
-        "$\\lVert a - b \\rVert \\le \\lvert \\{a\\} - \\{b\\} \\rvert$: if two fractional parts are within ε of each other, their difference is within ε of an integer.",
-        "Cutting the circle into $\\lceil 1/\\varepsilon \\rceil$ arcs of length at most ε and placing the m + 1 points 0, x, …, mx collides two of them whenever $m \\ge \\lceil 1/\\varepsilon \\rceil$.",
-        "The count never looks at x, which is exactly the uniformity the quantifier order demands: $m = \\lceil 1/\\varepsilon \\rceil$ works for every x at once."
+        "$\\lVert a - b \\rVert \\le \\lvert \\{a\\} - \\{b\\} \\rvert$: if two fractional parts are within $\\varepsilon$ of each other, their difference is within $\\varepsilon$ of an integer.",
+        "Cutting the circle into $\\lceil 1/\\varepsilon \\rceil$ arcs of length at most $\\varepsilon$ and placing the $m + 1$ points $0, x, \\dots, mx$ collides two of them whenever $m \\ge \\lceil 1/\\varepsilon \\rceil$.",
+        "The count never looks at $x$, which is exactly the uniformity the quantifier order demands: $m = \\lceil 1/\\varepsilon \\rceil$ works for every $x$ at once."
       ]
     },
     "simplification": {
-      "instance": "Take ε = 1/4. Place the points 0, x, 2x, 3x, 4x on the circle.",
-      "instance_latex": "\\varepsilon = \\tfrac14: \\text{ the points } 0, x, 2x, 3x, 4x \\text{ on } \\mathbb{R}/\\mathbb{Z}",
-      "what_to_try": "Split the circle into four arcs of length 1/4 and count points against arcs.",
-      "notice_prompt": "Two of five points share an arc, so their difference is a multiple of x within 1/4 of an integer. How many points do you need for a general ε, and does the count depend on x at all?"
+      "instance": "Take $\\varepsilon = \\tfrac14$. Place the points $0, x, 2x, 3x, 4x$ on the circle $\\mathbb{R}/\\mathbb{Z}$.",
+      "instance_latex": "",
+      "what_to_try": "Split the circle into four arcs of length $\\tfrac14$ and count points against arcs.",
+      "notice_prompt": "Two of five points share an arc, so their difference is a multiple of $x$ within $\\tfrac14$ of an integer. How many points do you need for a general $\\varepsilon$, and does the count depend on $x$ at all?"
     },
     "method": {
       "candidates": [
-        { "name": "Pigeonhole on fractional parts of 0, x, …, mx (Dirichlet's approximation)", "deciding_span_ids": ["s1", "s3", "s5"], "from_first_principles": "The bound must be uniform in x, so count instead of approximating: cut the circle into $\\lceil 1/\\varepsilon \\rceil$ arcs of length at most ε and place the m + 1 points 0, x, …, mx with $m = \\lceil 1/\\varepsilon \\rceil$. Two points ix and jx share an arc, so $\\lVert (j-i)x \\rVert \\le \\varepsilon$ with $1 \\le j - i \\le m$.", "kept": true, "why": "Produces m from ε alone and uses every quantifier exactly as written." },
-        { "name": "Equidistribution of {kx} for irrational x", "deciding_span_ids": ["s6"], "from_first_principles": "For irrational x the fractional parts of the multiples are dense, so some kx lands in the arc.", "kept": false, "why": "True, but gives no uniform m and says nothing about rational x." },
-        { "name": "Case split rational / irrational", "deciding_span_ids": ["s6"], "from_first_principles": "Rational x = p/q is finished by k = q, since qx is an integer; treat irrational x separately.", "kept": false, "why": "The rational case is easy but the irrational case needs the pigeonhole anyway, so the split buys nothing." },
-        { "name": "Continued fractions", "deciding_span_ids": ["s2"], "from_first_principles": "The convergents of x give the best rational approximations, hence small ‖qx‖.", "kept": false, "why": "Gives best approximations; far more than needed." }
+        { "name": "Pigeonhole on fractional parts of $0, x, \\dots, mx$ (Dirichlet's approximation)", "deciding_span_ids": ["s1", "s3", "s5"], "from_first_principles": "The bound must be uniform in $x$, so count instead of approximating: cut the circle into $\\lceil 1/\\varepsilon \\rceil$ arcs of length at most $\\varepsilon$ and place the $m + 1$ points $0, x, \\dots, mx$ with $m = \\lceil 1/\\varepsilon \\rceil$. Two points $ix$ and $jx$ share an arc, so $\\lVert (j-i)x \\rVert \\le \\varepsilon$ with $1 \\le j - i \\le m$.", "kept": true, "why": "Produces $m$ from $\\varepsilon$ alone and uses every quantifier exactly as written." },
+        { "name": "Equidistribution of $\\{kx\\}$ for irrational $x$", "deciding_span_ids": ["s6"], "from_first_principles": "For irrational $x$ the fractional parts of the multiples are dense, so some $kx$ lands in the arc.", "kept": false, "why": "True, but gives no uniform $m$ and says nothing about rational $x$." },
+        { "name": "Case split rational / irrational", "deciding_span_ids": ["s6"], "from_first_principles": "Rational $x = p/q$ is finished by $k = q$, since $qx$ is an integer; treat irrational $x$ separately.", "kept": false, "why": "The rational case is easy but the irrational case needs the pigeonhole anyway, so the split buys nothing." },
+        { "name": "Continued fractions", "deciding_span_ids": ["s2"], "from_first_principles": "The convergents of $x$ give the best rational approximations, hence small $\\lVert qx \\rVert$.", "kept": false, "why": "Gives best approximations; far more than needed." }
       ],
-      "chosen": "Pigeonhole with m = ⌈1/ε⌉: two of the points 0, x, …, mx share an arc of length at most ε, so their difference kx satisfies ‖kx‖ ≤ ε with 1 ≤ k ≤ m."
+      "chosen": "Pigeonhole with $m = \\lceil 1/\\varepsilon \\rceil$: two of the points $0, x, \\dots, mx$ share an arc of length at most $\\varepsilon$, so their difference $kx$ satisfies $\\lVert kx \\rVert \\le \\varepsilon$ with $1 \\le k \\le m$."
     },
     "prerequisites": [
-      { "name": "Pigeonhole principle", "needed_for": "Two of m + 1 points in ⌈1/ε⌉ arcs share an arc.", "flag": "needed" },
-      { "name": "Fractional part and distance to nearest integer", "needed_for": "Turning 'differs from its nearest integer by at most ε' into ‖kx‖ ≤ ε.", "flag": "needed" },
-      { "name": "‖a − b‖ ≤ |{a} − {b}|", "needed_for": "Transferring 'two fractional parts are close' to 'their difference is near an integer'.", "flag": "needed" },
-      { "name": "The circle ℝ/ℤ picture", "needed_for": "Seeing U_ε as an arc and the multiples as a walk.", "flag": "assumed" }
+      { "name": "Pigeonhole principle", "needed_for": "Two of $m + 1$ points in $\\lceil 1/\\varepsilon \\rceil$ arcs share an arc.", "flag": "needed" },
+      { "name": "Fractional part and distance to nearest integer", "needed_for": "Turning 'differs from its nearest integer by at most $\\varepsilon$' into $\\lVert kx \\rVert \\le \\varepsilon$.", "flag": "needed" },
+      { "name": "$\\lVert a - b \\rVert \\le \\lvert \\{a\\} - \\{b\\} \\rvert$", "needed_for": "Transferring 'two fractional parts are close' to 'their difference is near an integer'.", "flag": "needed" },
+      { "name": "The circle $\\mathbb{R}/\\mathbb{Z}$ picture", "needed_for": "Seeing $U_\\varepsilon$ as an arc and the multiples as a walk.", "flag": "assumed" }
     ],
     "second_reading": {
-      "new_spans": ["for any real number x"],
+      "new_spans": ["for any real number $x$"],
       "reweighted": [
-        { "span_id": "s1", "old": 70, "new": 95, "why": "On the first pass the quantifiers read as boilerplate; the simplification showed the whole difficulty is that m may not depend on x." },
-        { "span_id": "s6", "old": 45, "new": 70, "why": "Irrational x rules out any periodicity argument, which eliminates half the candidate methods before they start." }
+        { "span_id": "s1", "old": 70, "new": 95, "why": "On the first pass the quantifiers read as boilerplate; the simplification showed the whole difficulty is that $m$ may not depend on $x$." },
+        { "span_id": "s6", "old": 45, "new": 70, "why": "Irrational $x$ rules out any periodicity argument, which eliminates half the candidate methods before they start." }
       ],
-      "what_changed": "The argument moved from 'the multiples get close to an integer eventually' to 'm + 1 points in ⌈1/ε⌉ arcs must collide', with the quantifier order recognised as the constraint that forces a counting argument over any limiting one."
+      "what_changed": "The argument moved from 'the multiples get close to an integer eventually' to '$m + 1$ points in $\\lceil 1/\\varepsilon \\rceil$ arcs must collide', with the quantifier order recognised as the constraint that forces a counting argument over any limiting one."
     },
     "domain": "maths"
   },
   "student": {
     "problem": {
-      "text": "Let ε < 1/2 be a positive real number and let U_ε denote the set of real numbers that differ from their nearest integer by at most ε. Prove that there exists a positive integer m such that for any real number x, the sets {x, 2x, 3x, …, mx} and U_ε have at least one element in common.",
-      "latex": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
+      "text": "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common."
     },
     "spans": [
-      { "id": "t1", "text": "ε < 1/2", "category": "setting", "weight": 60, "reason": "ε is small" },
-      { "id": "t2", "text": "differ from their nearest integer by at most ε", "category": "definition", "weight": 70, "reason": "distance to the nearest integer" },
-      { "id": "t3", "text": "{x, 2x, 3x, …, mx}", "category": "rule", "weight": 55, "reason": "multiples of x" },
-      { "id": "t4", "text": "for any real number x", "category": "informal", "weight": 40, "reason": "x can be anything", "uncertain": true }
+      { "id": "t1", "text": "$\\varepsilon < \\tfrac12$", "category": "setting", "weight": 60, "reason": "$\\varepsilon$ is small" },
+      { "id": "t2", "text": "differ from their nearest integer by at most $\\varepsilon$", "category": "definition", "weight": 70, "reason": "distance to the nearest integer" },
+      { "id": "t3", "text": "$\\{x, 2x, 3x, \\dots, mx\\}$", "category": "rule", "weight": 55, "reason": "multiples of $x$" },
+      { "id": "t4", "text": "for any real number $x$", "category": "informal", "weight": 40, "reason": "$x$ can be anything", "uncertain": true }
     ],
     "reading": {
       "cues": [
-        { "id": "d1", "span_id": "t1", "why_it_matters": "ε is small", "how_spotted": "underlined while reading" },
+        { "id": "d1", "span_id": "t1", "why_it_matters": "$\\varepsilon$ is small", "how_spotted": "underlined while reading" },
         { "id": "d2", "span_id": "t2", "why_it_matters": "distance to the nearest integer", "how_spotted": "underlined while reading" },
-        { "id": "d3", "span_id": "t3", "why_it_matters": "multiples of x", "how_spotted": "underlined while reading" },
-        { "id": "d4", "span_id": "t4", "why_it_matters": "x can be anything", "how_spotted": "underlined while reading" }
+        { "id": "d3", "span_id": "t3", "why_it_matters": "multiples of $x$", "how_spotted": "underlined while reading" },
+        { "id": "d4", "span_id": "t4", "why_it_matters": "$x$ can be anything", "how_spotted": "underlined while reading" }
       ],
       "definitions": [
         { "term": "U_ε", "meaning_latex": "\\text{numbers within } \\varepsilon \\text{ of an integer}" }
       ]
     },
-    "goal": { "asked": "Find m so that some multiple of x is close to an integer.", "answer_form": "a value of m with a proof", "final_line_would_say": "" },
+    "goal": { "asked": "Find $m$ so that some multiple of $x$ is close to an integer.", "answer_form": "a value of $m$ with a proof", "final_line_would_say": "" },
     "informal_cues": [],
     "abstraction": { "underneath": [], "deeper_properties": [] },
     "simplification": {
-      "instance": "Tried x = 1/3 with ε = 1/4: 3x = 1 is an integer.",
+      "instance": "Tried $x = \\tfrac13$ with $\\varepsilon = \\tfrac14$: $3x = 1$ is an integer.",
       "instance_latex": "",
-      "what_to_try": "If x = p/q then qx is an integer.",
+      "what_to_try": "If $x = p/q$ then $qx$ is an integer.",
       "notice_prompt": ""
     },
     "method": {
       "candidates": [
-        { "name": "rational x = p/q: then m = q works since qx is an integer", "deciding_span_ids": ["t3"], "from_first_principles": "qx = p is an integer, so the distance is 0.", "kept": true, "why": "Works for every rational, but q changes with x." },
-        { "name": "irrational x: the multiples are dense so some k works", "deciding_span_ids": ["t4"], "from_first_principles": "The multiples of an irrational fill the circle, so one lands near an integer.", "kept": false, "why": "could not make m independent of x" }
+        { "name": "rational $x = p/q$: then $m = q$ works since $qx$ is an integer", "deciding_span_ids": ["t3"], "from_first_principles": "$qx = p$ is an integer, so the distance is 0.", "kept": true, "why": "Works for every rational, but $q$ changes with $x$." },
+        { "name": "irrational $x$: the multiples are dense so some $k$ works", "deciding_span_ids": ["t4"], "from_first_principles": "The multiples of an irrational fill the circle, so one lands near an integer.", "kept": false, "why": "could not make $m$ independent of $x$" }
       ],
-      "chosen": "rational x = p/q: then m = q works since qx is an integer"
+      "chosen": "rational $x = p/q$: then $m = q$ works since $qx$ is an integer"
     },
     "prerequisites": [
       { "name": "Fractional parts", "needed_for": "measuring distance to integers", "flag": "needed" }
     ],
     "second_reading": {
-      "new_spans": ["there exists a positive integer m such that for any real number x"],
+      "new_spans": ["there exists a positive integer $m$ such that for any real number $x$"],
       "reweighted": [
-        { "span_id": "t4", "old": 40, "new": 65, "why": "m has to be picked before x; my m = q changes with x, so it does not answer the question." }
+        { "span_id": "t4", "old": 40, "new": 65, "why": "$m$ has to be picked before $x$; my $m = q$ changes with $x$, so it does not answer the question." }
       ],
-      "what_changed": "I realised my m depends on x and the problem wants one m for all x at once. I did not find the uniform argument."
+      "what_changed": "I realised my $m$ depends on $x$ and the problem wants one $m$ for all $x$ at once. I did not find the uniform argument."
     },
     "domain": "maths"
   },
   "comparison": {
-    "first_divergence": "You chose m after looking at x (m = q for x = p/q). The problem fixes m first: 'there exists m such that for any x'. The expert weighted that quantifier order 95, because it forces an argument that works for every x at once, which is pigeonhole on m + 1 points of the circle.",
+    "first_divergence": "You chose $m$ after looking at $x$ ($m = q$ for $x = p/q$). The problem fixes $m$ first: 'there exists $m$ such that for any $x$'. The expert weighted that quantifier order 95, because it forces an argument that works for every $x$ at once, which is pigeonhole on $m + 1$ points of the circle.",
     "missed_cues": [
-      { "span_id": "s1", "what_it_unlocks": "A uniform bound, m = ⌈1/ε⌉, built from ε alone before x is ever mentioned.", "self_check": "Read the quantifiers in order and ask which variable is allowed to depend on which." },
-      { "span_id": "s5", "what_it_unlocks": "Existence of one good multiple is exactly what pigeonhole gives: m + 1 points, ⌈1/ε⌉ arcs, two must share.", "self_check": "When asked for 'at least one', ask what you would need to count." }
+      { "span_id": "s1", "what_it_unlocks": "A uniform bound, $m = \\lceil 1/\\varepsilon \\rceil$, built from $\\varepsilon$ alone before $x$ is ever mentioned.", "self_check": "Read the quantifiers in order and ask which variable is allowed to depend on which." },
+      { "span_id": "s5", "what_it_unlocks": "Existence of one good multiple is exactly what pigeonhole gives: $m + 1$ points, $\\lceil 1/\\varepsilon \\rceil$ arcs, two must share.", "self_check": "When asked for 'at least one', ask what you would need to count." }
     ],
-    "unused_cues": ["ε < 1/2"]
+    "unused_cues": ["$\\varepsilon < \\tfrac12$"]
   }
 }

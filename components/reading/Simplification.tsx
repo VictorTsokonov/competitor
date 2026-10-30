@@ -9,11 +9,12 @@ export default function Simplification({
   return (
     <div>
       <p className="mb-[10px] mt-3">
-        {simplification.instance} <Tex tex={simplification.instance_latex} />{" "}
+        <RichTex tex={simplification.instance} />{" "}
+        <Tex tex={simplification.instance_latex} />{" "}
         <RichTex tex={simplification.what_to_try} />
       </p>
       <p className="border-l-4 border-accent px-[18px] py-[10px] italic">
-        {simplification.notice_prompt}
+        <RichTex tex={simplification.notice_prompt} />
       </p>
     </div>
   );
