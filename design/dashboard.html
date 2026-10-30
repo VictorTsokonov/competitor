@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitor dashboard, notebook style</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7A1616}a:hover{color:#4F0D0D}
+.ib{width:36px;height:36px;border-radius:50%;border:2px solid #2B2622;background:transparent;color:#2B2622;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:rgba(43,38,34,.08)}
+.row{min-height:34px;display:flex;align-items:center;gap:8px;padding:0 8px;font-size:18px;color:#2B2622;text-decoration:none;border-radius:6px}
+.row:hover{background:rgba(43,38,34,.06)}
+.sel{background:rgba(139,26,26,.10);box-shadow:inset 3px 0 0 #8B1A1A}
+.cap{font-family:Caveat,cursive;font-weight:700;font-size:32px;color:#8B1A1A;line-height:1}
+.lab{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#5A5048}
+.src{font-size:15px;color:#5A5048;font-style:italic;margin-top:4px}
+.hl{padding:0 3px;border-radius:3px}
+.set{background:rgba(74,140,90,.28)}.def{background:rgba(214,150,30,.32)}.rule{background:rgba(139,26,26,.22)}.goal{background:rgba(94,70,150,.28)}.inf{background:rgba(43,38,34,.14)}
+.rule.hi{background:rgba(139,26,26,.42)}.goal.hi{background:rgba(94,70,150,.48)}
+.you{border-bottom:3px solid #8B1A1A}.unsure{border-bottom:3px dashed #8B1A1A}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;font-size:19px;font-weight:700;text-decoration:none;cursor:pointer;border:2px solid #2B2622;border-radius:255px 15px 225px 15px / 15px 225px 15px 255px;color:#2B2622;background:transparent;font-family:inherit}
+.pri{background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6}
+.dash{border-top:2px dashed rgba(43,38,34,.3)}
+.tag{display:inline-block;font-size:.875rem;padding:1px .625rem;border:2px solid #2B2622;border-radius:.5rem;color:#2B2622;white-space:nowrap}
+.tag.on{background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6}
+.dt{display:flex;justify-content:space-between;align-items:baseline;font-size:20px;font-weight:700;cursor:pointer}
+.cue{font-weight:700}
+.card{background:#FFFBF0;padding:14px 16px;box-shadow:2px 3px 0 rgba(43,38,34,.12);font-size:16px;line-height:1.5}
+.muted{color:#5A5048}
+.panel{scrollbar-width:thin}
+@media (max-width:60rem){.shell{flex-wrap:wrap;overflow-y:auto}.panel{flex:1 1 100% !important;overflow:visible !important;border:0 !important;border-bottom:2px dashed rgba(43,38,34,.3) !important}}
+</style>
+</helmet>
+<div style="height:100vh;background-color:{{paper}};background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, rgba(70,95,140,0.16) 35px, rgba(70,95,140,0.16) 36px);font-family:Kalam,'Comic Neue',cursive;color:#2B2622;display:flex;flex-direction:column;overflow:hidden;font-size:1.125rem">
+  <header style="padding:1.125rem 2rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;border-bottom:2px dashed rgba(43,38,34,.3)">
+    <a href="Main.dc.html" style="font-family:Caveat,cursive;font-size:34px;font-weight:700;text-decoration:none;color:#2B2622">C<span style="color:{{accent}}">∅</span></a>
+    <nav aria-label="Main" style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;font-size:19px">
+      <a href="Dashboard.dc.html" style="color:#2B2622;text-decoration:none;border-bottom:3px solid #2B2622">Dashboard</a>
+      <a href="Guide.dc.html" style="color:#2B2622;text-decoration:none">Guide</a>
+      <a href="#" class="pill" style="min-height:42px;font-size:17px;gap:10px"><span>G</span> Continue with Google</a>
+    </nav>
+  </header>
+
+  <div class="shell" style="position:relative;display:flex;flex:1;min-height:0">
+    <button type="button" class="ib" aria-label="Hide sets" title="Hide sets" style="position:absolute;top:14px;left:14px;z-index:2"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+    <button type="button" class="ib" aria-label="Hide comparison" title="Hide comparison" style="position:absolute;top:14px;right:14px;z-index:2"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg></button>
+
+    <aside class="panel" style="flex:0 0 17rem;padding:.875rem .875rem 1.75rem;border-right:2px solid rgba(43,38,34,.35);display:flex;flex-direction:column;gap:2px;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;min-height:36px;padding-left:46px"><span class="cap" style="font-size:28px">Sets</span><button type="button" class="ib" aria-label="New set" title="New set" style="width:32px;height:32px"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:14px;height:14px" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <div style="height:10px"></div>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▾</span>ICMC</a>
+      <a href="#" class="row" style="padding-left:26px"><span style="width:14px">▾</span>2020</a>
+      <a href="#" class="row sel" style="padding-left:58px">Problem 1</a>
+      <a href="#" class="row" style="padding-left:58px">Problem 2</a>
+      <a href="#" class="row" style="padding-left:26px"><span style="width:14px">▸</span>2019</a>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▸</span>Putnam</a>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▾</span>My sets</a>
+      <a href="#" class="row" style="padding-left:26px"><span style="width:14px">▸</span>Assessment project 1</a>
+      <div style="flex:1"></div>
+      <a href="NewProblem.dc.html" class="pill" style="min-height:42px;font-size:17px;justify-content:center">+ New problem</a>
+    </aside>
+
+    <main class="panel" style="flex:1 1 0;min-width:0;padding:3.5rem 2.5rem 5.5rem;overflow-y:auto">
+      <div style="max-width:48rem;margin:0 auto;font-size:1.1875rem;line-height:1.65">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px"><span class="lab">ICMC 2020 · Problem 1</span><span class="muted" style="font-size:15px">Analysed 30 Oct · 2 pages uploaded</span></div>
+        <p style="margin:0 0 10px">Alice and Bob play a game on <span class="hl set you">a sphere</span> which is initially marked with a <span class="hl set you">finite number of points</span>. Alice and Bob then take turns making moves, with <span class="hl inf">Alice going first</span>:</p>
+        <ul style="margin:0 0 10px 24px;padding:0">
+          <li>On Alice's move, she <span class="hl rule">counts the number of marked points on the sphere, n</span>. She then <span class="hl rule hi you">marks another n+1 points</span> on the sphere.</li>
+          <li>On Bob's move, he <span class="hl rule unsure">chooses one hemisphere</span> and removes all marked points on that hemisphere, <span class="hl rule hi">including any marked points on the boundary of the hemisphere</span>.</li>
+        </ul>
+        <p style="margin:0 0 10px">Can Bob <span class="hl goal hi">always guarantee</span> that <span class="hl goal hi">after a finite number of moves</span>, <span class="hl goal you">the sphere contains no marked points</span>?</p>
+        <p style="margin:0" class="muted">(A hemisphere is the region on a sphere that lies completely on one side of <span class="hl def">any plane passing through the centre</span> of the sphere.)</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;font-size:15px" class="muted"><span><span class="hl set">&nbsp;&nbsp;&nbsp;</span> setting</span><span><span class="hl def">&nbsp;&nbsp;&nbsp;</span> definition</span><span><span class="hl rule">&nbsp;&nbsp;&nbsp;</span> rule</span><span><span class="hl goal">&nbsp;&nbsp;&nbsp;</span> goal</span><span><span class="hl inf">&nbsp;&nbsp;&nbsp;</span> informal</span><span style="margin-left:auto"><span class="you">underline</span> you marked it · <span class="unsure">dashed</span> extraction unsure</span></div>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">1 · Reading</div>
+        <div class="src">Pólya (1945). Understand the problem before planning anything.</div>
+        <div style="display:grid;gap:16px;margin-top:16px">
+          <div><div class="cue">"including any marked points on the boundary of the hemisphere" <span class="tag on">rule · 95</span></div><div>The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever.</div><div class="muted" style="font-size:17px">Spotted because a clause that only matters in edge cases is usually there because the edge case is the point.</div></div>
+          <div><div class="cue">"marks another n+1 points" <span class="tag">rule · 85</span></div><div>n becomes 2n+1, slightly more than doubling. Bob must remove more than half each round or the count never falls.</div></div>
+          <div><div class="cue">"any plane passing through the centre" <span class="tag">definition · 75</span></div><div>Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary.</div></div>
+          <div class="muted" style="font-size:17px">Definitions made explicit: <em>hemisphere</em> = closed half of the sphere cut by a plane through the centre; <em>round</em> = one Alice move then one Bob move; <em>c<sub>k</sub></em> = count after Bob's k-th move.</div>
+        </div>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">2 · Goal</div>
+        <div class="src">Pólya (1945). State what is asked and what the final line would say.</div>
+        <p style="margin:12px 0 6px"><strong>Asked.</strong> Whether Bob has a strategy that empties the sphere against every possible play by Alice.</p>
+        <p style="margin:0 0 6px"><strong>Answer form.</strong> Yes or no, with proof. If yes, a strategy for Bob plus a proof it terminates. If no, an Alice strategy that keeps a point forever.</p>
+        <p style="margin:0"><strong>The final line would say.</strong> After every round the number of marked points strictly decreases, so after finitely many rounds it is zero.</p>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">3 · Informal cues</div>
+        <div class="src">Pólya (1945). Small words carry the quantifiers: always, finite, first.</div>
+        <ul style="margin:12px 0 0 22px;padding:0;display:grid;gap:8px">
+          <li><span class="hl inf">Alice going first</span>: each round is add-then-remove, so the quantity to control is the count left after Bob.</li>
+          <li><span class="hl goal">always guarantee</span>: Bob cannot rely on Alice placing points badly; the strategy must beat the worst case.</li>
+          <li><span class="hl set">finite number of points</span>: the count is a natural number from the first move, so descent is available.</li>
+        </ul>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">4 · Abstraction</div>
+        <div class="src">Chi, Feltovich &amp; Glaser (1981). Experts sort by deep structure; novices by surface features.</div>
+        <div style="display:grid;gap:12px;margin-top:12px">
+          <div><strong>sphere</strong> is really a closed surface with central symmetry and no boundary <span class="muted">→ every great circle passes through antipodal pairs; there is no edge for points to hide at.</span></div>
+          <div><strong>hemisphere</strong> is really the sphere cut by a closed half-space whose plane contains the centre <span class="muted">→ its boundary is a great circle, and because it is closed, points on that circle are removed.</span></div>
+          <div><strong>choosing a hemisphere</strong> is really choosing a plane through the centre, then a side <span class="muted">→ the two closed hemispheres cover every point, so one side contains at least half.</span></div>
+          <p style="margin:4px 0 0;padding:10px 18px;border-left:4px solid {{accent}}">"At least half" only stops growth. "More than half" forces decrease. The boundary clause is what upgrades one to the other.</p>
+        </div>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">5 · Simplification</div>
+        <div class="src">Pólya (1945). Solve a simpler related problem first.</div>
+        <p style="margin:12px 0 10px">Same game on a circle. Alice adds n+1 points; Bob removes a closed semicircle. Start with one point, Alice adds 2. Place the three points 120° apart and check whether any closed semicircle contains all three. Then ask how many marked points a diameter can pass through.</p>
+        <p style="margin:0;padding:10px 18px;border-left:4px solid {{accent}};font-style:italic">In two dimensions a diameter passes through at most one marked point and its antipode. On a sphere, how many marked points can a plane through the centre pass through, and what does the boundary clause let Bob do with that?</p>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">6 · Method</div>
+        <div class="src">Schoenfeld (1985). Control: pursue leads, abandon dead ends, record both.</div>
+        <div style="display:grid;gap:12px;margin-top:12px">
+          <div style="display:flex;gap:14px;align-items:flex-start"><span class="tag on">kept</span><div><strong>Monovariant: the count strictly decreases every round.</strong> Deciding cues: <span class="hl goal">after a finite number of moves</span>, <span class="hl rule">marks another n+1 points</span>, <span class="hl rule">boundary of the hemisphere</span>. A plane through two marked points removes at least n+2 of the 2n+1, leaving at most n−1.</div></div>
+          <div style="display:flex;gap:14px;align-items:flex-start"><span class="tag">dropped</span><div><strong>Induction on n.</strong> The same argument in different clothing; the monovariant is cleaner to state.</div></div>
+          <div style="display:flex;gap:14px;align-items:flex-start"><span class="tag">dropped</span><div><strong>An Alice strategy that keeps points forever.</strong> Any configuration is beaten by a plane through two of its points.</div></div>
+          <div style="display:flex;gap:14px;align-items:flex-start"><span class="tag">dropped</span><div><strong>Potential function on positions.</strong> Far heavier than needed; the count alone suffices.</div></div>
+        </div>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">7 · Prerequisites</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 28px;margin-top:14px;font-size:18px">
+          <div><strong>Pigeonhole / averaging</strong> <span class="tag on">needed</span><div class="muted">One of two closed hemispheres holds at least half the points.</div></div>
+          <div><strong>Monovariants</strong> <span class="tag on">needed</span><div class="muted">A strictly decreasing natural number reaches zero.</div></div>
+          <div><strong>Great circles, antipodes</strong> <span class="tag">assumed</span><div class="muted">Hemisphere boundaries are great circles through the centre.</div></div>
+          <div><strong>Closed vs open regions</strong> <span class="tag on">needed</span><div class="muted">Why boundary points count as removed.</div></div>
+        </div>
+
+        <div class="dash" style="margin:40px 0 22px"></div>
+        <div class="cap">8 · Second reading</div>
+        <div class="src">Pólya (1945); Schoenfeld (1992). Look back: re-read and verify after attempting.</div>
+        <p style="margin:12px 0 8px">After the circle experiment, two weights moved: <span class="hl rule">boundary of the hemisphere</span> 60 → <strong>95</strong>, and <span class="hl def">any plane passing through the centre</span> 40 → <strong>75</strong>, which was newly marked.</p>
+        <p style="margin:0">The method moved from "remove at least half", which only prevents growth, to "remove more than half", which forces descent.</p>
+      </div>
+    </main>
+
+    <aside class="panel" style="flex:0 0 21.25rem;padding:.875rem 1.375rem 1.75rem;border-left:2px solid rgba(43,38,34,.35);overflow-y:auto">
+      <div style="min-height:36px;display:flex;align-items:center;padding-right:46px"><span class="cap" style="font-size:28px">Comparison</span></div>
+      <div style="height:12px"></div>
+      <div style="padding:14px 0"><div class="dt">First divergence <span class="muted">–</span></div><p style="margin:10px 0 0;font-size:17px;line-height:1.55;padding-left:14px;border-left:4px solid {{accent}}">You never marked <em>"including any marked points on the boundary of the hemisphere"</em>. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns "at least half" into "more than half" and makes the count fall every round.</p><div class="src">Hattie &amp; Timperley (2007). Process-level feedback fixes the next ten problems.</div></div>
+      <div class="dash" style="padding:14px 0"><div class="dt">Missed cues · 4 <span class="muted">–</span></div>
+        <div style="display:grid;gap:10px;margin-top:10px">
+          <div class="card"><div><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl rule">boundary of the hemisphere</span></div><div style="margin-top:4px">Lets Bob put the plane through two marked points, so the count falls every round.</div><div class="muted" style="margin-top:4px;font-size:15px"><strong>Self-check:</strong> when a rule is spelled out in full, ask what breaks if one clause is deleted.</div></div>
+          <div class="card"><div><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl def">any plane passing through the centre</span></div><div style="margin-top:4px">Any two marked points share a plane through the centre.</div><div class="muted" style="margin-top:4px;font-size:15px"><strong>Self-check:</strong> when a definition names a free choice, ask what that choice lets the player optimise.</div></div>
+          <div class="card"><div><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl goal">always guarantee</span></div><div style="margin-top:4px">Forces worst-case reasoning against every Alice play.</div><div class="muted" style="margin-top:4px;font-size:15px"><strong>Self-check:</strong> on "always" or "guarantee", ask what the opponent's best reply is.</div></div>
+          <div class="card"><div><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl goal">after a finite number of moves</span></div><div style="margin-top:4px">Calls for a quantity that strictly decreases each round.</div><div class="muted" style="margin-top:4px;font-size:15px"><strong>Self-check:</strong> when the goal says "finite", ask what number goes down.</div></div>
+        </div>
+      </div>
+      <div class="dash" style="padding:14px 0"><div class="dt">Marked but unused · 1 <span class="muted">–</span></div><p style="margin:8px 0 0;font-size:17px"><span style="font-weight:700">✓</span> <span class="hl set">finite number of points</span> <span class="muted">you marked it, then your method never used it.</span></p></div>
+      <div class="dash" style="padding:14px 0"><div class="dt">Your method <span class="muted">–</span></div><p style="margin:8px 0 0;font-size:17px">Play small cases, triggered by <span class="hl set">finite number of points</span>. "Find an invariant" was considered and dropped: could not find one.</p></div>
+      <div class="dash" style="padding:14px 0"><div class="dt">Your second reading <span class="muted">+</span></div></div>
+      <div class="dash" style="padding:14px 0"><div class="dt">Your pages <span class="muted">–</span></div><div style="display:flex;gap:10px;margin-top:10px"><div style="width:58px;height:76px;background:#FFFBF0;box-shadow:2px 3px 0 rgba(43,38,34,.12);transform:rotate(-2deg)"></div><div style="width:58px;height:76px;background:#FFFBF0;box-shadow:2px 3px 0 rgba(43,38,34,.12);transform:rotate(1.5deg)"></div></div></div>
+      <div style="margin-top:22px;display:grid;gap:10px"><button type="button" class="pill pri" style="width:100%">Reveal solution</button><p style="margin:0;font-size:15px;text-align:center" class="muted">The expert reading is a plausible narrative, not a trace of the model's thinking.</p></div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#8B1A1A","options":["#8B1A1A","#7A1616","#9E2A2B","#6B1F2A"]},"paper":{"editor":"color","default":"#F4EBD3","options":["#F4EBD3","#F1E4C3","#F7F0DC","#EFE2BF"]},"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#8B1A1A', paper: this.props.paper ?? '#F4EBD3' };
+  }
+}
+</script>
+</body>
+</html>

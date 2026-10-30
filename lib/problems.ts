@@ -196,6 +196,10 @@ export function maxFolderDepth(folders: ProblemFolder[]): number {
   return max;
 }
 
+export function deleteProblem(state: LibraryState, id: string): LibraryState {
+  return { ...state, problems: state.problems.filter((p) => p.id !== id) };
+}
+
 export function deleteFolder(state: LibraryState, id: string): LibraryState {
   const target = state.folders.find((f) => f.id === id);
   if (!target) return state;

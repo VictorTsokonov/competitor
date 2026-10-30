@@ -91,18 +91,16 @@ export default function Dashboard() {
 
   const expert = data?.expert;
 
-  const creation = !data && !stored;
   return (
     <WorkspaceShell
       onSelectProblem={select}
       selectedProblemId={stored?.id}
-      creationActive={creation}
       right={
         data || stored ? (
           data ? (
             <ComparisonPanel data={data} />
           ) : (
-            <p className="w-80 px-5 py-8 text-sm text-muted">
+            <p className="w-full px-5 py-8 pr-[44px] text-sm text-muted">
               Comparison will appear here.
             </p>
           )

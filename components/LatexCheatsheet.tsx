@@ -53,19 +53,25 @@ export default function LatexCheatsheet() {
   }
 
   return (
-    <div className="w-80 shrink-0 px-5 py-4">
-      <h2 className="font-semibold">LaTeX reference</h2>
-      <p className="mt-1 text-sm text-muted">
+    <div className="w-full px-2 pb-4 pt-3">
+      <div className="flex h-8 items-center pl-2 pr-[44px]">
+        <h2 className="min-w-0 flex-1 truncate text-[13px] font-semibold uppercase text-muted">
+          LaTeX reference
+        </h2>
+      </div>
+      <p className="mt-1 px-2 text-sm text-muted">
         Click a row to copy its command.
       </p>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search, e.g. frac"
-        aria-label="Search LaTeX reference"
-        className="mt-3 w-full rounded-[16px] border border-line bg-background px-4 py-2 text-sm"
-      />
-      <ul className="mt-3 space-y-3">
+      <div className="px-2">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search, e.g. frac"
+          aria-label="Search LaTeX reference"
+          className="mt-3 w-full rounded-[16px] border border-line bg-background px-4 py-2 text-sm"
+        />
+      </div>
+      <ul className="mt-3 space-y-3 px-2">
         {visible.map((r) => (
           <li key={r.command} className="border-b border-line pb-3">
             <button

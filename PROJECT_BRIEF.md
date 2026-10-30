@@ -5,7 +5,7 @@ Maths tutor for Putnam/ICMC students that never gives the solution first. It com
 
 ## Pages (3, nothing else)
 - `/` Landing: dark hero, glyph-sphere canvas, "Stop solving. Start reading." (`reading` hollow), expert heatmap teaser, Read/Compare/Learn accordion, one-line protocol card, hackathon footer.
-- `/dashboard` Main app: 3 columns separated by 1px rules. Left: collapsible Sets tree (live item: ICMC 2020 / Problem 1). Centre: problem block (highlighted text, inline KaTeX, preserved lines) + 8 stage sections as a ruled document. Right: First divergence, Missed cues, collapsed Expert/Your readings, Legend, Reveal solution placeholder.
+- `/dashboard` Main app: CSS grid (auto / 1fr / auto). Left: resizable Sets tree 220–420px (live item: ICMC 2020 / Problem 1). Centre: problem block (highlighted text, inline KaTeX, preserved lines) + 8 stage sections as a ruled document. Right: resizable reference/comparison 220–420px. Collapsed panels are width 0; fixed icon toggles; state persists in localStorage.
 - `/guide` Student protocol: "Assume you will get this wrong.", worked handwritten example with transcript up front, five steps each with a crop of the example, photograph-and-upload card, "Why this works".
 
 ## Visual style

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitor new problem, notebook style</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7A1616}a:hover{color:#4F0D0D}
+.ib{width:36px;height:36px;border-radius:50%;border:2px solid #2B2622;background:transparent;color:#2B2622;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:rgba(43,38,34,.08)}
+.row{min-height:34px;display:flex;align-items:center;gap:8px;padding:0 8px;font-size:18px;color:#2B2622;text-decoration:none;border-radius:6px}
+.row:hover{background:rgba(43,38,34,.06)}
+.sel{background:rgba(139,26,26,.10);box-shadow:inset 3px 0 0 #8B1A1A}
+.cap{font-family:Caveat,cursive;font-weight:700;color:#8B1A1A;line-height:1}
+.lab{font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#5A5048}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;font-size:19px;font-weight:700;text-decoration:none;cursor:pointer;border:2px solid #2B2622;border-radius:255px 15px 225px 15px / 15px 225px 15px 255px;color:#2B2622;background:transparent;font-family:inherit}
+.pri{background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6}
+.field{width:100%;box-sizing:border-box;background:#FFFBF0;border:2px solid #2B2622;border-radius:10px;color:#2B2622;font:inherit;font-size:18px;padding:12px 14px;box-shadow:2px 3px 0 rgba(43,38,34,.12)}
+.field::placeholder{color:#8A7F74}
+.num{font-family:Caveat,cursive;font-size:1.875rem;font-weight:700;color:#8B1A1A;width:2.5rem;flex:none}
+.ref{padding:.75rem 0;border-top:2px dashed rgba(43,38,34,.3);display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;background:#FFFBF0;padding:.1rem .4rem;border-radius:.375rem}
+.copy{font-size:.875rem;border:2px solid #2B2622;border-radius:.5rem;background:transparent;padding:.1rem .6rem;cursor:pointer;font-family:inherit;color:#2B2622}
+.panel{scrollbar-width:thin}
+.m{font-family:"Times New Roman",Times,serif;font-size:1.25rem;color:#2B2622;display:inline-flex;align-items:center;gap:.35rem}
+.m i{font-style:italic}
+.frac{display:inline-flex;flex-direction:column;align-items:center;line-height:1;vertical-align:middle;font-size:.95em}
+.frac span:first-child{border-bottom:1.5px solid #2B2622;padding:0 .15em .1em}
+.frac span:last-child{padding-top:.1em}
+.op{display:inline-flex;flex-direction:column;align-items:center;line-height:1;font-size:.6em;vertical-align:middle}
+.op .big{font-size:2.2em;font-style:normal;line-height:.9}
+.rad{border-top:1.5px solid #2B2622;padding-top:.05em}
+@media (max-width:60rem){.shell{flex-wrap:wrap;overflow-y:auto}.panel{flex:1 1 100% !important;overflow:visible !important;border:0 !important;border-bottom:2px dashed rgba(43,38,34,.3) !important}}
+</style>
+</helmet>
+<div style="height:100vh;background-color:{{paper}};background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, rgba(70,95,140,0.16) 35px, rgba(70,95,140,0.16) 36px);font-family:Kalam,'Comic Neue',cursive;color:#2B2622;display:flex;flex-direction:column;overflow:hidden;font-size:1.125rem">
+  <header style="padding:1.125rem 2rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;border-bottom:2px dashed rgba(43,38,34,.3)">
+    <a href="Main.dc.html" style="font-family:Caveat,cursive;font-size:34px;font-weight:700;text-decoration:none;color:#2B2622">C<span style="color:{{accent}}">∅</span></a>
+    <nav aria-label="Main" style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;font-size:19px">
+      <a href="Dashboard.dc.html" style="color:#2B2622;text-decoration:none;border-bottom:3px solid #2B2622">Dashboard</a>
+      <a href="Guide.dc.html" style="color:#2B2622;text-decoration:none">Guide</a>
+      <a href="#" class="pill" style="min-height:42px;font-size:17px;gap:10px"><span>G</span> Continue with Google</a>
+    </nav>
+  </header>
+
+  <div class="shell" style="position:relative;display:flex;flex:1;min-height:0">
+    <button type="button" class="ib" aria-label="Hide sets" title="Hide sets" style="position:absolute;top:14px;left:14px;z-index:2"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+    <button type="button" class="ib" aria-label="Hide LaTeX reference" title="Hide LaTeX reference" style="position:absolute;top:14px;right:14px;z-index:2"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg></button>
+
+    <aside class="panel" style="flex:0 0 17rem;padding:.875rem .875rem 1.75rem;border-right:2px solid rgba(43,38,34,.35);display:flex;flex-direction:column;gap:2px;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;min-height:36px;padding-left:46px"><span class="cap" style="font-size:28px">Sets</span><button type="button" class="ib" aria-label="New set" title="New set" style="width:32px;height:32px"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:14px;height:14px" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <div style="height:10px"></div>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▸</span>ICMC</a>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▸</span>Putnam</a>
+      <a href="#" class="row" style="font-weight:700"><span style="width:14px">▾</span>My sets</a>
+      <a href="#" class="row" style="padding-left:26px"><span style="width:14px">▾</span>Assessment project 1</a>
+      <a href="#" class="row sel" style="padding-left:58px;font-style:italic">Untitled problem</a>
+    </aside>
+
+    <main class="panel" style="flex:1 1 0;min-width:0;padding:3.5rem 2.5rem 5.5rem;overflow-y:auto">
+      <div style="max-width:48rem;margin:0 auto">
+        <div class="lab" style="margin-bottom:8px">My sets · Assessment project 1</div>
+        <h1 class="cap" style="font-size:56px;margin:0 0 8px;color:#2B2622">New problem</h1>
+        <p style="margin:0 0 26px;font-size:19px;color:#5A5048">Paste the statement, or photograph it and we transcribe it into LaTeX.</p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px"><button type="button" class="pill pri" style="min-height:42px;font-size:17px">Write it</button><button type="button" class="pill" style="min-height:42px;font-size:17px;gap:8px"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:16px;height:16px" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3"/></svg>Photograph it</button></div>
+
+        <label for="pname" style="display:block;font-size:17px;font-weight:700;margin-bottom:6px">Name <span style="color:#5A5048;font-weight:400">(optional)</span></label>
+        <input id="pname" class="field" placeholder="e.g. Pigeonhole warm-up" style="margin-bottom:22px">
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px">
+          <div><label for="src" style="display:block;font-size:17px;font-weight:700;margin-bottom:6px">Statement</label><textarea id="src" class="field" rows="8" placeholder="Prove that among any $n+1$ distinct integers chosen from $\{1, 2, \dots, 2n\}$, there are two that are coprime."></textarea></div>
+          <div><div style="font-size:17px;font-weight:700;margin-bottom:6px">Preview</div><div class="field" style="min-height:222px;color:#8A7F74;line-height:1.6;">Prose and inline $…$ maths render here as you type.</div></div>
+        </div>
+        <p style="margin:8px 0 30px;font-size:15px;color:#5A5048">Plain text with $…$ for maths. The button on the right opens the LaTeX reference.</p>
+
+        <div style="padding:24px;border:2px dashed rgba(43,38,34,.4);border-radius:10px;margin-bottom:30px;position:relative">
+          <div aria-hidden="true" style="position:absolute;top:-14px;left:28px;width:110px;height:26px;background:rgba(214,196,150,.7);transform:rotate(-3deg)"></div>
+          <div class="cap" style="font-size:30px;margin-bottom:12px">Your attempt <span style="font-family:Kalam,cursive;font-size:16px;font-weight:400;color:#5A5048">· add now, or after you have tried it on paper</span></div>
+          <div style="display:grid;gap:10px;font-size:18px">
+            <div style="display:flex;gap:10px;align-items:flex-start"><span class="num">(i)</span><span>Assume you will get it wrong. Mark the phrases and write what each suggests.</span></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><span class="num">(ii)</span><span>Say what it is about, define the objects, list two or three methods with the phrase that triggered each.</span></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><span class="num">(iii)</span><span>Attempt it. Then photograph the pages, one page per photo, and drop them here.</span></div>
+          </div>
+          <div style="margin-top:18px;border:2px dashed rgba(43,38,34,.4);border-radius:10px;padding:26px;text-align:center;font-size:18px;color:#5A5048;background:rgba(255,251,240,.6)">Drop photos here, or <a href="#">choose files</a> · up to 6 pages</div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><button type="button" class="pill pri">Save and analyse</button><button type="button" class="pill">Save for later</button><span style="margin-left:auto;font-size:15px;color:#5A5048">Analysis takes about a minute. Stages appear as they finish.</span></div>
+      </div>
+    </main>
+
+    <aside class="panel" style="flex:0 0 20rem;padding:.875rem 1.375rem 1.75rem;border-left:2px solid rgba(43,38,34,.35);overflow-y:auto">
+      <div style="min-height:36px;display:flex;align-items:center;padding-right:46px"><span class="cap" style="font-size:1.75rem">LaTeX reference</span></div>
+      <p class="muted" style="margin:.25rem 0 .75rem;font-size:1rem;color:#5A5048">New to LaTeX? Each row shows the command and how it renders. Copy and paste it into the statement.</p>
+      <label for="refq" style="position:absolute;left:-9999px">Search commands</label>
+      <input id="refq" class="field" placeholder="Search, e.g. frac" style="margin-bottom:.5rem;font-size:1rem;padding:.5rem .75rem">
+      <div class="ref" style="border-top:0"><div><span class="code">\frac{a}{b}</span><div style="margin-top:.25rem"><span class="m"><span class="frac"><span><i>a</i></span><span><i>b</i></span></span></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\sqrt{x}, \sqrt[n]{x}</span><div style="margin-top:.25rem"><span class="m">√<span class="rad"><i>x</i></span>,&nbsp; <sup style="font-size:.6em"><i>n</i></sup>√<span class="rad"><i>x</i></span></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">x^{2}, a_{n}</span><div style="margin-top:.25rem"><span class="m"><i>x</i><sup>2</sup>, <i>a</i><sub><i>n</i></sub></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\sum_{i=1}^{n}</span><div style="margin-top:.25rem"><span class="m"><span class="op"><span><i>n</i></span><span class="big">∑</span><span><i>i</i>=1</span></span></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\prod_{i=1}^{n}</span><div style="margin-top:.25rem"><span class="m"><span class="op"><span><i>n</i></span><span class="big">∏</span><span><i>i</i>=1</span></span></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\int_{0}^{1} f(x)\,dx</span><div style="margin-top:.25rem"><span class="m"><span style="font-size:1.6em;line-height:1">∫</span><span style="display:inline-flex;flex-direction:column;font-size:.6em;line-height:1.1"><span>1</span><span>0</span></span><i>f</i>(<i>x</i>) <i>dx</i></span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\{1, 2, \dots, 2n\}</span><div style="margin-top:.25rem"><span class="m">{1, 2, …, 2<i>n</i>}</span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\leq, \geq, \neq, \equiv</span><div style="margin-top:.25rem"><span class="m">≤, ≥, ≠, ≡</span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\forall, \exists, \in, \subseteq</span><div style="margin-top:.25rem"><span class="m">∀, ∃, ∈, ⊆</span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\alpha, \beta, \pi, \infty</span><div style="margin-top:.25rem"><span class="m"><i>α</i>, <i>β</i>, <i>π</i>, ∞</span></div></div><button type="button" class="copy">Copy</button></div>
+      <div class="ref"><div><span class="code">\gcd(a,b), \binom{n}{k}</span><div style="margin-top:.25rem"><span class="m">gcd(<i>a</i>,<i>b</i>), <span style="font-size:1.6em;line-height:1">(</span><span class="op" style="font-size:.85em"><span><i>n</i></span><span><i>k</i></span></span><span style="font-size:1.6em;line-height:1">)</span></span></div></div><button type="button" class="copy">Copy</button></div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#8B1A1A","options":["#8B1A1A","#7A1616","#9E2A2B","#6B1F2A"]},"paper":{"editor":"color","default":"#F4EBD3","options":["#F4EBD3","#F1E4C3","#F7F0DC","#EFE2BF"]},"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#8B1A1A', paper: this.props.paper ?? '#F4EBD3' };
+  }
+}
+</script>
+</body>
+</html>

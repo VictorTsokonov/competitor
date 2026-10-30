@@ -2,15 +2,10 @@
 
 import { useState } from "react";
 import type { LibraryState } from "@/lib/problems";
-import { maxFolderDepth, moveProblem, moveFolder } from "@/lib/problems";
-import {
-  FolderTree,
-  GUIDE,
-  ProblemRow,
-  ruleAt,
-  type DragPayload,
-  type TreeCallbacks,
-} from "@/components/FolderTree";
+import { moveProblem, moveFolder } from "@/lib/problems";
+import ProblemRow from "@/components/ProblemRow";
+import { FolderTree } from "@/components/FolderTree";
+import type { DragPayload, TreeCallbacks } from "@/components/TreeRow";
 
 export default function ProblemLibrary({
   state,
@@ -41,26 +36,11 @@ export default function ProblemLibrary({
   };
 
   const ungrouped = state.problems.filter((p) => p.folderId === null);
-  const levels = Array.from(
-    { length: Math.min(maxFolderDepth(state.folders), GUIDE.cap) + 1 },
-    (_, i) => i
-  );
   const rootActive = dropTarget === "root";
 
   return (
-    <div className="relative">
-      {state.folders.length > 0 &&
-        levels.map((i) => (
-          <span
-            key={i}
-            aria-hidden="true"
-            className="absolute bottom-0 top-0 border-l border-line"
-            style={{ left: ruleAt(i) }}
-          />
-        ))}
-
+    <div>
       <FolderTree cb={cb} />
-
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -76,7 +56,7 @@ export default function ProblemLibrary({
           setDropTarget(null);
           setDragPayload(null);
         }}
-        className={`py-1 ${rootActive ? "rounded-[16px] bg-surface" : ""}`}
+        className={`py-1 ${rootActive ? "rounded-lg bg-surface" : ""}`}
       >
         <hr className="border-line" />
         <div className="mt-1">

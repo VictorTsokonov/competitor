@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitor guide, notebook style</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7A1616}a:hover{color:#4F0D0D}
+.ib{width:36px;height:36px;border-radius:50%;border:2px solid #2B2622;background:transparent;color:#2B2622;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.cap{font-family:Caveat,cursive;font-weight:700;color:#8B1A1A;line-height:1}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;font-size:19px;font-weight:700;text-decoration:none;cursor:pointer;border:2px solid #2B2622;border-radius:255px 15px 225px 15px / 15px 225px 15px 255px;color:#2B2622;background:transparent;font-family:inherit}
+.pri{background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6}
+.step{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:1rem;padding:1.875rem 0;border-top:2px dashed rgba(43,38,34,.3)}
+@media (max-width:40rem){.step{grid-template-columns:3.5rem minmax(0,1fr)}}
+.step h3{margin:0 0 6px;font-size:24px}
+.step p{margin:0;font-size:19px;line-height:1.6}
+.ex{margin-top:8px;font-size:17px;color:#5A5048;font-style:italic}
+@media (max-width:760px){.doodle{display:none}}
+</style>
+</helmet>
+<div style="min-height:100vh;background-color:{{paper}};background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, rgba(70,95,140,0.16) 35px, rgba(70,95,140,0.16) 36px);font-family:Kalam,'Comic Neue',cursive;color:#2B2622;position:relative;overflow:hidden">
+
+  <header style="padding:1.125rem 2rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;border-bottom:2px dashed rgba(43,38,34,.3)">
+    <a href="Main.dc.html" style="font-family:Caveat,cursive;font-size:34px;font-weight:700;text-decoration:none;color:#2B2622">C<span style="color:{{accent}}">∅</span></a>
+    <nav aria-label="Main" style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;font-size:19px">
+      <a href="Dashboard.dc.html" style="color:#2B2622;text-decoration:none">Dashboard</a>
+      <a href="Guide.dc.html" style="color:#2B2622;text-decoration:none;border-bottom:3px solid #2B2622">Guide</a>
+      <a href="#" class="pill" style="min-height:42px;font-size:17px;gap:10px"><span>G</span> Continue with Google</a>
+    </nav>
+  </header>
+
+  <section style="position:relative;max-width:900px;margin:0 auto;padding:clamp(2.5rem,7vw,4.5rem) 2rem 1.5rem clamp(1.25rem,6vw,5.5rem);text-align:center">
+    <p style="margin:0 0 8px;font-size:18px;letter-spacing:2px;text-transform:uppercase;color:#5A5048">the protocol</p>
+    <h1 class="cap" style="margin:0;font-size:clamp(3rem,6.5vw,5.75rem);color:#2B2622;line-height:1.05">Work the problem as if you <span style="color:{{accent}};text-decoration:underline;text-decoration-thickness:5px;text-underline-offset:.4rem">won't</span> solve it.</h1>
+    <p style="margin:1.25rem auto 0;max-width:38rem;font-size:1.25rem;line-height:1.55;color:#5A5048">Then the goal is no longer the answer. It is a record of how you read the problem, which Competitor lays next to an expert's.</p>
+  </section>
+
+  <section style="max-width:900px;margin:0 auto;padding:1.5rem 2rem 0 clamp(1.25rem,6vw,5.5rem)">
+    <div class="step"><div class="cap" style="font-size:44px">(i)</div><div><h3>Mark the phrases</h3><p>Copy the problem. Underline every phrase that seems to matter and write one line beside it: what does this suggest?</p><div class="ex">Circling "n+1" and noting "one more than the number of boxes".</div></div></div>
+    <div class="step"><div class="cap" style="font-size:44px">(ii)</div><div><h3>Say what it is about</h3><p>One sentence, before any maths. What kind of problem is this, and what shape does it have?</p><div class="ex">"This is about forcing a pair, not finding one."</div></div></div>
+    <div class="step"><div class="cap" style="font-size:44px">(iii)</div><div><h3>Define the objects</h3><p>Name what is given and what is wanted. Write the definitions you are relying on.</p><div class="ex">"Given S of size n+1; wanted a, b in S with gcd 1."</div></div></div>
+    <div class="step"><div class="cap" style="font-size:44px">(iv)</div><div><h3>List candidate methods</h3><p>Two or three. For each, which phrase made you think of it and why you kept or dropped it. This is the stage the comparison cares about most.</p><div class="ex">"Pigeonhole, triggered by n+1 against n pairs; kept."</div></div></div>
+    <div class="step" style="border-bottom:2px dashed rgba(43,38,34,.3)"><div class="cap" style="font-size:44px">(v)</div><div><h3>Attempt</h3><p>Work the problem with your chosen method, a line of reasoning beside each step. Twenty to thirty minutes, then stop.</p><div class="ex">Dark pen, one page per photo, good light.</div></div></div>
+  </section>
+
+  <section style="max-width:900px;margin:0 auto;padding:3.5rem 2rem 1.25rem clamp(1.25rem,6vw,5.5rem)">
+    <article style="position:relative;background:#FFFBF0;padding:40px;box-shadow:2px 3px 0 rgba(43,38,34,.12);transform:rotate(-0.4deg);text-align:center">
+      <div aria-hidden="true" style="position:absolute;top:-14px;left:50%;width:120px;height:28px;margin-left:-60px;background:rgba(214,196,150,.7);transform:rotate(2deg)"></div>
+      <div class="cap" style="font-size:40px;color:#2B2622;margin-bottom:18px">Then photograph your pages</div>
+      <a href="NewProblem.dc.html" class="pill pri">Start an analysis</a>
+    </article>
+  </section>
+
+  <section style="max-width:900px;margin:0 auto;padding:2.5rem 2rem 6rem clamp(1.25rem,6vw,5.5rem)">
+    <h2 class="cap" style="font-size:40px;margin:0 0 10px;color:#2B2622">Why this works</h2>
+    <p style="margin:0;font-size:19px;line-height:1.65">Explaining each step in your own words forces you to notice what you actually used and what you merely skimmed. Reading the whole problem before solving stops the first idea from swallowing the constraints. Over time the phrases you once ignored become the cues you check first.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#8B1A1A","options":["#8B1A1A","#7A1616","#9E2A2B","#6B1F2A"]},"paper":{"editor":"color","default":"#F4EBD3","options":["#F4EBD3","#F1E4C3","#F7F0DC","#EFE2BF"]},"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#8B1A1A', paper: this.props.paper ?? '#F4EBD3' };
+  }
+}
+</script>
+</body>
+</html>

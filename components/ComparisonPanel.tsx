@@ -64,7 +64,7 @@ export default function ComparisonPanel({ data }: { data: Analysis }) {
     studentSecond.reweighted.length > 0;
 
   return (
-    <div className="w-80 shrink-0 px-5 py-4">
+    <div className="w-full py-4 pl-5 pr-[44px]">
       <Details title="First divergence" defaultOpen={true}>
         <p className="border-l-[3px] border-accent pl-3">
           {data.comparison.first_divergence}

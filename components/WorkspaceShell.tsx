@@ -1,75 +1,87 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import SetsPanel from "@/components/SetsPanel";
-import RailMark from "@/components/RailMark";
-
-const RAIL_KEY = "competitor.rail.collapsed";
+import PanelToggle from "@/components/PanelToggle";
+import ResizeHandle from "@/components/ResizeHandle";
+import { usePanelState } from "@/lib/usePanelState";
 
 export default function WorkspaceShell({
   onSelectProblem,
   selectedProblemId,
-  creationActive,
   right,
   children,
 }: {
   onSelectProblem: (problemId?: string) => void;
   selectedProblemId?: string | null;
-  creationActive?: boolean;
   right: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const [railCollapsed, setRailCollapsed] = useState(false);
-
-  useEffect(() => {
-    try {
-      setRailCollapsed(localStorage.getItem(RAIL_KEY) === "1");
-    } catch {
-      /* storage unavailable: rail stays expanded */
-    }
-  }, []);
-
-  function setRailPersisted(next: boolean) {
-    setRailCollapsed(next);
-    try {
-      localStorage.setItem(RAIL_KEY, next ? "1" : "0");
-    } catch {
-      /* storage unavailable: rail still toggles for this session */
-    }
-  }
+  const {
+    leftOpen,
+    rightOpen,
+    leftWidth,
+    rightWidth,
+    toggle,
+    setWidth,
+    resetWidth,
+  } = usePanelState();
 
   return (
-    <main className="min-h-screen bg-background text-ink">
-      <div className="mx-auto flex max-w-[1440px] items-start">
-        <div className="sticky top-0 max-h-screen shrink-0">
-          <SetsPanel
-            onSelectProblem={onSelectProblem}
-            selectedProblemId={selectedProblemId}
-            creationActive={creationActive}
-          />
-        </div>
-
-        <div className="min-w-0 flex-1 px-6 py-10">{children}</div>
-
-        {railCollapsed ? (
-          <div className="group relative sticky top-0 flex max-h-screen min-h-screen w-12 shrink-0 flex-col items-center gap-4 pb-4 pt-5">
-            <button onClick={() => setRailPersisted(false)} aria-label="Expand panel">
-              <RailMark label="RHS" />
-            </button>
-            <div className="invisible absolute bottom-0 right-full top-0 z-30 w-80 overflow-y-auto border border-line bg-background opacity-0 transition-[opacity,transform] duration-200 motion-reduce:transition-none group-hover:visible group-hover:opacity-100 motion-safe:translate-x-1 motion-safe:group-hover:translate-x-0">
-              {right}
-            </div>
+    <main className="relative min-h-screen bg-background text-ink">
+      <PanelToggle
+        side="left"
+        open={leftOpen}
+        onToggle={() => toggle("left")}
+        label="sets"
+      />
+      <PanelToggle
+        side="right"
+        open={rightOpen}
+        onToggle={() => toggle("right")}
+        label="reference"
+      />
+      <div
+        className="mx-auto grid max-w-[1440px]"
+        style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }}
+      >
+        <aside
+          className="relative top-0 h-screen overflow-hidden transition-[width] duration-200 ease"
+          style={{ width: leftOpen ? leftWidth : 0 }}
+        >
+          <div className="h-full overflow-y-auto" style={{ width: leftWidth }}>
+            <SetsPanel
+              onSelectProblem={onSelectProblem}
+              selectedProblemId={selectedProblemId}
+            />
           </div>
-        ) : (
-          <div className="sticky top-0 max-h-screen shrink-0 overflow-y-auto border-l border-line">
-            <div className="flex items-center justify-end px-5 pt-5">
-              <button onClick={() => setRailPersisted(true)} aria-label="Collapse panel">
-                <RailMark label="RHS" />
-              </button>
-            </div>
+          {leftOpen && (
+            <ResizeHandle
+              side="left"
+              width={leftWidth}
+              onWidth={(w) => setWidth("left", w)}
+              onReset={() => resetWidth("left")}
+            />
+          )}
+        </aside>
+
+        <div className="min-w-0 px-6 py-10">{children}</div>
+
+        <aside
+          className="relative top-0 h-screen overflow-hidden transition-[width] duration-200 ease"
+          style={{ width: rightOpen ? rightWidth : 0 }}
+        >
+          <div className="h-full overflow-y-auto" style={{ width: rightWidth }}>
             {right}
           </div>
-        )}
+          {rightOpen && (
+            <ResizeHandle
+              side="right"
+              width={rightWidth}
+              onWidth={(w) => setWidth("right", w)}
+              onReset={() => resetWidth("right")}
+            />
+          )}
+        </aside>
       </div>
     </main>
   );

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Competitor dashboard on a phone, comparison drawer open</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7A1616}a:hover{color:#4F0D0D}
+.ib{width:2.75rem;height:2.75rem;border-radius:50%;border:2px solid #2B2622;background:transparent;color:#2B2622;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.row{min-height:2.75rem;display:flex;align-items:center;gap:.5rem;padding:0 .5rem;font-size:1.125rem;color:#2B2622;text-decoration:none;border-radius:6px}
+.sel{background:rgba(139,26,26,.10);box-shadow:inset 3px 0 0 #8B1A1A}
+.cap{font-family:Caveat,cursive;font-weight:700;color:#8B1A1A;line-height:1}
+.lab{font-size:.8125rem;letter-spacing:2px;text-transform:uppercase;color:#5A5048}
+.hl{padding:0 3px;border-radius:3px}
+.set{background:rgba(74,140,90,.28)}.rule{background:rgba(139,26,26,.22)}.goal{background:rgba(94,70,150,.28)}.inf{background:rgba(43,38,34,.14)}.def{background:rgba(214,150,30,.32)}
+.rule.hi{background:rgba(139,26,26,.42)}.goal.hi{background:rgba(94,70,150,.48)}
+.you{border-bottom:3px solid #8B1A1A}.unsure{border-bottom:3px dashed #8B1A1A}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0 1.25rem;font-size:1.0625rem;font-weight:700;text-decoration:none;cursor:pointer;border:2px solid #2B2622;border-radius:255px 15px 225px 15px / 15px 225px 15px 255px;color:#2B2622;background:transparent;font-family:inherit}
+.tag{display:inline-block;font-size:.8125rem;padding:1px .5rem;border:2px solid #2B2622;border-radius:.5rem;color:#2B2622;white-space:nowrap}
+.tag.on{background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6}
+</style>
+</helmet>
+<div style="width:390px;height:844px;position:relative;overflow:hidden;background-color:{{paper}};background-image:repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, rgba(70,95,140,0.16) 35px, rgba(70,95,140,0.16) 36px);font-family:Kalam,'Comic Neue',cursive;color:#2B2622;display:flex;flex-direction:column;font-size:1.0625rem">
+  <header style="padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px dashed rgba(43,38,34,.3)">
+    <button type="button" class="ib" aria-label="Show sets"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:1.125rem;height:1.125rem" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button>
+    <a href="Main.dc.html" style="font-family:Caveat,cursive;font-size:2rem;font-weight:700;text-decoration:none;color:#2B2622">C<span style="color:{{accent}}">∅</span></a>
+    <button type="button" class="ib" aria-label="Show comparison"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:1.125rem;height:1.125rem" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg></button>
+  </header>
+
+  <main style="flex:1;overflow-y:auto;padding:1.25rem 1.125rem 2rem;line-height:1.6">
+    <div class="lab" style="margin-bottom:.375rem">ICMC 2020 · Problem 1</div>
+    <p style="margin:0 0 .5rem">Alice and Bob play a game on <span class="hl set you">a sphere</span> which is initially marked with a <span class="hl set you">finite number of points</span>. Alice and Bob then take turns making moves, with <span class="hl inf">Alice going first</span>:</p>
+    <ul style="margin:0 0 .5rem 1.25rem;padding:0">
+      <li>On Alice's move, she <span class="hl rule">counts the number of marked points on the sphere, n</span>. She then <span class="hl rule hi you">marks another n+1 points</span> on the sphere.</li>
+      <li>On Bob's move, he <span class="hl rule unsure">chooses one hemisphere</span> and removes all marked points on that hemisphere, <span class="hl rule hi">including any marked points on the boundary of the hemisphere</span>.</li>
+    </ul>
+    <p style="margin:0">Can Bob <span class="hl goal hi">always guarantee</span> that <span class="hl goal hi">after a finite number of moves</span>, <span class="hl goal you">the sphere contains no marked points</span>?</p>
+    <div style="border-top:2px dashed rgba(43,38,34,.3);margin:1.5rem 0 1rem"></div>
+    <div class="cap" style="font-size:1.75rem">1 · Reading</div>
+    <div style="margin-top:.75rem"><div style="font-weight:700">"including any marked points on the boundary of the hemisphere" <span class="tag on">rule · 95</span></div><div>The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever.</div></div>
+  </main>
+
+  <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(43,38,34,.45)"></div>
+  <aside aria-label="Comparison" style="position:absolute;top:0;bottom:0;right:0;width:88%;max-width:21rem;background:{{paper}};box-shadow:-4px 0 0 rgba(43,38,34,.15);padding:.75rem 1rem 1.5rem;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;min-height:2.75rem"><span class="cap" style="font-size:1.75rem">Comparison</span><button type="button" class="ib" aria-label="Hide comparison"><svg aria-hidden="true" viewBox="0 0 24 24" style="width:1.125rem;height:1.125rem" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M15 4v16"/></svg></button></div>
+    <div style="padding:.75rem 0"><div style="font-size:1.125rem;font-weight:700">First divergence</div><p style="margin:.5rem 0 0;font-size:1rem;line-height:1.5;padding-left:.75rem;border-left:4px solid {{accent}}">You never marked <em>"including any marked points on the boundary of the hemisphere"</em>. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns "at least half" into "more than half".</p></div>
+    <div style="padding:.75rem 0;border-top:2px dashed rgba(43,38,34,.3)"><div style="font-size:1.125rem;font-weight:700">Missed cues · 4</div>
+      <div style="display:grid;gap:.5rem;margin-top:.5rem;font-size:.9375rem;line-height:1.45">
+        <div style="background:#FFFBF0;padding:.6rem .75rem;box-shadow:2px 3px 0 rgba(43,38,34,.12)"><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl rule">boundary of the hemisphere</span><div style="margin-top:.2rem">Lets Bob put the plane through two marked points, so the count falls every round.</div></div>
+        <div style="background:#FFFBF0;padding:.6rem .75rem;box-shadow:2px 3px 0 rgba(43,38,34,.12)"><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl def">any plane passing through the centre</span><div style="margin-top:.2rem">Any two marked points share a plane through the centre.</div></div>
+        <div style="background:#FFFBF0;padding:.6rem .75rem;box-shadow:2px 3px 0 rgba(43,38,34,.12)"><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl goal">always guarantee</span><div style="margin-top:.2rem">Forces worst-case reasoning against every Alice play.</div></div>
+        <div style="background:#FFFBF0;padding:.6rem .75rem;box-shadow:2px 3px 0 rgba(43,38,34,.12)"><span style="color:{{accent}};font-weight:700">✗</span> <span class="hl goal">after a finite number of moves</span><div style="margin-top:.2rem">Calls for a quantity that strictly decreases each round.</div></div>
+      </div>
+    </div>
+    <div style="padding:.75rem 0;border-top:2px dashed rgba(43,38,34,.3)"><div style="font-size:1.125rem;font-weight:700">Marked but unused · 1</div><p style="margin:.4rem 0 0;font-size:1rem"><span style="font-weight:700">✓</span> <span class="hl set">finite number of points</span></p></div>
+    <div style="padding:.75rem 0;border-top:2px dashed rgba(43,38,34,.3)"><div style="font-size:1.125rem;font-weight:700">Your pages</div><div style="display:flex;gap:.5rem;margin-top:.5rem"><div style="width:3.25rem;height:4.25rem;background:#FFFBF0;box-shadow:2px 3px 0 rgba(43,38,34,.12);transform:rotate(-2deg)"></div><div style="width:3.25rem;height:4.25rem;background:#FFFBF0;box-shadow:2px 3px 0 rgba(43,38,34,.12);transform:rotate(1.5deg)"></div></div></div>
+    <button type="button" class="pill" style="width:100%;margin-top:.75rem;background:#8B1A1A;border-color:#8B1A1A;color:#FBF5E6">Reveal solution</button>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#8B1A1A","options":["#8B1A1A","#7A1616","#9E2A2B","#6B1F2A"]},"paper":{"editor":"color","default":"#F4EBD3","options":["#F4EBD3","#F1E4C3","#F7F0DC","#EFE2BF"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent ?? '#8B1A1A', paper: this.props.paper ?? '#F4EBD3' };
+  }
+}
+</script>
+</body>
+</html>

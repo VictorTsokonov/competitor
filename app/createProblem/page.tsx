@@ -23,7 +23,6 @@ export default function CreateProblem() {
   return (
     <WorkspaceShell
       onSelectProblem={selectFromLibrary}
-      creationActive={true}
       right={<LatexCheatsheet />}
     >
       <div className="mx-auto w-full max-w-[760px]">
