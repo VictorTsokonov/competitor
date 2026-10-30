@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RichTex } from "@/components/StageCard";
+import { RichTex } from "@/components/reading/Tex";
 import { findLatexErrors } from "@/lib/latex";
 import {
   createProblem,

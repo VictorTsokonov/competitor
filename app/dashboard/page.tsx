@@ -5,20 +5,20 @@ import type { Analysis } from "@/lib/schema";
 import { loadLibrary, SELECT_INTENT_KEY, type StoredProblem } from "@/lib/problems";
 import AppShell from "@/components/layout/AppShell";
 import Pill from "@/components/ui/Pill";
-import ComparisonPanel from "@/components/ComparisonPanel";
+import ComparisonPanel from "@/components/comparison/ComparisonPanel";
 import CreateProblemForm from "@/components/CreateProblemForm";
 import LatexCheatsheet from "@/components/LatexCheatsheet";
-import ProblemText from "@/components/ProblemText";
-import { RichTex } from "@/components/StageCard";
-import ResponseCard from "@/components/ResponseCard";
-import ResponseReading from "@/components/ResponseReading";
-import ResponseGoal from "@/components/ResponseGoal";
-import ResponseInformalCues from "@/components/ResponseInformalCues";
-import ResponseAbstraction from "@/components/ResponseAbstraction";
-import ResponseSimplification from "@/components/ResponseSimplification";
-import ResponseMethod from "@/components/ResponseMethod";
-import ResponsePrerequisites from "@/components/ResponsePrerequisites";
-import ResponseSecondReading from "@/components/ResponseSecondReading";
+import ProblemReading from "@/components/reading/ProblemReading";
+import StageSection from "@/components/reading/StageSection";
+import Reading from "@/components/reading/Reading";
+import Goal from "@/components/reading/Goal";
+import InformalCues from "@/components/reading/InformalCues";
+import Abstraction from "@/components/reading/Abstraction";
+import Simplification from "@/components/reading/Simplification";
+import Method from "@/components/reading/Method";
+import Prerequisites from "@/components/reading/Prerequisites";
+import SecondReading from "@/components/reading/SecondReading";
+import { RichTex } from "@/components/reading/Tex";
 
 export default function Dashboard() {
   const [data, setData] = useState<Analysis | null>(null);
@@ -108,7 +108,7 @@ export default function Dashboard() {
           data ? (
             <ComparisonPanel data={data} />
           ) : (
-            <p className="w-full px-5 py-8 pr-[44px] text-sm text-muted">
+            <p className="w-full px-[1.375rem] pb-7 pt-[0.875rem] text-[1.0625rem] text-muted">
               Comparison will appear here.
             </p>
           )
@@ -117,81 +117,88 @@ export default function Dashboard() {
         )
       }
       centre={
-      <div className="mx-auto w-full max-w-[48rem] leading-[1.6]">
-        {stored && !data ? (
-          <div className="border-b border-rule pb-12">
-                <h2 className="text-2xl font-bold tracking-tight">{stored.name}</h2>
-                <div className="mt-4 leading-[1.6]">
-                  <RichTex tex={stored.latex} />
-                </div>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={analyseStored}
-                    className="rounded-full bg-accent px-6 py-2 text-sm font-semibold text-cream"
-                  >
-                    Analyse problem
-                  </button>
-                  <button
-                    onClick={() =>
-                      setActionStatus(
-                        "Photo upload for your solutions arrives with call C — nothing to submit through yet."
-                      )
-                    }
-                    className="rounded-full border-2 border-ink bg-transparent px-6 py-2 text-sm font-semibold"
-                  >
-                    Submit solution
-                  </button>
-                </div>
-                {actionStatus && (
-                  <p role="status" className="mt-3 text-sm text-muted">{actionStatus}</p>
-                )}
+        <div className="mx-auto w-full max-w-[48rem] text-[1.1875rem] leading-[1.65]">
+          {stored && !data ? (
+            <div>
+              <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                {stored.name}
+              </h2>
+              <div className="mt-4">
+                <RichTex tex={stored.latex} />
               </div>
-            ) : data && expert ? (
-              <>
-                <div className="border-b border-rule pb-12">
-                  <ProblemText text={data.problem.text} spans={expert.spans} />
-                </div>
-                <ResponseCard label="Stage 1 · Reading" sourceKey="reading" title="Reading" divider={false}>
-                  <ResponseReading reading={expert.reading} spans={expert.spans} />
-                </ResponseCard>
-                <ResponseCard label="Stage 2 · Goal" sourceKey="goal" title="Goal">
-                  <ResponseGoal goal={expert.goal} />
-                </ResponseCard>
-                <ResponseCard label="Stage 3 · Informal cues" sourceKey="informal" title="Informal cues">
-                  <ResponseInformalCues informal_cues={expert.informal_cues} spans={expert.spans} />
-                </ResponseCard>
-                <ResponseCard label="Stage 4 · Abstraction" sourceKey="abstraction" title="Abstraction">
-                  <ResponseAbstraction abstraction={expert.abstraction} />
-                </ResponseCard>
-                <ResponseCard label="Stage 5 · Simplification" sourceKey="simplification" title="Simplification">
-                  <ResponseSimplification simplification={expert.simplification} />
-                </ResponseCard>
-                <ResponseCard label="Stage 6 · Method" sourceKey="method" title="Method">
-                  <ResponseMethod method={expert.method} spans={expert.spans} />
-                  <div className="border-t border-rule pt-4">
-                    <p className="text-sm font-semibold">Prerequisites</p>
-                    <div className="mt-2">
-                      <ResponsePrerequisites
-                        prerequisites={expert.prerequisites}
-                      />
-                    </div>
-                  </div>
-                </ResponseCard>
-                <ResponseCard label="Stage 7 · Second reading" sourceKey="second_reading" title="Second reading">
-                  <ResponseSecondReading second_reading={expert.second_reading} spans={expert.spans} />
-                </ResponseCard>
-              </>
-            ) : (
-              <>
-                <h1 className="text-3xl font-bold tracking-tight">New problem</h1>
-                <p className="mt-2 text-muted">
-                  {status ??
-                    "Create your first problem here, or pick one from the library."}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Pill
+                  variant="primary"
+                  onClick={analyseStored}
+                  className="min-h-[42px] text-[1.0625rem]"
+                >
+                  Analyse problem
+                </Pill>
+                <Pill
+                  onClick={() =>
+                    setActionStatus(
+                      "Photo upload for your solutions arrives with call C — nothing to submit through yet."
+                    )
+                  }
+                  className="min-h-[42px] text-[1.0625rem]"
+                >
+                  Submit solution
+                </Pill>
+              </div>
+              {actionStatus && (
+                <p role="status" className="mt-3 text-[1.0625rem] text-muted">
+                  {actionStatus}
                 </p>
-                <CreateProblemForm onSaved={handleCreated} />
-              </>
-            )}
-      </div>
+              )}
+            </div>
+          ) : data && expert ? (
+            <>
+              <ProblemReading
+                data={data}
+                label={stored?.name ?? "ICMC 2020 · Problem 1"}
+              />
+              <StageSection index="1" title="Reading" sourceKey="reading">
+                <Reading reading={expert.reading} spans={expert.spans} />
+              </StageSection>
+              <StageSection index="2" title="Goal" sourceKey="goal">
+                <Goal goal={expert.goal} />
+              </StageSection>
+              <StageSection index="3" title="Informal cues" sourceKey="informal">
+                <InformalCues
+                  informal_cues={expert.informal_cues}
+                  spans={expert.spans}
+                />
+              </StageSection>
+              <StageSection index="4" title="Abstraction" sourceKey="abstraction">
+                <Abstraction abstraction={expert.abstraction} />
+              </StageSection>
+              <StageSection index="5" title="Simplification" sourceKey="simplification">
+                <Simplification simplification={expert.simplification} />
+              </StageSection>
+              <StageSection index="6" title="Method" sourceKey="method">
+                <Method method={expert.method} spans={expert.spans} />
+              </StageSection>
+              <StageSection index="7" title="Prerequisites">
+                <Prerequisites prerequisites={expert.prerequisites} />
+              </StageSection>
+              <StageSection index="8" title="Second reading" sourceKey="second_reading">
+                <SecondReading
+                  second_reading={expert.second_reading}
+                  spans={expert.spans}
+                />
+              </StageSection>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold tracking-tight">New problem</h1>
+              <p className="mt-2 text-muted">
+                {status ??
+                  "Create your first problem here, or pick one from the library."}
+              </p>
+              <CreateProblemForm onSaved={handleCreated} />
+            </>
+          )}
+        </div>
       }
     />
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tex } from "@/components/StageCard";
+import { Tex } from "@/components/reading/Tex";
 
 const ROWS: { command: string; sample: string }[] = [
   { command: "\\frac{a}{b}", sample: "\\frac{a}{b}" },
