@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ArchiveTree from "@/components/sets/ArchiveTree";
 import ProblemLibrary from "@/components/sets/ProblemLibrary";
 import IconButton from "@/components/ui/IconButton";
 import {
@@ -81,7 +80,6 @@ export default function SetsPanel({
           className="mb-2 w-full rounded border border-rule bg-card px-2 py-1 text-[1rem]"
         />
       )}
-      <ArchiveTree onSelectProblem={onSelectProblem} />
       <ProblemLibrary
         state={library}
         selectedId={selectedProblemId ?? null}

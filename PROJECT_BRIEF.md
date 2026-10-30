@@ -5,7 +5,7 @@ Maths tutor for Putnam/ICMC students that never gives the solution first. It com
 
 ## Pages (4)
 - `/` Landing: "C∅mpetitor" wordmark, struck "Stop solving." + "Start reading." + squiggle, two pills, "How it works" paragraph + guide link, footer links only.
-- `/dashboard` Main app: AppShell, CSS grid (auto / 1fr / auto). Left: Sets tree 220–420px (archive: ICMC 2020 / Problem 1 live; library folders). Centre: layered problem reading + 8 stage sections, max-width 48rem. Right: comparison (or LaTeX reference when idle) 220–420px. Collapsed panels are width 0; fixed corner toggles; state persists in localStorage. ≤60rem: drawers over backdrop, nav moves into Sets drawer.
+- `/dashboard` Main app: AppShell, CSS grid (auto / 1fr / auto), full viewport width. Left: Sets tree 220–420px (one library: seeded ICMC/Putnam year folders with ICMC 2020 Problem 1 live — all real, renamable, draggable; seeding is once per browser). Last viewed problem is restored per tab (sessionStorage) when returning to /dashboard. Centre: layered problem reading + 8 stage sections, max-width 48rem. Right: comparison (or LaTeX reference when idle) 220–420px. Collapsed panels are width 0; fixed corner toggles; state persists in localStorage. ≤60rem: drawers over backdrop, nav moves into Sets drawer.
 - `/createProblem` Same shell. Centre: statement editor + live preview, attempt card, photo dropzone, Save and analyse / Save for later. Right: LaTeX reference.
 - `/guide` Student protocol: "Work the problem as if you won't solve it.", five Roman-numeral steps, taped "Start an analysis" card, "Why this works".
 

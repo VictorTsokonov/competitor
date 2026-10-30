@@ -18,6 +18,8 @@ export type StoredProblem = {
 export type LibraryState = {
   problems: StoredProblem[];
   folders: ProblemFolder[];
+  // One-time archive seeding happened; keeps deleted seeds deleted.
+  seededArchive?: boolean;
 };
 
 export type KeyValueStorage = {
@@ -27,8 +29,54 @@ export type KeyValueStorage = {
 
 export const LIBRARY_KEY = "competitor.problems.v1";
 export const SELECT_INTENT_KEY = "competitor.selected-problem";
+// Last problem viewed on /dashboard; restored after navigating away and back.
+export const LAST_VIEW_KEY = "competitor.dashboard.view";
 
 const EMPTY: LibraryState = { problems: [], folders: [] };
+
+// The one archive problem with a real analysis behind it; the dashboard
+// loads the expert reading immediately when this id is selected.
+export const ARCHIVE_PROBLEM_ID = "seed-icmc-2020-p1";
+
+// Statement mirrors problem.text in dummy-data.json (kept out of the
+// client bundle; the analysis itself still comes from /api/analyse).
+const ICMC_2020_P1_TEXT = [
+  "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:",
+  "- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.",
+  "- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.",
+  "Can Bob always guarantee that after a finite number of moves, the sphere contains no marked points?",
+  "(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
+].join("\n");
+
+// Real folders and a real problem: rename, move, drag and delete like
+// anything the user creates. Seeded once, then owned by the library.
+function archiveSeed(): Pick<LibraryState, "problems" | "folders"> {
+  const folder = (id: string, name: string, parentId: string | null): ProblemFolder => ({
+    id,
+    name,
+    parentId,
+  });
+  return {
+    folders: [
+      folder("seed-icmc", "ICMC", null),
+      folder("seed-icmc-2020", "2020", "seed-icmc"),
+      folder("seed-icmc-2019", "2019", "seed-icmc"),
+      folder("seed-icmc-2018", "2018", "seed-icmc"),
+      folder("seed-putnam", "Putnam", null),
+      folder("seed-putnam-2024", "2024", "seed-putnam"),
+      folder("seed-putnam-2023", "2023", "seed-putnam"),
+    ],
+    problems: [
+      {
+        id: ARCHIVE_PROBLEM_ID,
+        name: "Problem 1",
+        latex: ICMC_2020_P1_TEXT,
+        folderId: "seed-icmc-2020",
+        createdAt: 0,
+      },
+    ],
+  };
+}
 
 function uid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -38,6 +86,10 @@ function uid(): string {
 }
 
 export function loadLibrary(storage: KeyValueStorage): LibraryState {
+  return seedArchive(storage, readLibrary(storage));
+}
+
+function readLibrary(storage: KeyValueStorage): LibraryState {
   try {
     const raw = storage.getItem(LIBRARY_KEY);
     if (!raw) return { ...EMPTY };
@@ -50,6 +102,7 @@ export function loadLibrary(storage: KeyValueStorage): LibraryState {
     );
     const ids = new Set(folders.map((f) => f.id));
     return {
+      seededArchive: parsed.seededArchive === true,
       problems: parsed.problems.filter(
         (p) =>
           p && typeof p.id === "string" && typeof p.name === "string" && typeof p.latex === "string"
@@ -64,6 +117,18 @@ export function loadLibrary(storage: KeyValueStorage): LibraryState {
   } catch {
     return { ...EMPTY };
   }
+}
+
+function seedArchive(storage: KeyValueStorage, state: LibraryState): LibraryState {
+  if (state.seededArchive) return state;
+  const seed = archiveSeed();
+  const seeded: LibraryState = {
+    seededArchive: true,
+    folders: [...seed.folders, ...state.folders],
+    problems: [...seed.problems, ...state.problems],
+  };
+  saveLibrary(storage, seeded);
+  return seeded;
 }
 
 export function saveLibrary(storage: KeyValueStorage, state: LibraryState): void {
