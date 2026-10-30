@@ -2,7 +2,7 @@
 
 Read with `PROJECT_BRIEF.md` at the start of every task. This file is how we work; the brief is what we build.
 
-## Vocabulary — type one of these words
+## Vocabulary — type one of these words (a leading `/` is optional: `/plan` ≡ `PLAN`, so the same words work in IDE sessions with built-in slash commands)
 
 - `PLAN <task>` — research, then one inline plan; no code written. Reply `go` to execute it.
 - `GOAL <objective>` — set a tracked session goal; progress is reported in % as work lands.
@@ -28,7 +28,7 @@ Read with `PROJECT_BRIEF.md` at the start of every task. This file is how we wor
 
 ## Starting a new session
 
-Memory and repo files persist across sessions; chat history does not. Open with: "Read PROJECT_BRIEF.md, WORKFLOW.md, and my project memory, then confirm you are ready." The agent must confirm what it loaded before doing anything else.
+Memory and repo files persist across sessions; chat history does not. `AGENTS.md` at the repo root carries the boot contract — harnesses that auto-read it need no opener. Otherwise open with: "Read PROJECT_BRIEF.md, WORKFLOW.md, and my project memory, then confirm you are ready." The agent must confirm what it loaded before doing anything else.
 
 ## Standing rules
 

@@ -6,7 +6,7 @@ Maths tutor for Putnam/ICMC students that never gives the solution first. It com
 ## Pages (3, nothing else)
 - `/` Landing: dark hero, glyph-sphere canvas, "Stop solving. Start reading." (`reading` hollow), expert heatmap teaser, Read/Compare/Learn accordion, one-line protocol card, hackathon footer.
 - `/dashboard` Main app: 3 columns separated by 1px rules. Left: collapsible Sets tree (live item: ICMC 2020 / Problem 1). Centre: problem block (highlighted text, inline KaTeX, preserved lines) + 8 stage sections as a ruled document. Right: First divergence, Missed cues, collapsed Expert/Your readings, Legend, Reveal solution placeholder.
-- `/guide` Student protocol: "Assume you will get this wrong.", five steps, photograph-and-upload card, "Why this works".
+- `/guide` Student protocol: "Assume you will get this wrong.", worked handwritten example with transcript up front, five steps each with a crop of the example, photograph-and-upload card, "Why this works".
 
 ## Visual style
 Meta-clean, mathematically minimal. Light/dark themes (class strategy, system default, toggle in localStorage with try/catch). Tokens: background, surface, text, text-muted, accent #0866FF (both), border. Dark: #0B0B0C / #161617 / white / #A1A1AA. Span categories: setting green, definition amber, rule red, goal violet, informal grey. 16px card radius where cards exist. KaTeX for all maths (no `$` support — use `\text{}` + bare math). No gradients, shadows, logos, or wordmarks.
@@ -20,10 +20,10 @@ Honest framing the UI keeps: "how spotted" is a plausible expert narrative, not 
 
 ## Schema (shared by expert and student chains)
 problem{text,latex}, spans[{id,text,category,weight 0-100,reason}], reading{cues[{id,span_id,why_it_matters,how_spotted}],definitions[{term,meaning_latex}]}, goal{asked,answer_form,final_line_would_say}, informal_cues[{span_id,bearing}], abstraction{underneath[{object,really_is,implies}],deeper_properties[]}, simplification{instance,instance_latex,what_to_try,notice_prompt}, method{candidates[{name,deciding_span_ids,from_first_principles,kept,why}],chosen}, prerequisites[{name,needed_for,flag assumed|needed}], second_reading{new_spans,reweighted[{span_id,old,new,why}],what_changed}, domain "maths"|"not_maths".
-Rules: every span is an exact substring of problem.text, checked in code; zod validates every model response; comparison is TypeScript set difference (currently hard-coded in dummy data — `lib/compare.ts` pending).
+Rules: every span is an exact substring of problem.text, checked in code; zod validates every model response; comparison is TypeScript set difference (currently hard-coded in dummy data — `lib/compare.ts` pending). Missed cues carry `span_id` + `what_it_unlocks` + `self_check`; student spans may be flagged `uncertain`. `/api/analyse` serves through the `lib/analysis.ts` provider seam (mock now, real `lib/providers/meta.ts` stubbed).
 
 ## Stack and rules
 Next.js 15 App Router, TypeScript strict, Tailwind, zod, openai, katex. API routes only, no DB, no auth. Files under ~150 lines. Boring readable code; validate at the boundary; explicit loading/error states; no fetch-on-mount for user work. After every change: build, lint, verify, report. See WORKFLOW.md for the vocabulary, crew, and slice loop.
 
 ## Status
-Mock UI for all 3 pages done. Next, in order: (1) real call A vs dummy, (2) photo upload + call C, (3) compare.ts, (4) calls B + D, (5) deploy/README/video, (6) ablation if time. Submit by Wed 4 Nov 20:00 UK. Judging: impact 30 / Meta tooling 25 / demo+video 25 / depth 20 — demo-first, scope creep is the risk.
+Mock UI for all 3 pages done: shared layered reading, structured missed cues, unused cues, student second reading, per-stage source citations, sticky side rails. Local problem library landed: `/createProblem` (LaTeX editor + live preview + cheatsheet, screenshot stub), nestable folder tree + problem/folder drag-and-drop in the left panel, dashboard opens on the creation form, per-problem Analyse/Submit backed by the provider seam (mock gates custom problems honestly), no auth/DB. Next, in order: (1) real call A vs dummy, (2) photo upload + call C, (3) compare.ts, (4) calls B + D, (5) deploy/README/video, (6) ablation if time. Submit by Wed 4 Nov 20:00 UK. Judging: impact 30 / Meta tooling 25 / demo+video 25 / depth 20 — demo-first, scope creep is the risk.

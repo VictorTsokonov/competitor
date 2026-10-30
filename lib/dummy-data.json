@@ -100,7 +100,7 @@
       { "id": "t1", "text": "a sphere", "category": "setting", "weight": 50, "reason": "3D shape, symmetric" },
       { "id": "t2", "text": "finite number of points", "category": "setting", "weight": 40, "reason": "we can count them" },
       { "id": "t3", "text": "marks another n+1 points", "category": "rule", "weight": 70, "reason": "more than doubles" },
-      { "id": "t4", "text": "chooses one hemisphere", "category": "rule", "weight": 60, "reason": "Bob removes half" },
+      { "id": "t4", "text": "chooses one hemisphere", "category": "rule", "weight": 60, "reason": "Bob removes half", "uncertain": true },
       { "id": "t5", "text": "the sphere contains no marked points", "category": "goal", "weight": 80, "reason": "need to reach zero" }
     ],
     "reading": {
@@ -129,12 +129,23 @@
     "prerequisites": [
       { "name": "Pigeonhole", "needed_for": "removing half", "flag": "needed" }
     ],
-    "second_reading": { "new_spans": [], "reweighted": [], "what_changed": "" },
+    "second_reading": {
+      "new_spans": ["including any marked points on the boundary of the hemisphere"],
+      "reweighted": [
+        { "span_id": "t4", "old": 60, "new": 85, "why": "Bob choosing the hemisphere matters more than I thought if he can put points on the edge." }
+      ],
+      "what_changed": "I thought Bob just removes half and the count stays stuck. The boundary clause means he can remove more than half, so the count can actually fall."
+    },
     "domain": "maths"
   },
   "comparison": {
     "first_divergence": "You never marked 'including any marked points on the boundary of the hemisphere'. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns 'at least half' into 'more than half' and makes the count fall every round.",
-    "missed_cues": ["including any marked points on the boundary of the hemisphere", "any plane passing through the centre", "always guarantee", "after a finite number of moves"],
+    "missed_cues": [
+      { "span_id": "s7", "what_it_unlocks": "Lets Bob put the plane through two marked points, turning 'at least half' into 'more than half' so the count falls every round.", "self_check": "When a rule is spelled out in full, ask what breaks if one clause is deleted." },
+      { "span_id": "s11", "what_it_unlocks": "Any two marked points share a plane through the centre, so Bob can always place two points on the boundary.", "self_check": "When a definition names a free choice ('any plane'), ask what that choice lets the player optimise." },
+      { "span_id": "s8", "what_it_unlocks": "Forces worst-case reasoning: the strategy must beat every Alice play, not a typical one.", "self_check": "When you see 'always' or 'guarantee', ask what the opponent's best reply is." },
+      { "span_id": "s9", "what_it_unlocks": "Calls for a termination argument: a quantity that strictly decreases each round.", "self_check": "When the goal says 'finite', ask what number goes down." }
+    ],
     "unused_cues": ["finite number of points"]
   }
 }

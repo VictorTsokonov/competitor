@@ -1,6 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ProblemLibrary from "@/components/ProblemLibrary";
+import CreateMenu from "@/components/CreateMenu";
+import RailMark from "@/components/RailMark";
+import {
+  createFolder,
+  loadLibrary,
+  saveLibrary,
+  type LibraryState,
+} from "@/lib/problems";
 
 const GROUPS = [
   { name: "ICMC", years: ["2020", "2019", "2018"] },
@@ -11,16 +20,36 @@ const STORAGE_KEY = "competitor.sets.collapsed";
 
 export default function SetsPanel({
   onSelectProblem,
+  selectedProblemId,
+  creationActive,
 }: {
-  onSelectProblem: () => void;
+  onSelectProblem: (problemId?: string) => void;
+  selectedProblemId?: string | null;
+  creationActive?: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     ICMC: true,
   });
   const [openYears, setOpenYears] = useState<Record<string, boolean>>({});
+  const [library, setLibrary] = useState<LibraryState>({ problems: [], folders: [] });
+  const [newFolder, setNewFolder] = useState(false);
+  const [folderDraft, setFolderDraft] = useState("");
 
   useEffect(() => {
+    const reload = () => setLibrary(loadLibrary(localStorage));
+    reload();
+    window.addEventListener("competitor:library-changed", reload);
+    return () => window.removeEventListener("competitor:library-changed", reload);
+  }, []);
+
+  // creationActive collapses the rail without persisting: manual toggles
+  // still own the stored preference, and any mode change re-evaluates.
+  useEffect(() => {
+    if (creationActive) {
+      setCollapsed(true);
+      return;
+    }
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored !== null) {
@@ -31,7 +60,7 @@ export default function SetsPanel({
     } catch {
       setCollapsed(window.innerWidth < 1280);
     }
-  }, []);
+  }, [creationActive]);
 
   function setPersisted(next: boolean) {
     setCollapsed(next);
@@ -46,28 +75,21 @@ export default function SetsPanel({
     return { ...set, [key]: !set[key] };
   }
 
-  if (collapsed) {
-    return (
-      <div className="flex w-12 flex-col items-center gap-4 py-4">
-        <button
-          onClick={() => setPersisted(false)}
-          aria-label="Expand sets panel"
-          className="text-lg"
-        >
-          ›
-        </button>
-        <span className="text-xs font-semibold uppercase tracking-widest text-muted [writing-mode:vertical-rl]">
-          Sets
-        </span>
-      </div>
-    );
+  function commitRootFolder() {
+    if (folderDraft.trim()) {
+      const { state: next } = createFolder(library, folderDraft, null);
+      setLibrary(next);
+      saveLibrary(localStorage, next);
+    }
+    setFolderDraft("");
+    setNewFolder(false);
   }
 
   function problemRow(group: string, year: string) {
     if (group === "ICMC" && year === "2020") {
       return (
         <button
-          onClick={onSelectProblem}
+          onClick={() => onSelectProblem()}
           className="block w-full px-2 py-1 text-left text-sm hover:underline"
         >
           Problem 1
@@ -79,14 +101,31 @@ export default function SetsPanel({
     );
   }
 
-  return (
-    <div className="w-64 p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Sets</h2>
-        <button onClick={() => setPersisted(true)} aria-label="Collapse sets panel" className="text-lg">
-          ‹
+  const expanded = (
+    <div className="max-h-screen w-64 overflow-y-auto border-r border-line p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <CreateMenu onNewFolder={() => setNewFolder(true)} />
+        </div>
+        <button onClick={() => setPersisted(true)} aria-label="Collapse panel">
+          <RailMark label="LHS" />
         </button>
       </div>
+      {newFolder && (
+        <input
+          autoFocus
+          value={folderDraft}
+          onChange={(e) => setFolderDraft(e.target.value)}
+          onBlur={() => setNewFolder(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commitRootFolder();
+            if (e.key === "Escape") setNewFolder(false);
+          }}
+          placeholder="Folder name"
+          aria-label="New folder name"
+          className="mb-3 w-full rounded border border-line bg-background px-2 py-1 text-sm"
+        />
+      )}
       <div className="space-y-1">
         {GROUPS.map((g) => (
           <div key={g.name}>
@@ -118,21 +157,15 @@ export default function SetsPanel({
               ))}
           </div>
         ))}
-        <div>
-          <button
-            onClick={() => setOpenGroups((s) => toggle(s, "My sets"))}
-            aria-expanded={!!openGroups["My sets"]}
-            className="flex w-full items-center justify-between px-2 py-1 text-left font-semibold hover:underline"
-          >
-            My sets
-            <span aria-hidden="true">{openGroups["My sets"] ? "−" : "+"}</span>
-          </button>
-          {openGroups["My sets"] && (
-            <span className="ml-3 block px-2 py-1 text-sm text-muted">
-              Assessment project 1
-            </span>
-          )}
-        </div>
+        <ProblemLibrary
+          state={library}
+          selectedId={selectedProblemId ?? null}
+          onChange={(next) => {
+            setLibrary(next);
+            saveLibrary(localStorage, next);
+          }}
+          onSelectProblem={(id) => onSelectProblem(id)}
+        />
       </div>
       <button
         disabled
@@ -143,4 +176,19 @@ export default function SetsPanel({
       </button>
     </div>
   );
+
+  if (collapsed) {
+    return (
+      <div className="group relative flex min-h-screen w-12 flex-col items-center gap-4 pt-5">
+        <button onClick={() => setPersisted(false)} aria-label="Expand panel">
+          <RailMark label="LHS" />
+        </button>
+        <div className="invisible absolute bottom-0 left-full top-0 z-30 w-64 overflow-y-auto border-y border-l border-line bg-background opacity-0 transition-[opacity,transform] duration-200 motion-reduce:transition-none group-hover:visible group-hover:opacity-100 motion-safe:-translate-x-1 motion-safe:group-hover:translate-x-0">
+          {expanded}
+        </div>
+      </div>
+    );
+  }
+
+  return expanded;
 }

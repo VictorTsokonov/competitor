@@ -19,6 +19,7 @@ export const SpanSchema = z.object({
   category: SpanCategorySchema,
   weight: z.number().int().min(0).max(100),
   reason: z.string(),
+  uncertain: z.boolean().optional(),
 });
 
 export const ReadingSchema = z.object({
@@ -119,9 +120,15 @@ export const ChainSchema = z
     });
   });
 
+export const MissedCueSchema = z.object({
+  span_id: z.string().min(1),
+  what_it_unlocks: z.string().min(1),
+  self_check: z.string().min(1),
+});
+
 export const ComparisonSchema = z.object({
   first_divergence: z.string(),
-  missed_cues: z.array(z.string()),
+  missed_cues: z.array(MissedCueSchema),
   unused_cues: z.array(z.string()),
 });
 
@@ -144,6 +151,7 @@ export const AnalysisSchema = z
     });
   });
 
+export type MissedCue = z.infer<typeof MissedCueSchema>;
 export type Chain = z.infer<typeof ChainSchema>;
 export type Analysis = z.infer<typeof AnalysisSchema>;
 export type SpanCategory = z.infer<typeof SpanCategorySchema>;

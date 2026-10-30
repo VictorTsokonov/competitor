@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { Analysis, Chain } from "@/lib/schema";
-import ProblemText from "@/components/ProblemText";
-import { CategoryLegend } from "@/components/Heatmap";
+import type { Analysis, Chain, MissedCue } from "@/lib/schema";
+import LayeredReading, { LayerLegend } from "@/components/LayeredReading";
+import ResponseSecondReading from "@/components/ResponseSecondReading";
+import { STAGE_SOURCES } from "@/lib/stage-sources";
 
 function Details({
   title,
@@ -30,16 +31,37 @@ function Details({
   );
 }
 
-function findSpan(expert: Chain, entry: string) {
-  const cue = expert.reading.cues.find((c) => c.id === entry);
-  const byCue = cue && expert.spans.find((s) => s.id === cue.span_id);
-  if (byCue) return byCue;
-  return expert.spans.find((s) => s.text === entry);
+function MissedCueItem({ expert, cue }: { expert: Chain; cue: MissedCue }) {
+  const span = expert.spans.find((s) => s.id === cue.span_id);
+  return (
+    <li className="flex items-start gap-2">
+      {span && (
+        <span
+          aria-hidden="true"
+          className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+          style={{ backgroundColor: `rgb(var(--cat-${span.category}))` }}
+        />
+      )}
+      <div>
+        <p className="font-semibold">{span?.text ?? cue.span_id}</p>
+        <p className="mt-1">{cue.what_it_unlocks}</p>
+        <p className="mt-1 text-muted">
+          <span className="font-semibold">Ask yourself: </span>
+          {cue.self_check}
+        </p>
+      </div>
+    </li>
+  );
 }
 
 export default function ComparisonPanel({ data }: { data: Analysis }) {
   const [showSolution, setShowSolution] = useState(false);
   const expert = data.expert;
+  const studentSecond = data.student.second_reading;
+  const hasStudentSecond =
+    studentSecond.what_changed.length > 0 ||
+    studentSecond.new_spans.length > 0 ||
+    studentSecond.reweighted.length > 0;
 
   return (
     <div className="w-80 shrink-0 px-5 py-4">
@@ -49,32 +71,45 @@ export default function ComparisonPanel({ data }: { data: Analysis }) {
         </p>
       </Details>
       <Details title="Missed cues" defaultOpen={true}>
-        <ul className="space-y-2 text-sm">
-          {data.comparison.missed_cues.map((entry) => {
-            const span = findSpan(expert, entry);
-            return (
-              <li key={entry} className="flex items-start gap-2">
-                {span && (
-                  <span
-                    aria-hidden="true"
-                    className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: `rgb(var(--cat-${span.category}))` }}
-                  />
-                )}
-                {span?.text ?? entry}
-              </li>
-            );
-          })}
+        <ul className="space-y-4 text-sm">
+          {data.comparison.missed_cues.map((cue) => (
+            <MissedCueItem key={cue.span_id} expert={expert} cue={cue} />
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-muted">
+          Source: {STAGE_SOURCES.divergence.cite} —{" "}
+          {STAGE_SOURCES.divergence.note}
+        </p>
+      </Details>
+      <Details title="Marked but unused" defaultOpen={true}>
+        <p className="text-sm text-muted">
+          You marked these but never used them.
+        </p>
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+          {data.comparison.unused_cues.map((entry) => (
+            <li key={entry}>{entry}</li>
+          ))}
         </ul>
       </Details>
-      <Details title="Expert reading" defaultOpen={false}>
-        <ProblemText text={data.problem.text} spans={expert.spans} className="text-sm" />
+      <Details title="Shared reading" defaultOpen={true}>
+        <LayeredReading
+          text={data.problem.text}
+          expertSpans={expert.spans}
+          studentSpans={data.student.spans}
+        />
       </Details>
-      <Details title="Your reading" defaultOpen={false}>
-        <ProblemText text={data.problem.text} spans={data.student.spans} className="text-sm" />
-      </Details>
+      {hasStudentSecond && (
+        <Details title="What changed in your reading" defaultOpen={true}>
+          <div className="text-sm">
+            <ResponseSecondReading
+              second_reading={studentSecond}
+              spans={data.student.spans}
+            />
+          </div>
+        </Details>
+      )}
       <Details title="Legend" defaultOpen={false}>
-        <CategoryLegend />
+        <LayerLegend />
       </Details>
       <button
         onClick={() => setShowSolution((v) => !v)}
