@@ -1,148 +1,473 @@
 {
+ "problem": {
+  "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+ },
+ "expert": {
   "problem": {
-    "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+   "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
   },
-  "expert": {
-    "problem": {
-      "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+  "spans": [
+   {
+    "id": "s1",
+    "text": "a sphere",
+    "category": "setting",
+    "weight": 60,
+    "reason": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre."
+   },
+   {
+    "id": "s2",
+    "text": "finite number of points",
+    "category": "setting",
+    "weight": 55,
+    "reason": "Finite means we can count, so a termination argument on the count is available."
+   },
+   {
+    "id": "s3",
+    "text": "Alice going first",
+    "category": "informal",
+    "weight": 35,
+    "reason": "Fixes the order inside a round: Alice adds, then Bob removes. Track the count after Bob's move."
+   },
+   {
+    "id": "s4",
+    "text": "counts the number of marked points on the sphere, n",
+    "category": "rule",
+    "weight": 50,
+    "reason": "Alice's move depends on the current count, so the count is the state of the game."
+   },
+   {
+    "id": "s5",
+    "text": "marks another n+1 points",
+    "category": "rule",
+    "weight": 85,
+    "reason": "$n$ becomes $2n+1$: slightly more than doubling. Bob must remove more than half each round or the count never falls."
+   },
+   {
+    "id": "s6",
+    "text": "chooses one hemisphere",
+    "category": "rule",
+    "weight": 70,
+    "reason": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes."
+   },
+   {
+    "id": "s7",
+    "text": "including any marked points on the boundary of the hemisphere",
+    "category": "rule",
+    "weight": 95,
+    "reason": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever."
+   },
+   {
+    "id": "s8",
+    "text": "always guarantee",
+    "category": "goal",
+    "weight": 80,
+    "reason": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks."
+   },
+   {
+    "id": "s9",
+    "text": "after a finite number of moves",
+    "category": "goal",
+    "weight": 80,
+    "reason": "Termination: we need a quantity that strictly decreases each round."
+   },
+   {
+    "id": "s10",
+    "text": "the sphere contains no marked points",
+    "category": "goal",
+    "weight": 65,
+    "reason": "The target state is count zero."
+   },
+   {
+    "id": "s11",
+    "text": "any plane passing through the centre",
+    "category": "definition",
+    "weight": 75,
+    "reason": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary."
+   }
+  ],
+  "reading": {
+   "cues": [
+    {
+     "id": "c1",
+     "span_id": "s1",
+     "why_it_matters": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre.",
+     "how_spotted": "The stage is named before anything happens; symmetry lives here."
     },
-    "spans": [
-      { "id": "s1", "text": "a sphere", "category": "setting", "weight": 60, "reason": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre." },
-      { "id": "s2", "text": "finite number of points", "category": "setting", "weight": 55, "reason": "Finite means we can count, so a termination argument on the count is available." },
-      { "id": "s3", "text": "Alice going first", "category": "informal", "weight": 35, "reason": "Fixes the order inside a round: Alice adds, then Bob removes. Track the count after Bob's move." },
-      { "id": "s4", "text": "counts the number of marked points on the sphere, n", "category": "rule", "weight": 50, "reason": "Alice's move depends on the current count, so the count is the state of the game." },
-      { "id": "s5", "text": "marks another n+1 points", "category": "rule", "weight": 85, "reason": "$n$ becomes $2n+1$: slightly more than doubling. Bob must remove more than half each round or the count never falls." },
-      { "id": "s6", "text": "chooses one hemisphere", "category": "rule", "weight": 70, "reason": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes." },
-      { "id": "s7", "text": "including any marked points on the boundary of the hemisphere", "category": "rule", "weight": 95, "reason": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever." },
-      { "id": "s8", "text": "always guarantee", "category": "goal", "weight": 80, "reason": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks." },
-      { "id": "s9", "text": "after a finite number of moves", "category": "goal", "weight": 80, "reason": "Termination: we need a quantity that strictly decreases each round." },
-      { "id": "s10", "text": "the sphere contains no marked points", "category": "goal", "weight": 65, "reason": "The target state is count zero." },
-      { "id": "s11", "text": "any plane passing through the centre", "category": "definition", "weight": 75, "reason": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary." }
-    ],
-    "reading": {
-      "cues": [
-        { "id": "c1", "span_id": "s1", "why_it_matters": "Centrally symmetric closed surface: every point has an antipode and hemispheres are cut by planes through the centre.", "how_spotted": "The stage is named before anything happens; symmetry lives here." },
-        { "id": "c2", "span_id": "s2", "why_it_matters": "Finite means we can count, so a termination argument on the count is available.", "how_spotted": "'Finite' next to 'counts' later means the count is the state." },
-        { "id": "c3", "span_id": "s5", "why_it_matters": "$n$ becomes $2n+1$: slightly more than doubling. Bob must remove more than half each round or the count never falls.", "how_spotted": "The growth rule is exact arithmetic, so do the arithmetic: $n$ to $2n+1$." },
-        { "id": "c4", "span_id": "s6", "why_it_matters": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes.", "how_spotted": "Bob's only verb is 'chooses': his power is a choice to optimise." },
-        { "id": "c5", "span_id": "s7", "why_it_matters": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever.", "how_spotted": "A clause that only matters in edge cases is usually there because the edge case is the point." },
-        { "id": "c6", "span_id": "s8", "why_it_matters": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks.", "how_spotted": "'Always' quantifies over all of Alice's play: worst case, not typical case." },
-        { "id": "c7", "span_id": "s9", "why_it_matters": "Termination: we need a quantity that strictly decreases each round.", "how_spotted": "'Finite' as a goal word calls for a descent argument." },
-        { "id": "c8", "span_id": "s11", "why_it_matters": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary.", "how_spotted": "The definition is spelled out in full, so the proof must use every word of it." }
-      ],
-      "definitions": [
-        { "term": "hemisphere", "meaning_latex": "\\text{closed half of the sphere cut by a plane through the centre; its boundary is a great circle}" },
-        { "term": "round", "meaning_latex": "\\text{one move by Alice followed by one move by Bob}" },
-        { "term": "count after a round", "meaning_latex": "c_{k}, \\text{the number of marked points after Bob's } k \\text{-th move}" }
-      ]
+    {
+     "id": "c2",
+     "span_id": "s2",
+     "why_it_matters": "Finite means we can count, so a termination argument on the count is available.",
+     "how_spotted": "'Finite' next to 'counts' later means the count is the state."
     },
-    "goal": {
-      "asked": "Whether Bob has a strategy that empties the sphere against every possible play by Alice.",
-      "answer_form": "Yes or no, with proof. If yes: a strategy for Bob plus a proof that it terminates. If no: a strategy for Alice that keeps at least one point forever.",
-      "final_line_would_say": "After every round the number of marked points strictly decreases, so after finitely many rounds it is zero."
+    {
+     "id": "c3",
+     "span_id": "s5",
+     "why_it_matters": "$n$ becomes $2n+1$: slightly more than doubling. Bob must remove more than half each round or the count never falls.",
+     "how_spotted": "The growth rule is exact arithmetic, so do the arithmetic: $n$ to $2n+1$."
     },
-    "informal_cues": [
-      { "span_id": "s3", "bearing": "Alice moves first, so each round is add-then-remove. The quantity to control is the count left after Bob." },
-      { "span_id": "s8", "bearing": "'Always' means Bob cannot rely on Alice placing points badly; the strategy must beat the worst case." },
-      { "span_id": "s2", "bearing": "'Finite' at the start means the count is a natural number from the first move, so induction and descent are available." }
-    ],
-    "abstraction": {
-      "underneath": [
-        { "object": "sphere", "really_is": "a closed surface with central symmetry and no boundary", "implies": "every great circle passes through antipodal pairs; there is no edge for points to hide at" },
-        { "object": "hemisphere", "really_is": "the intersection of the sphere with a closed half-space whose boundary plane contains the centre", "implies": "its boundary is a great circle, and because the region is closed, points on that circle are removed" },
-        { "object": "choosing a hemisphere", "really_is": "choosing a plane through the centre, then a side", "implies": "for any plane the two closed hemispheres cover every point, so one side contains at least half of them" }
-      ],
-      "deeper_properties": [
-        "Through the centre and any two points on the sphere there is a plane, so Bob can always place two marked points on the boundary.",
-        "Count argument: if $m$ points remain and the plane passes through two of them, one closed hemisphere contains at least $2 + \\lceil (m-2)/2 \\rceil = \\lceil (m+2)/2 \\rceil > m/2$ points.",
-        "'At least half' only stops growth; 'more than half' forces decrease. The boundary clause is what upgrades one to the other."
-      ]
+    {
+     "id": "c4",
+     "span_id": "s6",
+     "why_it_matters": "Bob's freedom is the choice of plane through the centre. The question becomes an optimisation over planes.",
+     "how_spotted": "Bob's only verb is 'chooses': his power is a choice to optimise."
     },
-    "simplification": {
-      "instance": "Play the same game on a circle. Alice adds n+1 points; Bob removes a closed semicircle (a diameter through the centre and one side).",
-      "instance_latex": "\\text{Start with one point. Alice adds } 2 \\text{, giving } 3 \\text{ points. Can Bob remove all } 3 \\text{?}",
-      "what_to_try": "Place the three points $120^\\circ$ apart. Check whether any closed semicircle contains all three. Then ask how many marked points a diameter can pass through.",
-      "notice_prompt": "In two dimensions a diameter passes through one marked point and its antipode at most, and Bob cannot clear three spread-out points. On a sphere, how many marked points can a plane through the centre pass through, and what does the boundary clause let Bob do with that?"
+    {
+     "id": "c5",
+     "span_id": "s7",
+     "why_it_matters": "The hemisphere is closed. Bob can put the plane through marked points and they count as removed. This is the lever.",
+     "how_spotted": "A clause that only matters in edge cases is usually there because the edge case is the point."
     },
-    "method": {
-      "candidates": [
-        { "name": "Monovariant: show the count strictly decreases every round", "deciding_span_ids": ["s9", "s5", "s7"], "from_first_principles": "The goal is termination, and termination arguments need a quantity in the natural numbers that strictly decreases. The count after Bob's move is the obvious quantity. Alice takes it from $n$ to $2n+1$, so Bob must remove at least $n+2$ to leave at most $n-1$. Putting the plane through two marked points guarantees removing $\\lceil (2n+3)/2 \\rceil = n+2$.", "kept": true, "why": "It answers the exact question asked and every step is forced by a span." },
-        { "name": "Induction on the number of points", "deciding_span_ids": ["s2", "s9"], "from_first_principles": "Finite initial count suggests induction on $n$.", "kept": false, "why": "It is the same argument as the monovariant in different clothing; the monovariant is cleaner to state." },
-        { "name": "Find an Alice strategy that keeps points forever", "deciding_span_ids": ["s8"], "from_first_principles": "If the answer were no, we would need a configuration Bob cannot shrink. Spreading points evenly is the natural try.", "kept": false, "why": "Any configuration is beaten by a plane through two of its points, so no such strategy exists." },
-        { "name": "Potential function on positions of points", "deciding_span_ids": ["s1"], "from_first_principles": "Geometric spread of points could be measured.", "kept": false, "why": "Far heavier than needed; the count alone suffices." }
-      ],
-      "chosen": "Monovariant with the two-point plane lemma: after each round at most $n-1$ points remain, so Bob wins."
+    {
+     "id": "c6",
+     "span_id": "s8",
+     "why_it_matters": "Bob needs a strategy that works against every play by Alice, so no assumption about where she marks.",
+     "how_spotted": "'Always' quantifies over all of Alice's play: worst case, not typical case."
     },
-    "prerequisites": [
-      { "name": "Pigeonhole / averaging", "needed_for": "One of two closed hemispheres contains at least half the points.", "flag": "needed" },
-      { "name": "Monovariant and termination arguments", "needed_for": "A strictly decreasing natural number reaches zero.", "flag": "needed" },
-      { "name": "Great circles and antipodal points", "needed_for": "Understanding that hemisphere boundaries are great circles through the centre.", "flag": "assumed" },
-      { "name": "Closed versus open regions", "needed_for": "Why boundary points count as removed.", "flag": "needed" }
-    ],
-    "second_reading": {
-      "new_spans": ["any plane passing through the centre"],
-      "reweighted": [
-        { "span_id": "s7", "old": 60, "new": 95, "why": "After the circle experiment it is clear the boundary clause is the whole difference between 2D and 3D." },
-        { "span_id": "s11", "old": 40, "new": 75, "why": "The definition is what lets two marked points be placed on the boundary." }
-      ],
-      "what_changed": "The method moved from 'remove at least half' (which only prevents growth) to 'remove more than half' (which forces descent), and the boundary clause became the key cue."
+    {
+     "id": "c7",
+     "span_id": "s9",
+     "why_it_matters": "Termination: we need a quantity that strictly decreases each round.",
+     "how_spotted": "'Finite' as a goal word calls for a descent argument."
     },
-    "domain": "maths"
+    {
+     "id": "c8",
+     "span_id": "s11",
+     "why_it_matters": "Any two points on the sphere lie on a common plane through the centre, so Bob can always put two marked points on the boundary.",
+     "how_spotted": "The definition is spelled out in full, so the proof must use every word of it."
+    }
+   ],
+   "definitions": [
+    {
+     "term": "hemisphere",
+     "meaning_latex": "\\text{closed half of the sphere cut by a plane through the centre; its boundary is a great circle}"
+    },
+    {
+     "term": "round",
+     "meaning_latex": "\\text{one move by Alice followed by one move by Bob}"
+    },
+    {
+     "term": "count after a round",
+     "meaning_latex": "c_{k}, \\text{the number of marked points after Bob's } k \\text{-th move}"
+    }
+   ]
   },
-  "student": {
-    "problem": {
-      "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
-    },
-    "spans": [
-      { "id": "t1", "text": "a sphere", "category": "setting", "weight": 50, "reason": "3D shape, symmetric" },
-      { "id": "t2", "text": "finite number of points", "category": "setting", "weight": 40, "reason": "we can count them" },
-      { "id": "t3", "text": "marks another n+1 points", "category": "rule", "weight": 70, "reason": "more than doubles" },
-      { "id": "t4", "text": "chooses one hemisphere", "category": "rule", "weight": 60, "reason": "Bob removes half", "uncertain": true },
-      { "id": "t5", "text": "the sphere contains no marked points", "category": "goal", "weight": 80, "reason": "need to reach zero" }
-    ],
-    "reading": {
-      "cues": [
-        { "id": "d1", "span_id": "t1", "why_it_matters": "3D shape, symmetric", "how_spotted": "underlined while reading" },
-        { "id": "d2", "span_id": "t2", "why_it_matters": "we can count them", "how_spotted": "underlined while reading" },
-        { "id": "d3", "span_id": "t3", "why_it_matters": "more than doubles", "how_spotted": "underlined while reading" },
-        { "id": "d4", "span_id": "t4", "why_it_matters": "Bob removes half", "how_spotted": "underlined while reading" },
-        { "id": "d5", "span_id": "t5", "why_it_matters": "need to reach zero", "how_spotted": "underlined while reading" }
-      ],
-      "definitions": [
-        { "term": "hemisphere", "meaning_latex": "\\text{half the sphere}" }
-      ]
-    },
-    "goal": { "asked": "Does Bob win?", "answer_form": "yes or no", "final_line_would_say": "" },
-    "informal_cues": [],
-    "abstraction": { "underneath": [], "deeper_properties": [] },
-    "simplification": { "instance": "Try with 1 point.", "instance_latex": "", "what_to_try": "Alice adds 2, Bob removes some.", "notice_prompt": "" },
-    "method": {
-      "candidates": [
-        { "name": "Play small cases", "deciding_span_ids": ["t2"], "from_first_principles": "See what happens.", "kept": true, "why": "Did not find a pattern." },
-        { "name": "Find an invariant", "deciding_span_ids": [], "from_first_principles": "", "kept": false, "why": "Could not find one." }
-      ],
-      "chosen": "Play small cases"
-    },
-    "prerequisites": [
-      { "name": "Pigeonhole", "needed_for": "removing half", "flag": "needed" }
-    ],
-    "second_reading": {
-      "new_spans": ["including any marked points on the boundary of the hemisphere"],
-      "reweighted": [
-        { "span_id": "t4", "old": 60, "new": 85, "why": "Bob choosing the hemisphere matters more than I thought if he can put points on the edge." }
-      ],
-      "what_changed": "I thought Bob just removes half and the count stays stuck. The boundary clause means he can remove more than half, so the count can actually fall."
-    },
-    "domain": "maths"
+  "goal": {
+   "asked": "Whether Bob has a strategy that empties the sphere against every possible play by Alice.",
+   "answer_form": "Yes or no, with proof. If yes: a strategy for Bob plus a proof that it terminates. If no: a strategy for Alice that keeps at least one point forever.",
+   "final_line_would_say": "After every round the number of marked points strictly decreases, so after finitely many rounds it is zero."
   },
-  "comparison": {
-    "first_divergence": "You never marked 'including any marked points on the boundary of the hemisphere'. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns 'at least half' into 'more than half' and makes the count fall every round.",
-    "missed_cues": [
-      { "span_id": "s7", "what_it_unlocks": "Lets Bob put the plane through two marked points, turning 'at least half' into 'more than half' so the count falls every round.", "self_check": "When a rule is spelled out in full, ask what breaks if one clause is deleted." },
-      { "span_id": "s11", "what_it_unlocks": "Any two marked points share a plane through the centre, so Bob can always place two points on the boundary.", "self_check": "When a definition names a free choice ('any plane'), ask what that choice lets the player optimise." },
-      { "span_id": "s8", "what_it_unlocks": "Forces worst-case reasoning: the strategy must beat every Alice play, not a typical one.", "self_check": "When you see 'always' or 'guarantee', ask what the opponent's best reply is." },
-      { "span_id": "s9", "what_it_unlocks": "Calls for a termination argument: a quantity that strictly decreases each round.", "self_check": "When the goal says 'finite', ask what number goes down." }
+  "informal_cues": [
+   {
+    "span_id": "s3",
+    "bearing": "Alice moves first, so each round is add-then-remove. The quantity to control is the count left after Bob."
+   },
+   {
+    "span_id": "s8",
+    "bearing": "'Always' means Bob cannot rely on Alice placing points badly; the strategy must beat the worst case."
+   },
+   {
+    "span_id": "s2",
+    "bearing": "'Finite' at the start means the count is a natural number from the first move, so induction and descent are available."
+   }
+  ],
+  "abstraction": {
+   "underneath": [
+    {
+     "object": "sphere",
+     "really_is": "a closed surface with central symmetry and no boundary",
+     "implies": "every great circle passes through antipodal pairs; there is no edge for points to hide at"
+    },
+    {
+     "object": "hemisphere",
+     "really_is": "the intersection of the sphere with a closed half-space whose boundary plane contains the centre",
+     "implies": "its boundary is a great circle, and because the region is closed, points on that circle are removed"
+    },
+    {
+     "object": "choosing a hemisphere",
+     "really_is": "choosing a plane through the centre, then a side",
+     "implies": "for any plane the two closed hemispheres cover every point, so one side contains at least half of them"
+    }
+   ],
+   "deeper_properties": [
+    "Through the centre and any two points on the sphere there is a plane, so Bob can always place two marked points on the boundary.",
+    "Count argument: if $m$ points remain and the plane passes through two of them, one closed hemisphere contains at least $2 + \\lceil (m-2)/2 \\rceil = \\lceil (m+2)/2 \\rceil > m/2$ points.",
+    "'At least half' only stops growth; 'more than half' forces decrease. The boundary clause is what upgrades one to the other."
+   ]
+  },
+  "simplification": {
+   "instance": "Play the same game on a circle. Alice adds n+1 points; Bob removes a closed semicircle (a diameter through the centre and one side).",
+   "instance_latex": "\\text{Start with one point. Alice adds } 2 \\text{, giving } 3 \\text{ points. Can Bob remove all } 3 \\text{?}",
+   "what_to_try": "Place the three points $120^\\circ$ apart. Check whether any closed semicircle contains all three. Then ask how many marked points a diameter can pass through.",
+   "notice_prompt": "In two dimensions a diameter passes through one marked point and its antipode at most, and Bob cannot clear three spread-out points. On a sphere, how many marked points can a plane through the centre pass through, and what does the boundary clause let Bob do with that?"
+  },
+  "method": {
+   "candidates": [
+    {
+     "name": "Monovariant: show the count strictly decreases every round",
+     "deciding_span_ids": [
+      "s9",
+      "s5",
+      "s7"
+     ],
+     "from_first_principles": "The goal is termination, and termination arguments need a quantity in the natural numbers that strictly decreases. The count after Bob's move is the obvious quantity. Alice takes it from $n$ to $2n+1$, so Bob must remove at least $n+2$ to leave at most $n-1$. Putting the plane through two marked points guarantees removing $\\lceil (2n+3)/2 \\rceil = n+2$.",
+     "kept": true,
+     "why": "It answers the exact question asked and every step is forced by a span."
+    },
+    {
+     "name": "Induction on the number of points",
+     "deciding_span_ids": [
+      "s2",
+      "s9"
+     ],
+     "from_first_principles": "Finite initial count suggests induction on $n$.",
+     "kept": false,
+     "why": "It is the same argument as the monovariant in different clothing; the monovariant is cleaner to state."
+    },
+    {
+     "name": "Find an Alice strategy that keeps points forever",
+     "deciding_span_ids": [
+      "s8"
+     ],
+     "from_first_principles": "If the answer were no, we would need a configuration Bob cannot shrink. Spreading points evenly is the natural try.",
+     "kept": false,
+     "why": "Any configuration is beaten by a plane through two of its points, so no such strategy exists."
+    },
+    {
+     "name": "Potential function on positions of points",
+     "deciding_span_ids": [
+      "s1"
+     ],
+     "from_first_principles": "Geometric spread of points could be measured.",
+     "kept": false,
+     "why": "Far heavier than needed; the count alone suffices."
+    }
+   ],
+   "chosen": "Monovariant with the two-point plane lemma: after each round at most $n-1$ points remain, so Bob wins."
+  },
+  "prerequisites": [
+   {
+    "name": "Pigeonhole / averaging",
+    "needed_for": "One of two closed hemispheres contains at least half the points.",
+    "flag": "needed"
+   },
+   {
+    "name": "Monovariant and termination arguments",
+    "needed_for": "A strictly decreasing natural number reaches zero.",
+    "flag": "needed"
+   },
+   {
+    "name": "Great circles and antipodal points",
+    "needed_for": "Understanding that hemisphere boundaries are great circles through the centre.",
+    "flag": "assumed"
+   },
+   {
+    "name": "Closed versus open regions",
+    "needed_for": "Why boundary points count as removed.",
+    "flag": "needed"
+   }
+  ],
+  "second_reading": {
+   "new_spans": [
+    "any plane passing through the centre"
+   ],
+   "reweighted": [
+    {
+     "span_id": "s7",
+     "old": 60,
+     "new": 95,
+     "why": "After the circle experiment it is clear the boundary clause is the whole difference between 2D and 3D."
+    },
+    {
+     "span_id": "s11",
+     "old": 40,
+     "new": 75,
+     "why": "The definition is what lets two marked points be placed on the boundary."
+    }
+   ],
+   "what_changed": "The method moved from 'remove at least half' (which only prevents growth) to 'remove more than half' (which forces descent), and the boundary clause became the key cue."
+  },
+  "domain": "maths"
+ },
+ "student": {
+  "problem": {
+   "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+  },
+  "spans": [
+   {
+    "id": "t1",
+    "text": "a sphere",
+    "category": "setting",
+    "weight": 50,
+    "reason": "3D shape, symmetric"
+   },
+   {
+    "id": "t2",
+    "text": "finite number of points",
+    "category": "setting",
+    "weight": 40,
+    "reason": "we can count them"
+   },
+   {
+    "id": "t3",
+    "text": "marks another n+1 points",
+    "category": "rule",
+    "weight": 70,
+    "reason": "more than doubles"
+   },
+   {
+    "id": "t4",
+    "text": "chooses one hemisphere",
+    "category": "rule",
+    "weight": 60,
+    "reason": "Bob removes half",
+    "uncertain": true
+   },
+   {
+    "id": "t5",
+    "text": "the sphere contains no marked points",
+    "category": "goal",
+    "weight": 80,
+    "reason": "need to reach zero"
+   }
+  ],
+  "reading": {
+   "cues": [
+    {
+     "id": "d1",
+     "span_id": "t1",
+     "why_it_matters": "3D shape, symmetric",
+     "how_spotted": "underlined while reading"
+    },
+    {
+     "id": "d2",
+     "span_id": "t2",
+     "why_it_matters": "we can count them",
+     "how_spotted": "underlined while reading"
+    },
+    {
+     "id": "d3",
+     "span_id": "t3",
+     "why_it_matters": "more than doubles",
+     "how_spotted": "underlined while reading"
+    },
+    {
+     "id": "d4",
+     "span_id": "t4",
+     "why_it_matters": "Bob removes half",
+     "how_spotted": "underlined while reading"
+    },
+    {
+     "id": "d5",
+     "span_id": "t5",
+     "why_it_matters": "need to reach zero",
+     "how_spotted": "underlined while reading"
+    }
+   ],
+   "definitions": [
+    {
+     "term": "hemisphere",
+     "meaning_latex": "\\text{half the sphere}"
+    }
+   ]
+  },
+  "goal": {
+   "asked": "Does Bob win?",
+   "answer_form": "yes or no",
+   "final_line_would_say": ""
+  },
+  "informal_cues": [],
+  "abstraction": {
+   "underneath": [],
+   "deeper_properties": []
+  },
+  "simplification": {
+   "instance": "Try with 1 point.",
+   "instance_latex": "",
+   "what_to_try": "Alice adds 2, Bob removes some.",
+   "notice_prompt": ""
+  },
+  "method": {
+   "candidates": [
+    {
+     "name": "Play small cases",
+     "deciding_span_ids": [
+      "t2"
+     ],
+     "from_first_principles": "See what happens.",
+     "kept": true,
+     "why": "Did not find a pattern."
+    },
+    {
+     "name": "Find an invariant",
+     "deciding_span_ids": [],
+     "from_first_principles": "",
+     "kept": false,
+     "why": "Could not find one."
+    }
+   ],
+   "chosen": "Play small cases"
+  },
+  "prerequisites": [
+   {
+    "name": "Pigeonhole",
+    "needed_for": "removing half",
+    "flag": "needed"
+   }
+  ],
+  "second_reading": {
+   "new_spans": [
+    "including any marked points on the boundary of the hemisphere"
+   ],
+   "reweighted": [
+    {
+     "span_id": "t4",
+     "old": 60,
+     "new": 85,
+     "why": "Bob choosing the hemisphere matters more than I thought if he can put points on the edge."
+    }
+   ],
+   "what_changed": "I thought Bob just removes half and the count stays stuck. The boundary clause means he can remove more than half, so the count can actually fall."
+  },
+  "domain": "maths"
+ },
+ "comparison": {
+  "where_you_are": "You marked the setting and the goal and found a counting idea, but the rule's boundary clause never entered your reading, so your route had to make do with 'at least half'.",
+  "first_divergence": "You never marked 'including any marked points on the boundary of the hemisphere'. The expert weighted it 95: it lets Bob choose the plane through two marked points, which turns 'at least half' into 'more than half' and makes the count fall every round.",
+  "cards": [
+   {
+    "kind": "missed_cue",
+    "evidence_student": "Your five stages never mention 'including any marked points on the boundary of the hemisphere'; your removal step keeps only 'at least half'.",
+    "expert_span_ids": [
+     "s7"
     ],
-    "unused_cues": ["finite number of points"]
-  }
+    "diagnosis": "Lets Bob put the plane through two marked points, turning 'at least half' into 'more than half' so the count falls every round.",
+    "redirection": "Put the cutting plane through marked points on purpose and recount what Bob removes in one round.",
+    "self_check": "When a rule is spelled out in full, ask what breaks if one clause is deleted."
+   },
+   {
+    "kind": "missed_cue",
+    "evidence_student": "Your working treats the hemisphere as a given region; the freedom in 'any plane passing through the centre' is never exercised.",
+    "expert_span_ids": [
+     "s11"
+    ],
+    "diagnosis": "Any two marked points share a plane through the centre, so Bob can always place two points on the boundary.",
+    "redirection": "List what Bob is free to choose, then ask which choice puts marked points on the boundary.",
+    "self_check": "When a definition names a free choice ('any plane'), ask what that choice lets the player optimise."
+   },
+   {
+    "kind": "missed_cue",
+    "evidence_student": "Your argument checks one way Alice might play rather than every way.",
+    "expert_span_ids": [
+     "s8"
+    ],
+    "diagnosis": "Forces worst-case reasoning: the strategy must beat every Alice play, not a typical one.",
+    "redirection": "Re-run your strategy against the worst Alice you can invent before trusting it.",
+    "self_check": "When you see 'always' or 'guarantee', ask what the opponent's best reply is."
+   }
+  ],
+  "unused_cues": [
+   "finite number of points"
+  ],
+  "where_to_next": "Redo one round of the game with the plane through two marked points and recount; the whole proof lives in that recount."
+ }
 }

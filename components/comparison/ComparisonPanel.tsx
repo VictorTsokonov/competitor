@@ -3,7 +3,8 @@
 import { useState } from "react";
 import type { Analysis } from "@/lib/schema";
 import FirstDivergence from "@/components/comparison/FirstDivergence";
-import MissedCueCard from "@/components/comparison/MissedCueCard";
+import FeedbackCardView from "@/components/comparison/FeedbackCardView";
+import { RichTex } from "@/components/reading/Tex";
 import UnusedCues from "@/components/comparison/UnusedCues";
 import StudentMethod from "@/components/comparison/StudentMethod";
 import StudentSecondReading from "@/components/comparison/StudentSecondReading";
@@ -73,8 +74,10 @@ export default function ComparisonPanel({
       </div>
     );
   }
-  const missed = data.comparison.missed_cues;
-  const unused = data.comparison.unused_cues;
+  const { cards, unused_cues: unused } = data.comparison;
+  // Grounded readings earn the stronger note; without a verified solution
+  // the humbler wording stays.
+  const grounded = data.solution?.verified === true;
   return (
     <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
       <div className="flex min-h-[36px] items-center pr-[46px]">
@@ -83,17 +86,27 @@ export default function ComparisonPanel({
         </span>
       </div>
       <p className="mt-1 text-[0.9375rem] text-muted">
-        The expert reading is a plausible narrative, not a trace of the
-        model&apos;s thinking.
+        {grounded
+          ? "The expert reading is grounded in a route the expert solved and verified on a small case. The solution itself stays private."
+          : "The expert reading is a plausible narrative, not a trace of the model's thinking."}
       </p>
+      {data.comparison.where_you_are && (
+        <p className="mt-3 text-[1.0625rem]">
+          <RichTex tex={data.comparison.where_you_are} />
+        </p>
+      )}
       <div className="h-3" />
       <Section title="First divergence" defaultOpen={true} first>
         <FirstDivergence text={data.comparison.first_divergence} />
       </Section>
-      <Section title={`Missed cues · ${missed.length}`} defaultOpen={true}>
+      <Section title={`What to revisit · ${cards.length}`} defaultOpen={true}>
         <div className="mt-[10px] grid gap-[10px]">
-          {missed.map((cue) => (
-            <MissedCueCard key={cue.span_id} expert={data.expert} cue={cue} />
+          {cards.map((card) => (
+            <FeedbackCardView
+              key={`${card.kind}-${card.expert_span_ids.join("-")}`}
+              expert={data.expert}
+              card={card}
+            />
           ))}
         </div>
       </Section>
@@ -106,6 +119,13 @@ export default function ComparisonPanel({
       <Section title="Your second reading" defaultOpen={false}>
         <StudentSecondReading student={data.student} />
       </Section>
+      {data.comparison.where_to_next && (
+        <Section title="Where to next" defaultOpen={true}>
+          <p className="mt-[10px] text-[1.0625rem]">
+            <RichTex tex={data.comparison.where_to_next} />
+          </p>
+        </Section>
+      )}
       <Section title="Your pages" defaultOpen={true}>
         <PageThumbnails pages={pages} />
       </Section>

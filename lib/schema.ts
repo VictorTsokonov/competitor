@@ -193,16 +193,28 @@ export const AttemptReportSchema = z.object({
   legibility: z.array(z.string()),
 });
 
-export const MissedCueSchema = z.object({
-  span_id: z.string().min(1),
-  what_it_unlocks: z.string().min(1),
+// One piece of elaborated, process-level feedback (Hattie & Timperley
+// 2007; Shute 2008): the student's own evidence, why that path stalls,
+// the next move short of the solution, and a self-check question.
+export const FeedbackCardSchema = z.object({
+  // near_miss: touched the right idea and dropped it — outranks the rest.
+  kind: z.enum(["near_miss", "missed_cue", "wrong_turn", "unused_mark"]),
+  evidence_student: z.string().min(1),
+  expert_span_ids: z.array(z.string()),
+  diagnosis: z.string().min(1),
+  redirection: z.string().min(1),
   self_check: z.string().min(1),
 });
 
 export const ComparisonSchema = z.object({
+  // Feed back / feed forward framing: where the attempt stands, the
+  // first point the readings part, at most three ranked cards, marks the
+  // method never used, and the next move — never the solution.
+  where_you_are: z.string(),
   first_divergence: z.string(),
-  missed_cues: z.array(MissedCueSchema),
+  cards: z.array(FeedbackCardSchema).max(3),
   unused_cues: z.array(z.string()),
+  where_to_next: z.string(),
 });
 
 export const AnalysisSchema = z
@@ -230,7 +242,8 @@ export const AnalysisSchema = z
     });
   });
 
-export type MissedCue = z.infer<typeof MissedCueSchema>;
+export type FeedbackCard = z.infer<typeof FeedbackCardSchema>;
+export type Comparison = z.infer<typeof ComparisonSchema>;
 export type Chain = z.infer<typeof ChainSchema>;
 export type Analysis = z.infer<typeof AnalysisSchema>;
 export type SpanCategory = z.infer<typeof SpanCategorySchema>;

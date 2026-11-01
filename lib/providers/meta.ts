@@ -125,9 +125,11 @@ export async function fetchMetaAnalysis(input: AnalysisInput): Promise<Analysis>
     student: emptyStudentChain(text),
     // Honest placeholder until call C provides a student chain.
     comparison: {
+      where_you_are: "",
       first_divergence: "Submit your attempt to see the comparison.",
-      missed_cues: [],
+      cards: [],
       unused_cues: [],
+      where_to_next: "",
     },
     solution: input.solution ?? undefined,
   });
