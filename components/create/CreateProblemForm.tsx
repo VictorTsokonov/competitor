@@ -45,6 +45,34 @@ export default function CreateProblemForm({
   const [photos, setPhotos] = useState<PageImage[]>([]);
   const [attemptPages, setAttemptPages] = useState<PageImage[]>([]);
   const [status, setStatus] = useState<string | null>(null);
+  const [transcribing, setTranscribing] = useState(false);
+
+  // The "statement" purpose of /api/read: the photo becomes editable
+  // text + $…$ LaTeX in Write mode, where the student checks it.
+  function transcribe() {
+    if (photos.length === 0 || transcribing) return;
+    setTranscribing(true);
+    setStatus(null);
+    fetch("/api/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        purpose: "statement",
+        pages: photos.map((p) => p.dataUrl),
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
+        return res.json() as Promise<{ text: string }>;
+      })
+      .then(({ text }) => {
+        setLatex(text);
+        setMode("write");
+        setStatus("Transcribed — check it against the photo before saving.");
+      })
+      .catch((e: Error) => setStatus(`Transcription failed: ${e.message}`))
+      .finally(() => setTranscribing(false));
+  }
 
   function persist(): string | null {
     if (!latex.trim()) {
@@ -159,13 +187,22 @@ export default function CreateProblemForm({
               </>
             }
           />
-          <PageThumbnails
-            pages={photos}
-            onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
-          />
+          {photos.length > 0 && (
+            <PageThumbnails
+              pages={photos}
+              onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
+            />
+          )}
+          {photos.length > 0 && (
+            <div className="mt-3">
+              <Pill onClick={transcribe} className="min-h-[38px] text-[1rem]">
+                {transcribing ? "Transcribing…" : "Transcribe into LaTeX"}
+              </Pill>
+            </div>
+          )}
           <p className="mt-2 text-[0.9375rem] text-muted">
-            Automatic reading isn’t wired yet — type the problem in Write
-            mode to save it. The photo stays on this page only.
+            The transcription opens in Write mode for you to check; the
+            photo itself stays on this page.
           </p>
         </div>
       )}

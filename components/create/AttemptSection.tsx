@@ -67,7 +67,9 @@ export default function AttemptSection({
             </>
           }
         />
-        <PageThumbnails pages={pages} onRemove={remove} onMove={move} />
+        {pages.length > 0 && (
+          <PageThumbnails pages={pages} onRemove={remove} onMove={move} />
+        )}
         <p className="mt-2 text-center text-[0.9375rem] text-muted">
           {pages.length > 0
             ? "Keep only this problem's pages, in reading order — remove the rest."
