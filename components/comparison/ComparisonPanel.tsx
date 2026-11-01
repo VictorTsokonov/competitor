@@ -8,6 +8,7 @@ import UnusedCues from "@/components/comparison/UnusedCues";
 import StudentMethod from "@/components/comparison/StudentMethod";
 import StudentSecondReading from "@/components/comparison/StudentSecondReading";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
+import type { PageImage } from "@/lib/pages";
 
 function Section({
   title,
@@ -38,17 +39,29 @@ function Section({
   );
 }
 
-// data null is the unsolved state; an analysis whose student chain is the
-// empty placeholder (expert wired, call C pending) keeps the same empty
-// state with the comparison's own message. The heading stays either way so
-// the layout does not jump when the full comparison arrives.
-export default function ComparisonPanel({ data }: { data: Analysis | null }) {
-  const emptyText = !data
-    ? "The comparison appears here after you submit your attempt."
-    : data.student.spans.length === 0 && data.comparison.missed_cues.length === 0
-      ? data.comparison.first_divergence || "Submit your attempt to see the comparison."
-      : null;
-  if (emptyText || !data) {
+// data null is the unsolved state. While compare.ts is pending the server
+// sends a comparison with empty cue lists, so the panel keeps its empty
+// state even once a real student chain exists — the heading stays either
+// way so the layout does not jump when the full comparison arrives. pages
+// are this session's submitted attempt pages, shown while they are known.
+export default function ComparisonPanel({
+  data,
+  pages,
+}: {
+  data: Analysis | null;
+  pages?: PageImage[];
+}) {
+  const placeholder =
+    !data ||
+    (data.comparison.missed_cues.length === 0 &&
+      data.comparison.unused_cues.length === 0);
+  if (placeholder) {
+    const emptyText = !data
+      ? "The comparison appears here after you submit your attempt."
+      : data.student.spans.length > 0
+        ? "Your reading is on the statement — underlined next to the expert's highlights. The cue-by-cue comparison lands here next."
+        : data.comparison.first_divergence ||
+          "Submit your attempt to see the comparison.";
     return (
       <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
         <div className="flex min-h-[36px] items-center pr-[46px]">
@@ -57,6 +70,12 @@ export default function ComparisonPanel({ data }: { data: Analysis | null }) {
           </span>
         </div>
         <p className="mt-3 text-[1.0625rem] text-muted">{emptyText}</p>
+        {pages && pages.length > 0 && (
+          <div className="mt-4">
+            <div className="text-[1.25rem] font-bold">Your pages</div>
+            <PageThumbnails pages={pages} />
+          </div>
+        )}
       </div>
     );
   }
@@ -94,7 +113,7 @@ export default function ComparisonPanel({ data }: { data: Analysis | null }) {
         <StudentSecondReading student={data.student} />
       </Section>
       <Section title="Your pages" defaultOpen={true}>
-        <PageThumbnails />
+        <PageThumbnails pages={pages} />
       </Section>
     </div>
   );
