@@ -1,18 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import PhotoDropzone, { type DroppedPhoto } from "@/components/create/PhotoDropzone";
+import PhotoDropzone from "@/components/create/PhotoDropzone";
+import PageThumbnails from "@/components/comparison/PageThumbnails";
+import { MAX_ATTEMPT_PAGES, type PageImage } from "@/lib/pages";
 
 const STEPS = [
   "Assume you will get it wrong. Mark the phrases and write what each suggests.",
   "Say what it is about, define the objects, list two or three methods with the phrase that triggered each.",
-  "Attempt it. Then photograph the pages, one page per photo, and drop them here.",
+  "Attempt it. Then photograph the pages — or drop a PDF export of them — here.",
 ];
 
 const NUMERALS = ["(i)", "(ii)", "(iii)"];
 
-export default function AttemptSection() {
-  const [photos, setPhotos] = useState<DroppedPhoto[]>([]);
+export default function AttemptSection({
+  pages,
+  onPages,
+}: {
+  pages: PageImage[];
+  onPages: (pages: PageImage[]) => void;
+}) {
+  function remove(id: string) {
+    onPages(pages.filter((p) => p.id !== id));
+  }
+
+  function move(id: string, dir: -1 | 1) {
+    const from = pages.findIndex((p) => p.id === id);
+    const to = from + dir;
+    if (from < 0 || to < 0 || to >= pages.length) return;
+    const next = [...pages];
+    [next[from], next[to]] = [next[to], next[from]];
+    onPages(next);
+  }
+
   return (
     <div className="relative mb-[30px] rounded-[0.625rem] border-2 border-dashed border-ink/40 p-6">
       <div
@@ -37,18 +56,22 @@ export default function AttemptSection() {
       </div>
       <div className="mt-[18px]">
         <PhotoDropzone
-          photos={photos}
-          onPhotos={setPhotos}
-          max={6}
+          pages={pages}
+          onPages={onPages}
+          max={MAX_ATTEMPT_PAGES}
           emptyLabel={
             <>
-              Drop photos here, or{" "}
-              <span className="underline">choose files</span> · up to 6 pages
+              Drop photos or a PDF here, or{" "}
+              <span className="underline">choose files</span> · up to{" "}
+              {MAX_ATTEMPT_PAGES} pages
             </>
           }
         />
+        <PageThumbnails pages={pages} onRemove={remove} onMove={move} />
         <p className="mt-2 text-center text-[0.9375rem] text-muted">
-          Photos stay on this page for now.
+          {pages.length > 0
+            ? "Keep only this problem's pages, in reading order — remove the rest."
+            : "Pages are sent only when you submit your attempt."}
         </p>
       </div>
     </div>

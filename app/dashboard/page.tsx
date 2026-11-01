@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Analysis } from "@/lib/schema";
+import type { PageImage } from "@/lib/pages";
 import {
   LAST_VIEW_KEY,
   loadLibrary,
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [stored, setStored] = useState<StoredProblem | null>(null);
   const [label, setLabel] = useState<string>("");
   const [actionStatus, setActionStatus] = useState<string | null>(null);
+  const [pages, setPages] = useState<PageImage[]>([]);
 
   function rememberView(problemId: string | null) {
     try {
@@ -60,6 +62,7 @@ export default function Dashboard() {
     setData(null);
     setStatus(null);
     setActionStatus(null);
+    setPages([]);
     if (!problemId) {
       setStored(null);
       rememberView(null);
@@ -153,7 +156,7 @@ export default function Dashboard() {
                 </p>
               ) : (
                 <>
-                  <AttemptSection />
+                  <AttemptSection pages={pages} onPages={setPages} />
                   <Pill
                     variant="primary"
                     onClick={submitAttempt}

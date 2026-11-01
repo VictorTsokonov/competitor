@@ -1,48 +1,46 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { filesToPages, type PageImage } from "@/lib/pages";
 
-export type DroppedPhoto = { url: string; name: string };
-
+// Drop target + file input. Converts every drop (photos, HEIC, multi-page
+// PDFs) into ordered JPEG pages via lib/pages.ts; the parent renders the
+// resulting pages with PageThumbnails and owns reorder/remove.
 export default function PhotoDropzone({
-  photos,
-  onPhotos,
+  pages,
+  onPages,
   max,
   emptyLabel,
 }: {
-  photos: DroppedPhoto[];
-  onPhotos: (photos: DroppedPhoto[]) => void;
+  pages: PageImage[];
+  onPages: (pages: PageImage[]) => void;
   max: number;
   emptyLabel: React.ReactNode;
 }) {
   const [dragging, setDragging] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [notes, setNotes] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const urls = useRef<string[]>([]);
 
-  useEffect(() => {
-    const seen = urls.current;
-    return () => {
-      for (const url of seen) URL.revokeObjectURL(url);
-    };
-  }, []);
-
-  function add(files: Iterable<File | undefined>) {
-    const fresh: DroppedPhoto[] = [];
-    for (const file of files) {
-      if (!file || !file.type.startsWith("image/")) continue;
-      const url = URL.createObjectURL(file);
-      urls.current.push(url);
-      fresh.push({ url, name: file.name });
+  async function add(files: Iterable<File | undefined>) {
+    if (busy) return;
+    setNotes([]);
+    setBusy("Reading…");
+    try {
+      const { pages: fresh, errors } = await filesToPages(files, setBusy);
+      const kept = [...pages, ...fresh].slice(0, max);
+      const dropped = pages.length + fresh.length - max;
+      const allNotes = [...errors];
+      if (dropped > 0) {
+        allNotes.push(
+          `Only the first ${max} pages are kept — remove pages that aren't part of this problem.`
+        );
+      }
+      setNotes(allNotes);
+      if (fresh.length > 0) onPages(kept);
+    } finally {
+      setBusy(null);
     }
-    if (fresh.length === 0) return;
-    const merged = [...photos, ...fresh].slice(0, max);
-    setNote(
-      photos.length + fresh.length > max
-        ? `Only the first ${max} pages are kept.`
-        : null
-    );
-    onPhotos(merged);
   }
 
   return (
@@ -58,44 +56,44 @@ export default function PhotoDropzone({
         onDrop={(e) => {
           e.preventDefault();
           setDragging(false);
-          add(e.dataTransfer.files);
+          void add(e.dataTransfer.files);
         }}
         className={`w-full cursor-pointer rounded-[0.625rem] border-2 border-dashed bg-card/60 px-6 py-[26px] text-center text-[1.125rem] text-muted ${
           dragging ? "border-accent" : "border-ink/40"
         }`}
       >
-        {photos.length === 0 ? (
+        {busy ? (
+          busy
+        ) : pages.length === 0 ? (
           emptyLabel
         ) : (
-          <span className="flex flex-wrap items-center justify-center gap-3">
-            {photos.map((p) => (
-              <img
-                key={p.url}
-                src={p.url}
-                alt={p.name}
-                className="h-24 w-auto rounded-md bg-card shadow-[2px_3px_0_rgba(43,38,34,0.12)]"
-              />
-            ))}
-          </span>
+          <>
+            {pages.length} page{pages.length === 1 ? "" : "s"} ready — drop
+            more, or <span className="underline">choose files</span>
+          </>
         )}
       </button>
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,.heic,.heif,application/pdf,.pdf"
         multiple={max > 1}
-        aria-label="Choose photo files"
+        aria-label="Choose photo or PDF files"
         className="sr-only"
         onChange={(e) => {
-          add(e.target.files ?? []);
+          void add(e.target.files ?? []);
           e.target.value = "";
         }}
       />
-      {note && (
-        <p role="status" className="mt-2 text-center text-[0.9375rem] text-muted">
+      {notes.map((note) => (
+        <p
+          key={note}
+          role="status"
+          className="mt-2 text-center text-[0.9375rem] text-muted"
+        >
           {note}
         </p>
-      )}
+      ))}
     </div>
   );
 }

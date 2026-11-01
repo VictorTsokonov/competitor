@@ -6,7 +6,9 @@ import Pill from "@/components/ui/Pill";
 import LatexEditor from "@/components/latex/LatexEditor";
 import LatexPreview from "@/components/latex/LatexPreview";
 import AttemptSection from "@/components/create/AttemptSection";
-import PhotoDropzone, { type DroppedPhoto } from "@/components/create/PhotoDropzone";
+import PhotoDropzone from "@/components/create/PhotoDropzone";
+import PageThumbnails from "@/components/comparison/PageThumbnails";
+import type { PageImage } from "@/lib/pages";
 import {
   createProblem,
   loadLibrary,
@@ -40,7 +42,8 @@ export default function CreateProblemForm({
   const [mode, setMode] = useState<"write" | "photo">("write");
   const [name, setName] = useState("");
   const [latex, setLatex] = useState("");
-  const [photos, setPhotos] = useState<DroppedPhoto[]>([]);
+  const [photos, setPhotos] = useState<PageImage[]>([]);
+  const [attemptPages, setAttemptPages] = useState<PageImage[]>([]);
   const [status, setStatus] = useState<string | null>(null);
 
   function persist(): string | null {
@@ -146,8 +149,8 @@ export default function CreateProblemForm({
       ) : (
         <div className="mb-[30px]">
           <PhotoDropzone
-            photos={photos}
-            onPhotos={setPhotos}
+            pages={photos}
+            onPages={setPhotos}
             max={1}
             emptyLabel={
               <>
@@ -156,6 +159,10 @@ export default function CreateProblemForm({
               </>
             }
           />
+          <PageThumbnails
+            pages={photos}
+            onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
+          />
           <p className="mt-2 text-[0.9375rem] text-muted">
             Automatic reading isn’t wired yet — type the problem in Write
             mode to save it. The photo stays on this page only.
@@ -163,7 +170,7 @@ export default function CreateProblemForm({
         </div>
       )}
 
-      <AttemptSection />
+      <AttemptSection pages={attemptPages} onPages={setAttemptPages} />
 
       <div className="flex flex-wrap items-center gap-3">
         <Pill variant="primary" onClick={saveAndAnalyse}>
