@@ -1,8 +1,15 @@
-import type { Analysis, Solution } from "./schema";
+import type {
+  Analysis,
+  AttemptReport,
+  Chain,
+  Comparison,
+  Solution,
+} from "./schema";
 import type { AnalysisInput, AttemptInput, AttemptResult } from "./providers/types";
-import { fetchMockAnalysis, fetchMockAttempt } from "./providers/mock";
+import { fetchMockAnalysis, fetchMockAttempt, fetchMockComparison } from "./providers/mock";
 import { fetchMetaAnalysis, fetchMetaAttempt } from "./providers/meta";
 import { runSolve } from "./providers/meta/solve";
+import { runExplain } from "./providers/meta/explain";
 import { readPages } from "./providers/meta/vision";
 
 export type { AnalysisInput, AttemptInput, AttemptResult } from "./providers/types";
@@ -24,6 +31,19 @@ export async function fetchAnalysis(input: AnalysisInput): Promise<Analysis> {
 export async function fetchAttempt(input: AttemptInput): Promise<AttemptResult> {
   if (process.env.USE_MOCK === "true") return fetchMockAttempt(input);
   return fetchMetaAttempt(input);
+}
+
+// The explain call. Mock mode serves the bundled hand-written comparison.
+export async function fetchExplanation(input: {
+  problemText: string;
+  problemId?: string;
+  expert: Chain;
+  student: Chain;
+  report?: AttemptReport;
+  solution?: Solution | null;
+}): Promise<Comparison> {
+  if (process.env.USE_MOCK === "true") return fetchMockComparison(input.problemId);
+  return (await runExplain(input)).data;
 }
 
 export async function fetchStatementText(pages: string[]): Promise<{ text: string }> {

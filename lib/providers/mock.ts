@@ -23,6 +23,12 @@ export async function fetchMockAnalysis(
   return bundledAnalysis(input.problemId);
 }
 
+export async function fetchMockComparison(
+  problemId: string | undefined
+): Promise<Analysis["comparison"]> {
+  return bundledAnalysis(problemId).comparison;
+}
+
 // The dummies were written as guide-following students, so the mock
 // attempt is their student chain with a clean structure report.
 export async function fetchMockAttempt(

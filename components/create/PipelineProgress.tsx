@@ -2,21 +2,28 @@
 
 import { useEffect, useState } from "react";
 import Pill from "@/components/ui/Pill";
-import type { Stage } from "@/lib/useAnalysisJob";
+import type { JobStageKey, Stage } from "@/lib/useAnalysisJob";
 
 export type PipelineView = {
   startedAt: number;
   stages: {
-    key: "transcribe" | "expert" | "attempt";
+    key: JobStageKey;
     label: string;
     stage: Stage;
     onRetry?: () => void;
   }[];
 };
 
-// Measured on the fixtures (1 Nov): statement read ~15s, expert pass
-// ~35s, attempt read ~30s; expert and attempt run in parallel.
-const ESTIMATE_S = { transcribe: 15, expert: 35, attempt: 30 } as const;
+// Measured on the fixtures (1 Nov): statement read ~15s, solve+verify
+// ~30-170s, expert pass with second reading ~50s, attempt read ~30s,
+// feedback ~25s; expert and attempt run in parallel, after the solve.
+const ESTIMATE_S = {
+  transcribe: 15,
+  solve: 75,
+  expert: 50,
+  attempt: 30,
+  explain: 25,
+} as const;
 
 function estimateSeconds(view: PipelineView): number {
   const open = (key: keyof typeof ESTIMATE_S) =>
@@ -25,7 +32,9 @@ function estimateSeconds(view: PipelineView): number {
     );
   return (
     (open("transcribe") ? ESTIMATE_S.transcribe : 0) +
-    Math.max(open("expert") ? ESTIMATE_S.expert : 0, open("attempt") ? ESTIMATE_S.attempt : 0)
+    (open("solve") ? ESTIMATE_S.solve : 0) +
+    Math.max(open("expert") ? ESTIMATE_S.expert : 0, open("attempt") ? ESTIMATE_S.attempt : 0) +
+    (open("explain") ? ESTIMATE_S.explain : 0)
   );
 }
 

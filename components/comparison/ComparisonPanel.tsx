@@ -48,9 +48,14 @@ function Section({
 export default function ComparisonPanel({
   data,
   pages,
+  explain,
 }: {
   data: Analysis | null;
   pages?: PageImage[];
+  // The explain stage's live state, while a job runs: the panel shows
+  // the TypeScript comparison first and this line says the upgrade is
+  // coming (or failed, with a retry).
+  explain?: { phase: string; message?: string; onRetry: () => void };
 }) {
   if (!data || data.student.spans.length === 0) {
     const emptyText = !data
@@ -90,6 +95,23 @@ export default function ComparisonPanel({
           ? "The expert reading is grounded in a route the expert solved and verified on a small case. The solution itself stays private."
           : "The expert reading is a plausible narrative, not a trace of the model's thinking."}
       </p>
+      {(explain?.phase === "running" || explain?.phase === "pending") && (
+        <p role="status" className="mt-2 text-[0.9375rem] text-muted">
+          Writing your feedback…
+        </p>
+      )}
+      {explain?.phase === "error" && (
+        <p className="mt-2 text-[0.9375rem] text-muted">
+          The feedback pass failed: {explain.message}{" "}
+          <button
+            type="button"
+            onClick={explain.onRetry}
+            className="cursor-pointer underline"
+          >
+            Try again
+          </button>
+        </p>
+      )}
       {data.comparison.where_you_are && (
         <p className="mt-3 text-[1.0625rem]">
           <RichTex tex={data.comparison.where_you_are} />

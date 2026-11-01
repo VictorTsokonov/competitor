@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Analysis } from "@/lib/schema";
+import type { Analysis, Comparison } from "@/lib/schema";
 import type { PageImage } from "@/lib/pages";
 import { loadCachedAnalysis, saveCachedAnalysis } from "@/lib/analysisCache";
 import {
@@ -9,6 +9,7 @@ import {
   useAnalysisJob,
   type AnalysisJob,
   type AttemptOutcome,
+  type JobStageKey,
 } from "@/lib/useAnalysisJob";
 import {
   createProblem,
@@ -39,30 +40,23 @@ import { RichTex } from "@/components/reading/Tex";
 
 function pipelineView(
   job: AnalysisJob,
-  retryStage: (key: "transcribe" | "expert" | "attempt") => void
+  retryStage: (key: JobStageKey) => void
 ): PipelineView {
   const pages = job.attemptPages.length;
+  const stage = (key: JobStageKey, label: string) => ({
+    key,
+    label,
+    stage: job[key],
+    onRetry: () => retryStage(key),
+  });
   return {
     startedAt: job.startedAt,
     stages: [
-      {
-        key: "transcribe",
-        label: "Reading the problem from your screenshot",
-        stage: job.transcribe,
-        onRetry: () => retryStage("transcribe"),
-      },
-      {
-        key: "expert",
-        label: "Expert is reading the problem",
-        stage: job.expert,
-        onRetry: () => retryStage("expert"),
-      },
-      {
-        key: "attempt",
-        label: `Reading your attempt (${pages} page${pages === 1 ? "" : "s"})`,
-        stage: job.attempt,
-        onRetry: () => retryStage("attempt"),
-      },
+      stage("transcribe", "Reading the problem from your screenshot"),
+      stage("solve", "Expert is solving the problem — kept private, it grounds the reading"),
+      stage("expert", "Expert is reading the problem"),
+      stage("attempt", `Reading your attempt (${pages} page${pages === 1 ? "" : "s"})`),
+      stage("explain", "Writing your feedback"),
     ],
   };
 }
@@ -75,6 +69,7 @@ export default function Dashboard() {
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [pages, setPages] = useState<PageImage[]>([]);
   const [attempt, setAttempt] = useState<AttemptOutcome | null>(null);
+  const [explained, setExplained] = useState<Comparison | null>(null);
   // Workflow "create and solve later": the id whose progress card replaces
   // the creation form until dismissed.
   const [creationCard, setCreationCard] = useState<string | null>(null);
@@ -89,6 +84,9 @@ export default function Dashboard() {
     },
     onAttempt: (problemId, outcome) => {
       if (selectedIdRef.current === problemId) setAttempt(outcome);
+    },
+    onExplain: (problemId, comparison) => {
+      if (selectedIdRef.current === problemId) setExplained(comparison);
     },
     onAnalysed: (problemId) => {
       setStored((prev) =>
@@ -125,6 +123,7 @@ export default function Dashboard() {
       setStored(null);
       setData(null);
       setAttempt(null);
+      setExplained(null);
       setPages([]);
       rememberView(null);
       return;
@@ -140,6 +139,7 @@ export default function Dashboard() {
     const isJobProblem = job?.problemId === problemId && r.problemId === problemId;
     setData(isJobProblem ? (r.expert ?? null) : null);
     setAttempt(isJobProblem ? (r.attempt ?? null) : null);
+    setExplained(isJobProblem ? (r.explain ?? null) : null);
     setPages(isJobProblem && job ? job.attemptPages : []);
     if (isJobProblem) return;
     // Analysed problems ship or persist with a reading: the cache first (it
@@ -184,6 +184,7 @@ export default function Dashboard() {
       rememberView(problem.id);
       setData(null);
       setAttempt(null);
+      setExplained(null);
       setStatus(null);
       setActionStatus(null);
       setPages(req.attemptPages);
@@ -224,11 +225,12 @@ export default function Dashboard() {
     startJob(stored, [], pages, true);
   }
 
-  // What the page renders: the expert analysis, with this session's
-  // extracted student reading and the TypeScript comparison merged in.
+  // What the page renders: the expert analysis with this session's
+  // student reading merged in — the explain call's feedback once it has
+  // landed, the TypeScript comparison until then.
   const analysis: Analysis | null = useMemo(
-    () => (data && attempt ? mergeAnalysis(data, attempt) : data),
-    [data, attempt]
+    () => (data && attempt ? mergeAnalysis(data, attempt, explained ?? undefined) : data),
+    [data, attempt, explained]
   );
   const expert = analysis?.expert;
 
@@ -264,7 +266,19 @@ export default function Dashboard() {
       }
       right={
         analysis || stored ? (
-          <ComparisonPanel data={analysis} pages={pages} />
+          <ComparisonPanel
+            data={analysis}
+            pages={pages}
+            explain={
+              jobForStored
+                ? {
+                    phase: jobForStored.explain.phase,
+                    message: jobForStored.explain.message,
+                    onRetry: () => retryStage("explain"),
+                  }
+                : undefined
+            }
+          />
         ) : (
           <LatexReference />
         )
