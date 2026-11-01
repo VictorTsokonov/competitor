@@ -95,6 +95,24 @@ export const SecondReadingSchema = z.object({
 
 export const DomainSchema = z.enum(["maths", "not_maths"]);
 
+// Call S: the expert's private solution. Never rendered anywhere — it
+// exists to ground call A's reading and the feedback in a route that was
+// actually checked (the small case is recomputed by a sceptical second
+// pass; `verified` records its verdict, set in code, never by the solver).
+export const SolutionSchema = z.object({
+  route: z.string().min(1),
+  key_steps: z.array(z.string().min(1)).min(1),
+  final_line: z.string().min(1),
+  small_case: z.object({
+    instance: z.string().min(1),
+    worked: z.string().min(1),
+    confirms: z.string().min(1),
+  }),
+  verified: z.boolean(),
+  verification_notes: z.array(z.string()),
+});
+export type Solution = z.infer<typeof SolutionSchema>;
+
 export const ChainSchema = z
   .object({
     problem: ProblemSchema,
@@ -196,6 +214,9 @@ export const AnalysisSchema = z
     // Present once a real attempt has been extracted (call C); absent on
     // expert-only analyses and the hand-written dummies.
     attempt_report: AttemptReportSchema.optional(),
+    // Call S's private grounding. Carried so resubmits and the feedback
+    // call can use it without re-solving; never rendered anywhere.
+    solution: SolutionSchema.optional(),
   })
   .superRefine((val, ctx) => {
     (["expert", "student"] as const).forEach((side) => {
