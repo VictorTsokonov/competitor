@@ -1,7 +1,7 @@
 import type { Chain } from "../../schema";
 
 // Call A system prompt. The worked example is the expert chain from
-// lib/dummy/icmc-2020-p1.json with arrays trimmed so the whole prompt
+// lib/dummy/icmc-2019-p1.json with arrays trimmed so the whole prompt
 // stays under ~4k tokens; the full dummy files are the quality target.
 const EXAMPLE: Chain = {
   problem: {

@@ -1,6 +1,6 @@
 // Run call A (expert pass) from the terminal, to tune the prompt without
 // clicking through the UI:
-//   npx tsx scripts/expert-pass.ts icmc-2020-p1
+//   npx tsx scripts/expert-pass.ts icmc-2019-p1
 //   npx tsx scripts/expert-pass.ts path/to/problem.txt
 // Prints the validated chain JSON, then a short report.
 

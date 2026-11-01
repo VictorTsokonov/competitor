@@ -44,8 +44,8 @@ const EMPTY: LibraryState = { problems: [], folders: [] };
 // analysis itself still comes from /api/analyse).
 const SEED_VERSION = 2;
 
-// Statement mirrors problem.text in lib/dummy/icmc-2020-p1.json.
-const ICMC_2020_P1_TEXT = [
+// Statement mirrors problem.text in lib/dummy/icmc-2019-p1.json.
+const ICMC_2019_P1_TEXT = [
   "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:",
   "- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.",
   "- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.",
@@ -53,7 +53,7 @@ const ICMC_2020_P1_TEXT = [
   "(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
 ].join("\n");
 
-const ICMC_2020_P2_LATEX =
+const ICMC_2019_P2_LATEX =
   "Find integers $a$ and $b$ such that $$a^b = 3^0\\binom{2020}{0} - 3^1\\binom{2020}{2} + 3^2\\binom{2020}{4} - \\cdots + 3^{1010}\\binom{2020}{2020}.$$";
 
 const ICMC_2020_P6_LATEX =
@@ -65,10 +65,10 @@ const SEED_PROBLEMS: { introducedIn: number; problem: StoredProblem }[] = [
   {
     introducedIn: 1,
     problem: {
-      id: "seed-icmc-2020-p1",
+      id: "seed-icmc-2019-p1",
       name: "Problem 1",
-      latex: ICMC_2020_P1_TEXT,
-      folderId: "seed-icmc-2020",
+      latex: ICMC_2019_P1_TEXT,
+      folderId: "seed-icmc-2019",
       createdAt: 0,
       state: "analysed",
     },
@@ -76,10 +76,10 @@ const SEED_PROBLEMS: { introducedIn: number; problem: StoredProblem }[] = [
   {
     introducedIn: 2,
     problem: {
-      id: "seed-icmc-2020-p2",
+      id: "seed-icmc-2019-p2",
       name: "Problem 2",
-      latex: ICMC_2020_P2_LATEX,
-      folderId: "seed-icmc-2020",
+      latex: ICMC_2019_P2_LATEX,
+      folderId: "seed-icmc-2019",
       createdAt: 0,
       state: "analysed",
     },
@@ -126,7 +126,35 @@ function uid(): string {
 }
 
 export function loadLibrary(storage: KeyValueStorage): LibraryState {
-  return seedArchive(storage, readLibrary(storage));
+  return seedArchive(storage, migrateSeedIds(readLibrary(storage)));
+}
+
+// The sphere and binomial problems were first seeded mislabelled as ICMC
+// 2020 P1/P2; they are ICMC 2019 P1/P2. Saved libraries may still hold the
+// old ids, so rename on read (idempotent; persisted on the next save) and
+// re-home problems the user left in the 2020 folder.
+const RENAMED_SEED_IDS: Record<string, string> = {
+  "seed-icmc-2020-p1": "seed-icmc-2019-p1",
+  "seed-icmc-2020-p2": "seed-icmc-2019-p2",
+};
+
+function migrateSeedIds(state: LibraryState): LibraryState {
+  if (!state.problems.some((p) => p.id in RENAMED_SEED_IDS)) return state;
+  const has2019 = state.folders.some((f) => f.id === "seed-icmc-2019");
+  return {
+    ...state,
+    problems: state.problems.map((p) => {
+      const renamed = RENAMED_SEED_IDS[p.id];
+      if (!renamed) return p;
+      const folderId =
+        p.folderId === "seed-icmc-2020"
+          ? has2019
+            ? "seed-icmc-2019"
+            : null
+          : p.folderId;
+      return { ...p, id: renamed, folderId };
+    }),
+  };
 }
 
 // Missing state (libraries saved before states existed) defaults to
