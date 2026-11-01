@@ -1,41 +1,71 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import type { Analysis, AttemptReport, Chain } from "@/lib/schema";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Analysis } from "@/lib/schema";
 import type { PageImage } from "@/lib/pages";
 import { loadCachedAnalysis, saveCachedAnalysis } from "@/lib/analysisCache";
-import { compareChains } from "@/lib/compare";
 import {
+  mergeAnalysis,
+  useAnalysisJob,
+  type AnalysisJob,
+  type AttemptOutcome,
+} from "@/lib/useAnalysisJob";
+import {
+  createProblem,
   LAST_VIEW_KEY,
   loadLibrary,
   problemLabel,
   saveLibrary,
   SELECT_INTENT_KEY,
-  setProblemState,
   type StoredProblem,
 } from "@/lib/problems";
 import AppShell from "@/components/layout/AppShell";
 import Pill from "@/components/ui/Pill";
 import ComparisonPanel from "@/components/comparison/ComparisonPanel";
-import CreateProblemForm from "@/components/create/CreateProblemForm";
+import CreateProblemForm, {
+  type CreateRequest,
+} from "@/components/create/CreateProblemForm";
 import AttemptSection from "@/components/create/AttemptSection";
+import PipelineProgress, {
+  type PipelineView,
+} from "@/components/create/PipelineProgress";
 import LatexReference from "@/components/latex/LatexReference";
 import ProblemReading from "@/components/reading/ProblemReading";
 import AttemptNotice, {
   type AttemptCallState,
 } from "@/components/reading/AttemptNotice";
-import StageSection from "@/components/reading/StageSection";
-import Reading from "@/components/reading/Reading";
-import Goal from "@/components/reading/Goal";
-import InformalCues from "@/components/reading/InformalCues";
-import Abstraction from "@/components/reading/Abstraction";
-import Simplification from "@/components/reading/Simplification";
-import Method from "@/components/reading/Method";
-import Prerequisites from "@/components/reading/Prerequisites";
-import SecondReading from "@/components/reading/SecondReading";
+import ExpertStages from "@/components/reading/ExpertStages";
 import { RichTex } from "@/components/reading/Tex";
 
-type AttemptOutcome = { student: Chain; report: AttemptReport };
+function pipelineView(
+  job: AnalysisJob,
+  retryStage: (key: "transcribe" | "expert" | "attempt") => void
+): PipelineView {
+  const pages = job.attemptPages.length;
+  return {
+    startedAt: job.startedAt,
+    stages: [
+      {
+        key: "transcribe",
+        label: "Reading the problem from your screenshot",
+        stage: job.transcribe,
+        onRetry: () => retryStage("transcribe"),
+      },
+      {
+        key: "expert",
+        label: "Expert is reading the problem",
+        stage: job.expert,
+        onRetry: () => retryStage("expert"),
+      },
+      {
+        key: "attempt",
+        label: `Reading your attempt (${pages} page${pages === 1 ? "" : "s"})`,
+        stage: job.attempt,
+        onRetry: () => retryStage("attempt"),
+      },
+    ],
+  };
+}
 
 export default function Dashboard() {
   const [data, setData] = useState<Analysis | null>(null);
@@ -45,8 +75,26 @@ export default function Dashboard() {
   const [actionStatus, setActionStatus] = useState<string | null>(null);
   const [pages, setPages] = useState<PageImage[]>([]);
   const [attempt, setAttempt] = useState<AttemptOutcome | null>(null);
-  const [attemptState, setAttemptState] = useState<AttemptCallState>({
-    phase: "idle",
+  // Workflow "create and solve later": the id whose progress card replaces
+  // the creation form until dismissed.
+  const [creationCard, setCreationCard] = useState<string | null>(null);
+  const selectedIdRef = useRef<string | null>(null);
+
+  const { job, jobActive, startJob, retryStage, results } = useAnalysisJob({
+    onStatement: (problem) => {
+      if (selectedIdRef.current === problem.id) setStored(problem);
+    },
+    onExpert: (problemId, analysis) => {
+      if (selectedIdRef.current === problemId) setData(analysis);
+    },
+    onAttempt: (problemId, outcome) => {
+      if (selectedIdRef.current === problemId) setAttempt(outcome);
+    },
+    onAnalysed: (problemId) => {
+      setStored((prev) =>
+        prev && prev.id === problemId ? { ...prev, state: "analysed" } : prev
+      );
+    },
   });
 
   function rememberView(problemId: string | null) {
@@ -69,36 +117,15 @@ export default function Dashboard() {
     });
   }
 
-  // Call C: the pages go to /api/read and come back as the student's chain
-  // plus the structure report, independent of the expert pass.
-  function requestAttempt(
-    problem: StoredProblem,
-    pageList: PageImage[]
-  ): Promise<AttemptOutcome> {
-    return fetch("/api/read", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        purpose: "attempt",
-        problemId: problem.id,
-        problemText: problem.latex,
-        pages: pageList.map((p) => p.dataUrl),
-      }),
-    }).then(async (res) => {
-      if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
-      return res.json() as Promise<AttemptOutcome>;
-    });
-  }
-
   function select(problemId?: string) {
-    setData(null);
+    selectedIdRef.current = problemId ?? null;
     setStatus(null);
     setActionStatus(null);
-    setPages([]);
-    setAttempt(null);
-    setAttemptState({ phase: "idle" });
     if (!problemId) {
       setStored(null);
+      setData(null);
+      setAttempt(null);
+      setPages([]);
       rememberView(null);
       return;
     }
@@ -107,6 +134,14 @@ export default function Dashboard() {
     setStored(problem);
     setLabel(problem ? problemLabel(lib, problem) : "");
     rememberView(problem?.id ?? null);
+    // Returning to the problem a job is running on restores what already
+    // landed; any other selection starts clean.
+    const r = results.current;
+    const isJobProblem = job?.problemId === problemId && r.problemId === problemId;
+    setData(isJobProblem ? (r.expert ?? null) : null);
+    setAttempt(isJobProblem ? (r.attempt ?? null) : null);
+    setPages(isJobProblem && job ? job.attemptPages : []);
+    if (isJobProblem) return;
     // Analysed problems ship or persist with a reading: the cache first (it
     // holds the merged student reading and skips re-running call A), then
     // the API for bundled problems or a cleared cache.
@@ -127,9 +162,39 @@ export default function Dashboard() {
     }
   }
 
-  function handleCreated(id: string) {
+  // Both creation workflows: the problem exists in the library at once
+  // (a photographed one in state "creating" until its transcription
+  // lands); "submit" redirects to it and runs the full pipeline, "later"
+  // stays on a progress card and only transcribes.
+  function handleCreate(req: CreateRequest) {
+    if (jobActive) return;
+    const lib = loadLibrary(localStorage);
+    const created = createProblem(lib, {
+      name: req.name,
+      latex: req.writtenText ?? "",
+      state: req.writtenText ? "unsolved" : "creating",
+    });
+    saveLibrary(localStorage, created.state);
     window.dispatchEvent(new Event("competitor:library-changed"));
-    select(id);
+    const problem = created.problem;
+    if (req.mode === "submit") {
+      selectedIdRef.current = problem.id;
+      setStored(problem);
+      setLabel(problemLabel(created.state, problem));
+      rememberView(problem.id);
+      setData(null);
+      setAttempt(null);
+      setStatus(null);
+      setActionStatus(null);
+      setPages(req.attemptPages);
+      setCreationCard(null);
+      startJob(problem, req.statementPages, req.attemptPages, true);
+    } else {
+      setCreationCard(problem.id);
+      if (req.statementPages.length > 0) {
+        startJob(problem, req.statementPages, [], false);
+      }
+    }
   }
 
   // Selection intent handed off from /createProblem wins; otherwise the
@@ -149,73 +214,36 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function runAttempt(problem: StoredProblem, pageList: PageImage[]) {
-    setAttemptState({ phase: "loading", pageCount: pageList.length });
-    requestAttempt(problem, pageList)
-      .then((r) => {
-        setAttempt(r);
-        setAttemptState({ phase: "idle" });
-      })
-      .catch((e: Error) => setAttemptState({ phase: "error", message: e.message }));
-  }
-
-  // Submit runs call A (skipped when cached) and call C in parallel, each
-  // with its own status and error; the reading renders as soon as the
-  // expert pass lands and the student underlines layer in after.
   function submitAttempt() {
-    if (!stored || attemptState.phase === "loading") return;
+    if (!stored || jobActive) return;
     if (pages.length === 0) {
       setActionStatus("Add at least one page of your attempt first.");
       return;
     }
-    const problem = stored;
-    setActionStatus("Running the expert pass…");
-    const cached = loadCachedAnalysis(localStorage, problem.id, problem.latex);
-    (cached ? Promise.resolve(cached) : requestAnalysis(problem))
-      .then((d) => {
-        setData(d);
-        setActionStatus(null);
-      })
-      .catch((e: Error) => setActionStatus(`Expert pass failed: ${e.message}`));
-    runAttempt(problem, pages);
+    setActionStatus(null);
+    startJob(stored, [], pages, true);
   }
 
   // What the page renders: the expert analysis, with this session's
-  // extracted student reading merged over its placeholder student chain
-  // and the comparison computed in TypeScript (lib/compare.ts).
+  // extracted student reading and the TypeScript comparison merged in.
   const analysis: Analysis | null = useMemo(
-    () =>
-      data && attempt
-        ? {
-            ...data,
-            student: attempt.student,
-            attempt_report: attempt.report,
-            comparison: compareChains(data.expert, attempt.student),
-          }
-        : data,
+    () => (data && attempt ? mergeAnalysis(data, attempt) : data),
     [data, attempt]
   );
-
-  // The problem counts as Analysed only once both calls landed; until then
-  // a reload returns to Unsolved with the expert pass cached, so a failed
-  // attempt read is resubmitted cheaply.
-  useEffect(() => {
-    if (!stored || !analysis || !attempt) return;
-    saveCachedAnalysis(localStorage, stored.id, analysis);
-    if (stored.state === "unsolved") {
-      const lib = setProblemState(loadLibrary(localStorage), stored.id, "analysed");
-      saveLibrary(localStorage, lib);
-      window.dispatchEvent(new Event("competitor:library-changed"));
-      setStored({ ...stored, state: "analysed" });
-    }
-  }, [analysis, attempt, stored]);
-
   const expert = analysis?.expert;
 
-  const retryAttempt =
-    stored && pages.length > 0
-      ? () => runAttempt(stored, pages)
-      : undefined;
+  const jobForStored = job && stored && job.problemId === stored.id ? job : null;
+  const jobForCard = job && creationCard === job.problemId ? job : null;
+  const cardReady = !jobForCard || jobForCard.transcribe.phase === "done";
+
+  // Call C's state for the notice under the reading, derived from the job.
+  const attemptCallState: AttemptCallState =
+    jobForStored?.attempt.phase === "running" ||
+    jobForStored?.attempt.phase === "pending"
+      ? { phase: "loading", pageCount: jobForStored.attemptPages.length }
+      : jobForStored?.attempt.phase === "error"
+        ? { phase: "error", message: jobForStored.attempt.message ?? "request failed" }
+        : { phase: "idle" };
 
   const comparing = !!(analysis || stored);
   return (
@@ -224,7 +252,13 @@ export default function Dashboard() {
       selectedProblemId={stored?.id}
       rightLabel={comparing ? "comparison" : "LaTeX reference"}
       leftFooter={
-        <Pill href="/createProblem" className="min-h-[42px] w-full text-[1.0625rem]">
+        <Pill
+          onClick={() => {
+            setCreationCard(null);
+            select(undefined);
+          }}
+          className="min-h-[42px] w-full text-[1.0625rem]"
+        >
           + New problem
         </Pill>
       }
@@ -237,83 +271,106 @@ export default function Dashboard() {
       }
       centre={
         <div className="mx-auto w-full max-w-[48rem] text-[1.1875rem] leading-[1.65]">
-          {stored && !analysis ? (
-            <div>
-              <h2 className="font-display text-[2.5rem] font-bold leading-none">
-                {stored.name}
-              </h2>
-              <div className="mb-[30px] mt-4">
-                <RichTex tex={stored.latex} />
+          {stored ? (
+            jobForStored && jobActive && !analysis ? (
+              <div>
+                <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                  {stored.name}
+                </h2>
+                {stored.latex && (
+                  <div className="mt-4">
+                    <RichTex tex={stored.latex} />
+                  </div>
+                )}
+                <PipelineProgress view={pipelineView(jobForStored, retryStage)} />
               </div>
-              {stored.state === "analysed" ? (
+            ) : analysis && expert ? (
+              <>
+                <ProblemReading
+                  data={analysis}
+                  label={label || stored.name}
+                />
+                <div className="mt-[26px]">
+                  <AttemptNotice
+                    state={attemptCallState}
+                    report={analysis.attempt_report}
+                  />
+                </div>
+                <ExpertStages expert={expert} />
+              </>
+            ) : stored.state === "creating" ? (
+              <div>
+                <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                  {stored.name}
+                </h2>
+                <p role="status" className="mt-4 text-[1.0625rem] text-muted">
+                  The statement never finished being read — the page was
+                  closed mid-creation. Delete this problem in the Sets panel
+                  and create it again.
+                </p>
+              </div>
+            ) : stored.state === "analysed" ? (
+              <div>
+                <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                  {stored.name}
+                </h2>
+                <div className="mb-[30px] mt-4">
+                  <RichTex tex={stored.latex} />
+                </div>
                 <p role="status" className="text-[1.0625rem] text-muted">
                   {status ?? "Loading analysis…"}
                 </p>
-              ) : (
-                <>
-                  <AttemptSection pages={pages} onPages={setPages} />
-                  <Pill
-                    variant="primary"
-                    onClick={submitAttempt}
-                    className="min-h-[42px] text-[1.0625rem]"
-                  >
-                    Submit attempt
-                  </Pill>
-                  {actionStatus && (
-                    <p role="status" className="mt-3 text-[1.0625rem] text-muted">
-                      {actionStatus}
-                    </p>
-                  )}
-                  <div className="mt-4">
-                    <AttemptNotice state={attemptState} onRetry={retryAttempt} />
-                  </div>
-                </>
-              )}
-            </div>
-          ) : analysis && expert ? (
-            <>
-              <ProblemReading
-                data={analysis}
-                label={label || stored?.name || ""}
-              />
-              <div className="mt-[26px]">
-                <AttemptNotice
-                  state={attemptState}
-                  report={analysis.attempt_report}
-                  onRetry={retryAttempt}
-                />
               </div>
-              <StageSection index="1" title="Reading" sourceKey="reading">
-                <Reading reading={expert.reading} spans={expert.spans} />
-              </StageSection>
-              <StageSection index="2" title="Goal" sourceKey="goal">
-                <Goal goal={expert.goal} />
-              </StageSection>
-              <StageSection index="3" title="Informal cues" sourceKey="informal">
-                <InformalCues
-                  informal_cues={expert.informal_cues}
-                  spans={expert.spans}
-                />
-              </StageSection>
-              <StageSection index="4" title="Abstraction" sourceKey="abstraction">
-                <Abstraction abstraction={expert.abstraction} />
-              </StageSection>
-              <StageSection index="5" title="Simplification" sourceKey="simplification">
-                <Simplification simplification={expert.simplification} />
-              </StageSection>
-              <StageSection index="6" title="Method" sourceKey="method">
-                <Method method={expert.method} spans={expert.spans} />
-              </StageSection>
-              <StageSection index="7" title="Prerequisites">
-                <Prerequisites prerequisites={expert.prerequisites} />
-              </StageSection>
-              <StageSection index="8" title="Second reading" sourceKey="second_reading">
-                <SecondReading
-                  second_reading={expert.second_reading}
-                  spans={expert.spans}
-                />
-              </StageSection>
-            </>
+            ) : (
+              <div>
+                <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                  {stored.name}
+                </h2>
+                <div className="mb-[30px] mt-4">
+                  <RichTex tex={stored.latex} />
+                </div>
+                <AttemptSection pages={pages} onPages={setPages} />
+                <Pill
+                  variant="primary"
+                  onClick={submitAttempt}
+                  className="min-h-[42px] text-[1.0625rem]"
+                >
+                  Submit attempt
+                </Pill>
+                {actionStatus && (
+                  <p role="status" className="mt-3 text-[1.0625rem] text-muted">
+                    {actionStatus}
+                  </p>
+                )}
+              </div>
+            )
+          ) : creationCard ? (
+            <div>
+              <h2 className="font-display text-[2.5rem] font-bold leading-none">
+                {cardReady ? "Problem ready" : "Problem creation in progress"}
+              </h2>
+              {jobForCard ? (
+                <PipelineProgress view={pipelineView(jobForCard, retryStage)} />
+              ) : (
+                <p className="mt-4 text-[1.0625rem] text-muted">
+                  Saved to Sets — find it in the left panel.
+                </p>
+              )}
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Pill
+                  variant="primary"
+                  onClick={() => {
+                    const id = creationCard;
+                    setCreationCard(null);
+                    select(id);
+                  }}
+                  className="min-h-[42px] text-[1.0625rem]"
+                >
+                  Go to problem
+                </Pill>
+                <Pill onClick={() => setCreationCard(null)}>New problem</Pill>
+              </div>
+            </div>
           ) : (
             <>
               {status && (
@@ -321,7 +378,7 @@ export default function Dashboard() {
                   {status}
                 </p>
               )}
-              <CreateProblemForm onSaved={handleCreated} />
+              <CreateProblemForm onCreate={handleCreate} busy={jobActive} />
             </>
           )}
         </div>

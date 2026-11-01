@@ -49,7 +49,14 @@ export default function ProblemRow({
         />
       ) : (
         <>
-          <span className="min-w-0 flex-1 truncate">{problem.name}</span>
+          <span
+            className={`min-w-0 flex-1 truncate ${
+              problem.state === "creating" ? "italic text-muted" : ""
+            }`}
+          >
+            {problem.name}
+            {problem.state === "creating" && " …"}
+          </span>
           <span className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
             <ActionButton
               label={`Rename ${problem.name}`}

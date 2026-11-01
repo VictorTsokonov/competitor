@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Field from "@/components/ui/Field";
 import Pill from "@/components/ui/Pill";
 import LatexEditor from "@/components/latex/LatexEditor";
@@ -8,15 +8,23 @@ import LatexPreview from "@/components/latex/LatexPreview";
 import AttemptSection from "@/components/create/AttemptSection";
 import PhotoDropzone from "@/components/create/PhotoDropzone";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
-import type { PageImage } from "@/lib/pages";
-import {
-  createProblem,
-  loadLibrary,
-  saveLibrary,
-} from "@/lib/problems";
+import { filesToPages, MAX_ATTEMPT_PAGES, type PageImage } from "@/lib/pages";
 
 const STATEMENT_PLACEHOLDER =
   "Prove that among any $n+1$ distinct integers chosen from $\\{1, 2, \\dots, 2n\\}$, there are two that are coprime.";
+
+const MAX_STATEMENT_PAGES = 3;
+
+// What the dashboard needs to create the problem and run the pipeline:
+// the statement as typed text or as screenshot pages (transcribed as the
+// pipeline's first stage), and optionally the attempt pages.
+export type CreateRequest = {
+  name?: string;
+  writtenText?: string;
+  statementPages: PageImage[];
+  attemptPages: PageImage[];
+  mode: "submit" | "later";
+};
 
 function CameraIcon() {
   return (
@@ -35,9 +43,11 @@ function CameraIcon() {
 }
 
 export default function CreateProblemForm({
-  onSaved,
+  onCreate,
+  busy,
 }: {
-  onSaved: (id: string) => void;
+  onCreate: (req: CreateRequest) => void;
+  busy: boolean;
 }) {
   const [mode, setMode] = useState<"write" | "photo">("write");
   const [name, setName] = useState("");
@@ -45,58 +55,75 @@ export default function CreateProblemForm({
   const [photos, setPhotos] = useState<PageImage[]>([]);
   const [attemptPages, setAttemptPages] = useState<PageImage[]>([]);
   const [status, setStatus] = useState<string | null>(null);
-  const [transcribing, setTranscribing] = useState(false);
 
-  // The "statement" purpose of /api/read: the photo becomes editable
-  // text + $…$ LaTeX in Write mode, where the student checks it.
-  function transcribe() {
-    if (photos.length === 0 || transcribing) return;
-    setTranscribing(true);
-    setStatus(null);
-    fetch("/api/read", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        purpose: "statement",
-        pages: photos.map((p) => p.dataUrl),
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json()).error ?? "request failed");
-        return res.json() as Promise<{ text: string }>;
-      })
-      .then(({ text }) => {
-        setLatex(text);
-        setMode("write");
-        setStatus("Transcribed — check it against the photo before saving.");
-      })
-      .catch((e: Error) => setStatus(`Transcription failed: ${e.message}`))
-      .finally(() => setTranscribing(false));
-  }
-
-  function persist(): string | null {
-    if (!latex.trim()) {
-      setStatus("Write the problem first — there is nothing to save yet.");
-      return null;
+  // Pasted screenshots land in the problem field until it has a source,
+  // then in the attempt; clicking a dropzone first targets that field.
+  useEffect(() => {
+    function onPaste(e: ClipboardEvent) {
+      const files = Array.from(e.clipboardData?.files ?? []).filter((f) =>
+        f.type.startsWith("image/")
+      );
+      if (files.length === 0) return;
+      e.preventDefault();
+      const focused = (document.activeElement as HTMLElement | null)
+        ?.closest?.("[data-paste-target]")
+        ?.getAttribute("data-paste-target");
+      const hasStatement = latex.trim().length > 0 || photos.length > 0;
+      const dest =
+        focused === "problem" || focused === "attempt"
+          ? focused
+          : hasStatement
+            ? "attempt"
+            : "problem";
+      void filesToPages(files).then(({ pages, errors }) => {
+        if (pages.length > 0) {
+          if (dest === "problem") {
+            setMode("photo");
+            setPhotos((prev) => [...prev, ...pages].slice(0, MAX_STATEMENT_PAGES));
+          } else {
+            setAttemptPages((prev) =>
+              [...prev, ...pages].slice(0, MAX_ATTEMPT_PAGES)
+            );
+          }
+        }
+        setStatus(
+          errors.length > 0
+            ? errors.join(" ")
+            : `Pasted into the ${dest === "problem" ? "problem" : "attempt"} field.`
+        );
+      });
     }
-    const fresh = loadLibrary(localStorage);
-    const created = createProblem(fresh, {
-      name: name.trim() || undefined,
-      latex: latex.trim(),
-    });
-    saveLibrary(localStorage, created.state);
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [latex, photos.length]);
+
+  function create(createMode: "submit" | "later") {
+    if (busy) return;
+    const writtenText = latex.trim();
+    if (mode === "write" && !writtenText) {
+      setStatus(
+        "Write the problem first — or switch to Photograph it and drop a screenshot."
+      );
+      return;
+    }
+    if (mode === "photo" && photos.length === 0) {
+      setStatus("Drop a screenshot of the problem first.");
+      return;
+    }
+    if (createMode === "submit" && attemptPages.length === 0) {
+      setStatus(
+        "Add at least one page of your attempt — or use “Create problem and solve later”."
+      );
+      return;
+    }
     setStatus(null);
-    return created.problem.id;
-  }
-
-  function saveAndAnalyse() {
-    const id = persist();
-    if (id) onSaved(id);
-  }
-
-  function saveForLater() {
-    const id = persist();
-    if (id) setStatus("Saved to Sets — find it in the left panel.");
+    onCreate({
+      name: name.trim() || undefined,
+      writtenText: mode === "write" ? writtenText : undefined,
+      statementPages: mode === "photo" ? photos : [],
+      attemptPages,
+      mode: createMode,
+    });
   }
 
   return (
@@ -105,7 +132,8 @@ export default function CreateProblemForm({
         New problem
       </h1>
       <p className="mb-[26px] text-[1.1875rem] text-muted">
-        Paste the statement, or photograph it and we transcribe it into LaTeX.
+        Paste or write the statement — a screenshot is transcribed into LaTeX
+        for you — and add your attempt now or later.
       </p>
 
       <div className="mb-[26px] flex flex-wrap gap-[10px]" role="group" aria-label="Creation method">
@@ -175,14 +203,14 @@ export default function CreateProblemForm({
           </p>
         </div>
       ) : (
-        <div className="mb-[30px]">
+        <div className="mb-[30px]" data-paste-target="problem">
           <PhotoDropzone
             pages={photos}
             onPages={setPhotos}
-            max={1}
+            max={MAX_STATEMENT_PAGES}
             emptyLabel={
               <>
-                Drop a photo of the problem here, or{" "}
+                Drop or paste a screenshot of the problem here, or{" "}
                 <span className="underline">choose a file</span>
               </>
             }
@@ -193,31 +221,31 @@ export default function CreateProblemForm({
               onRemove={(id) => setPhotos(photos.filter((p) => p.id !== id))}
             />
           )}
-          {photos.length > 0 && (
-            <div className="mt-3">
-              <Pill onClick={transcribe} className="min-h-[38px] text-[1rem]">
-                {transcribing ? "Transcribing…" : "Transcribe into LaTeX"}
-              </Pill>
-            </div>
-          )}
           <p className="mt-2 text-[0.9375rem] text-muted">
-            The transcription opens in Write mode for you to check; the
-            photo itself stays on this page.
+            It is transcribed into LaTeX when you create the problem; you can
+            edit the statement afterwards if a symbol came out wrong.
           </p>
         </div>
       )}
 
-      <AttemptSection pages={attemptPages} onPages={setAttemptPages} />
+      <div data-paste-target="attempt">
+        <AttemptSection pages={attemptPages} onPages={setAttemptPages} />
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Pill variant="primary" onClick={saveAndAnalyse}>
-          Save and analyse
+        <Pill
+          variant="primary"
+          onClick={() => create("submit")}
+          className="min-h-[42px] text-[1.0625rem]"
+        >
+          {busy ? "Working…" : "Create problem and submit solution"}
         </Pill>
-        <Pill onClick={saveForLater}>Save for later</Pill>
-        <span className="ml-auto text-[0.9375rem] text-muted">
-          Analysis takes about a minute. Stages appear as they finish.
-        </span>
+        <Pill onClick={() => create("later")}>Create problem and solve later</Pill>
       </div>
+      <p className="mt-3 text-[0.9375rem] text-muted">
+        Analysis takes about a minute; each stage reports itself as it
+        finishes.
+      </p>
       {status && (
         <p role="status" className="mt-3 text-[1.0625rem] text-muted">
           {status}

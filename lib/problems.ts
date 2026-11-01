@@ -7,9 +7,11 @@ export type ProblemFolder = {
   parentId: string | null;
 };
 
+// Creating: a photographed statement whose transcription is still running
+// (latex is "" until it lands; orphaned when the tab died mid-read).
 // Unsolved: created or opened, no attempt submitted. Analysed: an attempt
 // was submitted and the expert/student/comparison reading exists.
-export type ProblemState = "unsolved" | "analysed";
+export type ProblemState = "creating" | "unsolved" | "analysed";
 
 export type StoredProblem = {
   id: string;
@@ -160,7 +162,9 @@ function migrateSeedIds(state: LibraryState): LibraryState {
 // Missing state (libraries saved before states existed) defaults to
 // analysed for bundled problems, which ship with a reading, else unsolved.
 function normaliseState(p: { id: string; state?: unknown }): ProblemState {
-  if (p.state === "analysed" || p.state === "unsolved") return p.state;
+  if (p.state === "analysed" || p.state === "unsolved" || p.state === "creating") {
+    return p.state;
+  }
   return BUNDLED_IDS.has(p.id) ? "analysed" : "unsolved";
 }
 
@@ -238,7 +242,12 @@ export function nextAutoName(state: LibraryState): string {
 
 export function createProblem(
   state: LibraryState,
-  input: { name?: string; latex: string; folderId?: string | null }
+  input: {
+    name?: string;
+    latex: string;
+    folderId?: string | null;
+    state?: ProblemState;
+  }
 ): { state: LibraryState; problem: StoredProblem } {
   const problem: StoredProblem = {
     id: uid(),
@@ -246,9 +255,24 @@ export function createProblem(
     latex: input.latex,
     folderId: input.folderId ?? null,
     createdAt: Date.now(),
-    state: "unsolved",
+    state: input.state ?? "unsolved",
   };
   return { state: { ...state, problems: [...state.problems, problem] }, problem };
+}
+
+// Lands the transcribed statement on a problem created from a photo; the
+// problem leaves "creating" at the same moment.
+export function setProblemStatement(
+  state: LibraryState,
+  id: string,
+  latex: string
+): LibraryState {
+  return {
+    ...state,
+    problems: state.problems.map((p) =>
+      p.id === id ? { ...p, latex, state: "unsolved" } : p
+    ),
+  };
 }
 
 export function setProblemState(
