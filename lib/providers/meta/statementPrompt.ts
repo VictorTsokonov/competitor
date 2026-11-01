@@ -9,6 +9,6 @@ Return ONLY one JSON object: { "text": string }
 RULES
 - Transcribe the statement exactly: same wording, sentence order, numbering and line breaks (use \\n). Do not solve, summarise, complete or correct it.
 - Write every maths expression inline as $...$ LaTeX ($$...$$ for displayed equations). Prose stays prose.
-- Transcribe only the problem statement itself: skip page headers, problem scores, and surrounding problems, but keep the statement's own parenthetical remarks and definitions.
+- Transcribe only the problem statement itself: skip page headers, problem scores, surrounding problems, AND the problem's own label ("Problem 4.", "P6)", "Question 2:" and the like) — the statement starts at its first real word. Keep the statement's own parenthetical remarks and definitions.
 - If a fragment is illegible, write [illegible] in its place rather than guessing.
 - If the images contain no readable problem statement, return { "text": "" }.`;

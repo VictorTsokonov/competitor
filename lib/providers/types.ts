@@ -1,4 +1,4 @@
-import type { AttemptReport, Chain } from "../schema";
+import type { AttemptReport, Chain, Solution } from "../schema";
 
 // Shared provider input, defined here so providers never import from
 // lib/analysis.ts (which imports the providers back).
@@ -7,6 +7,8 @@ export type AnalysisInput = {
   // Set for problems from the library; lets the mock serve bundled analyses.
   problemId?: string;
   studentMarks?: string;
+  // Call S's result, when the client already holds it; grounds call A/B.
+  solution?: Solution | null;
 };
 
 // Call C input: the statement the spans must quote, and the attempt pages
