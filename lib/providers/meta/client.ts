@@ -34,11 +34,12 @@ function issueList(issues: string[], cap: number): string {
 
 // One JSON call: system + user to muse-spark-1.3 in JSON mode, parse,
 // validate with the given zod schema; on validation failure retry once
-// with the model's reply and the errors appended, then throw.
+// with the model's reply and the errors appended, then throw. The user
+// turn is plain text, or content parts when the call carries page images.
 export async function requestValidatedJson<T>(opts: {
   label: string;
   system: string;
-  user: string;
+  user: string | OpenAI.ChatCompletionContentPart[];
   schema: z.ZodType<T>;
   effort: MetaEffort;
 }): Promise<JsonCall<T>> {

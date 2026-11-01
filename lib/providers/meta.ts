@@ -1,52 +1,17 @@
-import { z } from "zod";
-import {
-  AnalysisSchema,
-  ChainSchema,
-  refineChainReferences,
-  type Analysis,
-  type Chain,
-} from "../schema";
-import type { AnalysisInput } from "./types";
+import type { z } from "zod";
+import { AnalysisSchema, type Analysis, type Chain } from "../schema";
+import type { AnalysisInput, AttemptInput, AttemptResult } from "./types";
 import { requestValidatedJson, type JsonCall } from "./meta/client";
+import { pinnedChainSchema } from "./meta/chainSchema";
+import { readPages } from "./meta/vision";
 import { EXPERT_SYSTEM_PROMPT } from "./meta/expertPrompt";
 
-// Call A (expert pass) is live; call C (student extraction) lives in
-// ./meta/vision.ts; call B (second reading given A) is still pending, so
-// the comparison stays the honest empty state.
+// Call A (expert pass) and call C (student extraction, via ./meta/vision)
+// are live; call B (second reading given A) is still pending, so the
+// comparison stays the honest empty state.
 
 export const NOT_MATHS_MESSAGE =
   "The model read this as not a well-posed maths problem, so there is no expert reading to build. Edit the statement and resubmit.";
-
-// The model must echo problem.text verbatim; rather than fail on echo
-// drift, pin it to the source so spans are validated against the real
-// statement. Span ids referenced anywhere must exist. side "expert" also
-// demands the 8-12 spans the prompt asks for; a student chain carries only
-// what the pages evidence, so any count from 0 up is legal.
-export function pinnedChainSchema(
-  problemText: string,
-  side: "expert" | "student"
-) {
-  return z.preprocess(
-    (raw) =>
-      typeof raw === "object" && raw !== null
-        ? { ...(raw as Record<string, unknown>), problem: { text: problemText } }
-        : raw,
-    ChainSchema.superRefine((chain, ctx) => {
-      refineChainReferences(chain, ctx);
-      if (
-        side === "expert" &&
-        chain.domain === "maths" &&
-        (chain.spans.length < 8 || chain.spans.length > 12)
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `a maths reading needs 8-12 spans, got ${chain.spans.length}`,
-          path: ["spans"],
-        });
-      }
-    })
-  );
-}
 
 // Call A with full attempt info, for the tuning script. Throws a readable
 // message when the input is not a maths problem.
@@ -66,10 +31,23 @@ export async function requestExpertPass(problemText: string): Promise<Chain> {
   return (await runExpertPass(problemText)).data;
 }
 
-export async function requestStudentExtraction(
-  _problemText: string // eslint-disable-line @typescript-eslint/no-unused-vars -- stub until call C
-): Promise<Chain["spans"]> {
-  throw new Error("call C (student extraction) not wired yet");
+// Call C: the student's reading extracted from attempt pages, plus the
+// structure report. A not_maths verdict here means the pages were not a
+// maths attempt at all; a nearly empty attempt still comes back "maths".
+export async function fetchMetaAttempt(input: AttemptInput): Promise<AttemptResult> {
+  const text = input.problemText.trim();
+  if (!text) throw new Error("The problem statement is empty: nothing to read against.");
+  const { data } = await readPages({
+    purpose: "attempt",
+    pages: input.pages,
+    problemText: text,
+  });
+  if (data.chain.domain === "not_maths") {
+    throw new Error(
+      "The model could not read these pages as a maths attempt. Check the photos show your working and resubmit."
+    );
+  }
+  return { student: data.chain, report: data.report };
 }
 
 // All stages empty: the UI renders expert highlights with no underlines
