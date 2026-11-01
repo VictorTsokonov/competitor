@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Analysis, AttemptReport, Chain } from "@/lib/schema";
 import type { PageImage } from "@/lib/pages";
 import { loadCachedAnalysis, saveCachedAnalysis } from "@/lib/analysisCache";
+import { compareChains } from "@/lib/compare";
 import {
   LAST_VIEW_KEY,
   loadLibrary,
@@ -179,31 +180,35 @@ export default function Dashboard() {
     runAttempt(problem, pages);
   }
 
+  // What the page renders: the expert analysis, with this session's
+  // extracted student reading merged over its placeholder student chain
+  // and the comparison computed in TypeScript (lib/compare.ts).
+  const analysis: Analysis | null = useMemo(
+    () =>
+      data && attempt
+        ? {
+            ...data,
+            student: attempt.student,
+            attempt_report: attempt.report,
+            comparison: compareChains(data.expert, attempt.student),
+          }
+        : data,
+    [data, attempt]
+  );
+
   // The problem counts as Analysed only once both calls landed; until then
   // a reload returns to Unsolved with the expert pass cached, so a failed
   // attempt read is resubmitted cheaply.
   useEffect(() => {
-    if (!stored || !data || !attempt) return;
-    const merged: Analysis = {
-      ...data,
-      student: attempt.student,
-      attempt_report: attempt.report,
-    };
-    saveCachedAnalysis(localStorage, stored.id, merged);
+    if (!stored || !analysis || !attempt) return;
+    saveCachedAnalysis(localStorage, stored.id, analysis);
     if (stored.state === "unsolved") {
       const lib = setProblemState(loadLibrary(localStorage), stored.id, "analysed");
       saveLibrary(localStorage, lib);
       window.dispatchEvent(new Event("competitor:library-changed"));
       setStored({ ...stored, state: "analysed" });
     }
-  }, [data, attempt, stored]);
-
-  // What the page renders: the expert analysis, with this session's
-  // extracted student reading merged over its placeholder student chain.
-  const analysis: Analysis | null =
-    data && attempt
-      ? { ...data, student: attempt.student, attempt_report: attempt.report }
-      : data;
+  }, [analysis, attempt, stored]);
 
   const expert = analysis?.expert;
 

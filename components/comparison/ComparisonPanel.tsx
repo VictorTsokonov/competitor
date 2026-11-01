@@ -39,11 +39,11 @@ function Section({
   );
 }
 
-// data null is the unsolved state. While compare.ts is pending the server
-// sends a comparison with empty cue lists, so the panel keeps its empty
-// state even once a real student chain exists — the heading stays either
-// way so the layout does not jump when the full comparison arrives. pages
-// are this session's submitted attempt pages, shown while they are known.
+// data null is the unsolved state; an expert-only analysis (no attempt
+// extracted yet) keeps the empty state. Once the student chain is real the
+// comparison from lib/compare.ts renders in full — the heading stays
+// either way so the layout does not jump. pages are this session's
+// submitted attempt pages, shown while they are known.
 export default function ComparisonPanel({
   data,
   pages,
@@ -51,17 +51,11 @@ export default function ComparisonPanel({
   data: Analysis | null;
   pages?: PageImage[];
 }) {
-  const placeholder =
-    !data ||
-    (data.comparison.missed_cues.length === 0 &&
-      data.comparison.unused_cues.length === 0);
-  if (placeholder) {
+  if (!data || data.student.spans.length === 0) {
     const emptyText = !data
       ? "The comparison appears here after you submit your attempt."
-      : data.student.spans.length > 0
-        ? "Your reading is on the statement — underlined next to the expert's highlights. The cue-by-cue comparison lands here next."
-        : data.comparison.first_divergence ||
-          "Submit your attempt to see the comparison.";
+      : data.comparison.first_divergence ||
+        "Submit your attempt to see the comparison.";
     return (
       <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
         <div className="flex min-h-[36px] items-center pr-[46px]">
