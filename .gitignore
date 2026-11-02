@@ -38,3 +38,6 @@ next-env.d.ts
 
 # local agent notes
 claude.md
+
+# private test data (handwriting, contest statements)
+fixtures/

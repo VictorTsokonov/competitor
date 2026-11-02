@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Analysis, Comparison } from "@/lib/schema";
 import type { PageImage } from "@/lib/pages";
-import { loadCachedAnalysis, saveCachedAnalysis } from "@/lib/analysisCache";
+import {
+  clearCachedAnalysis,
+  loadCachedAnalysis,
+  saveCachedAnalysis,
+} from "@/lib/analysisCache";
 import {
   mergeAnalysis,
   useAnalysisJob,
@@ -18,6 +22,7 @@ import {
   problemLabel,
   saveLibrary,
   SELECT_INTENT_KEY,
+  setProblemState,
   type StoredProblem,
 } from "@/lib/problems";
 import AppShell from "@/components/layout/AppShell";
@@ -215,6 +220,25 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Re-analyse: forget the cached reading and flip back to Unsolved so
+  // the next submission runs the whole pipeline fresh (attempt pages are
+  // never stored, so the student resubmits them).
+  function reanalyse() {
+    if (!stored || jobActive) return;
+    clearCachedAnalysis(localStorage, stored.id);
+    saveLibrary(
+      localStorage,
+      setProblemState(loadLibrary(localStorage), stored.id, "unsolved")
+    );
+    window.dispatchEvent(new Event("competitor:library-changed"));
+    setStored({ ...stored, state: "unsolved" });
+    setData(null);
+    setAttempt(null);
+    setExplained(null);
+    setPages([]);
+    setActionStatus(null);
+  }
+
   function submitAttempt() {
     if (!stored || jobActive) return;
     if (pages.length === 0) {
@@ -311,6 +335,20 @@ export default function Dashboard() {
                   />
                 </div>
                 <ExpertStages expert={expert} />
+                {!jobActive && (
+                  <div className="mt-[30px]">
+                    <Pill
+                      onClick={reanalyse}
+                      className="min-h-[42px] text-[1.0625rem]"
+                    >
+                      Re-analyse from scratch
+                    </Pill>
+                    <p className="mt-2 text-[0.9375rem] text-muted">
+                      Clears this reading; resubmit your attempt to run the
+                      whole pipeline again.
+                    </p>
+                  </div>
+                )}
               </>
             ) : stored.state === "creating" ? (
               <div>

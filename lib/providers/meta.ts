@@ -6,6 +6,7 @@ import { pinnedChainSchema } from "./meta/chainSchema";
 import { readPages } from "./meta/vision";
 import { EXPERT_SYSTEM_PROMPT } from "./meta/expertPrompt";
 import { REWEIGH_SYSTEM_PROMPT } from "./meta/reweighPrompt";
+import { runChainAudit } from "./meta/audit";
 
 // Call A (expert pass, grounded in call S's verified solution when one is
 // supplied), call B (second reading, ./meta/reweighPrompt) and call C
@@ -67,15 +68,28 @@ export async function requestExpertPass(
   solution?: Solution | null
 ): Promise<Chain> {
   const first = (await runExpertPass(problemText, solution)).data;
+  let chain = first;
   try {
-    return (await runSecondReading(problemText, first, solution)).data;
+    chain = (await runSecondReading(problemText, first, solution)).data;
   } catch (e: unknown) {
     // The second reading refines; its failure must never cost the reading.
     console.log(
       `[meta] call B failed (${e instanceof Error ? e.message : "error"}); keeping the first reading`
     );
-    return first;
   }
+  // Call R: audit the chain against the verified route (true, faithful,
+  // followable, no leak), with one revision on a fail. Like call B, its
+  // own failure never costs the reading.
+  if (solution?.verified) {
+    try {
+      chain = (await runChainAudit(problemText, chain, solution)).chain;
+    } catch (e: unknown) {
+      console.log(
+        `[meta] call R failed (${e instanceof Error ? e.message : "error"}); keeping the unaudited reading`
+      );
+    }
+  }
+  return chain;
 }
 
 // Call C: the student's reading extracted from attempt pages, plus the

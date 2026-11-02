@@ -41,6 +41,19 @@ export function loadCachedAnalysis(
   return parsed.success ? parsed.data : null;
 }
 
+// Re-analyse: drop this problem's entry so the next submission runs the
+// full pipeline instead of being served the cached reading.
+export function clearCachedAnalysis(storage: KeyValueStorage, problemId: string): void {
+  try {
+    const cache = readCache(storage);
+    if (!(problemId in cache)) return;
+    delete cache[problemId];
+    storage.setItem(KEY, JSON.stringify(cache));
+  } catch {
+    /* storage unavailable: nothing to clear */
+  }
+}
+
 export function saveCachedAnalysis(
   storage: KeyValueStorage,
   problemId: string,
