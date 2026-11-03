@@ -11,14 +11,15 @@ export type PanelState = {
   rightWidth: number;
 };
 
-// v2: defaults re-anchored to design/dashboard.html (17rem / 21.25rem);
-// the key bump discards widths persisted under the old defaults.
-const STORAGE_KEY = "competitor.panels.v2";
+// v3: the comparison panel opens wider (25rem) and can be dragged to
+// 35rem, since feedback cards carry maths; the key bump discards widths
+// persisted under the old defaults.
+const STORAGE_KEY = "competitor.panels.v3";
 
 export const PANEL_MIN = 220;
-export const PANEL_MAX = 420;
+export const PANEL_MAX = 560;
 export const DEFAULT_LEFT_WIDTH = 272;
-export const DEFAULT_RIGHT_WIDTH = 340;
+export const DEFAULT_RIGHT_WIDTH = 400;
 
 function clampWidth(px: number): number {
   if (!Number.isFinite(px)) return DEFAULT_LEFT_WIDTH;

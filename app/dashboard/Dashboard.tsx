@@ -42,7 +42,7 @@ function libraryChanged(): void {
 export default function Dashboard() {
   // Demo: the recorded examples, read-only, nothing reaches the model.
   // Live: this browser's own library and the full pipeline.
-  const { mode, examples, local, readLibrary } = useAppMode();
+  const { mode, local, readLibrary } = useAppMode();
   const demo = mode === "demo";
   const jobs = useJobs();
   const { stored, label, loaded, status, pages, setPages, card, setCard, select, show } =
@@ -148,7 +148,6 @@ export default function Dashboard() {
   );
 
   const comparing = !!(analysis || stored);
-  const example = demo && stored ? examples.find((e) => e.id === stored.id) : undefined;
   return (
     <AppShell
       onSelectProblem={open}
@@ -188,7 +187,11 @@ export default function Dashboard() {
         )
       }
       centre={
-        <div className="mx-auto w-full max-w-[48rem] text-[1.1875rem] leading-[1.65]">
+        // An open problem uses the full centre width; the creation form and
+        // the demo note keep a readable measure.
+        <div
+          className={`mx-auto w-full text-[1.1875rem] leading-[1.65]${stored ? "" : " max-w-[48rem]"}`}
+        >
           {stored ? (
             // Keyed by problem, so a page conversion still running for one
             // problem's attempt form never lands in the next one's.
@@ -196,7 +199,6 @@ export default function Dashboard() {
               key={stored.id}
               problem={stored}
               label={label || stored.name}
-              note={example && `${example.source} · ${example.recorded}`}
               analysis={analysis}
               job={job}
               demo={demo}

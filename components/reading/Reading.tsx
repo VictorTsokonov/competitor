@@ -1,11 +1,7 @@
 import type { Chain } from "@/lib/schema";
-import Tag from "@/components/ui/Tag";
+import Highlight from "@/components/ui/Highlight";
 import { FieldTex, RichTex, readsAsProse } from "@/components/reading/Tex";
 import SpanText from "@/components/reading/SpanText";
-
-// Cue tags light up only for the highest weights; the mockup shows
-// rule · 95 on and rule · 85 off.
-const TAG_ON_AT = 90;
 
 // A plain-words meaning reads "term: meaning"; a bare formula keeps
 // "term = formula". The line supplies its own closing full stop. A term
@@ -38,9 +34,13 @@ export default function Reading({
             <div className="font-bold">
               “{span ? <SpanText text={span.text} /> : c.span_id}”{" "}
               {span && (
-                <Tag on={span.weight >= TAG_ON_AT}>
-                  {span.category} · {span.weight}
-                </Tag>
+                // A quiet chip in the span's own category tint, the colour
+                // of the statement highlights and the legend.
+                <span className="whitespace-nowrap align-middle text-[0.875rem] font-normal text-muted">
+                  <Highlight category={span.category} weight={span.weight}>
+                    {span.category} · {span.weight}
+                  </Highlight>
+                </span>
               )}
             </div>
             <div>

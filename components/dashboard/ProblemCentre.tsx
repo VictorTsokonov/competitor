@@ -17,7 +17,6 @@ import type { Analysis } from "@/lib/schema";
 export default function ProblemCentre({
   problem,
   label,
-  note,
   analysis,
   job,
   demo,
@@ -30,8 +29,6 @@ export default function ProblemCentre({
 }: {
   problem: StoredProblem;
   label: string;
-  // A recorded example's provenance.
-  note?: string;
   analysis: Analysis | null;
   job?: AnalysisJob;
   demo: boolean;
@@ -56,7 +53,6 @@ export default function ProblemCentre({
       <ReadingView
         analysis={analysis}
         label={label}
-        note={note}
         job={job}
         demo={demo}
         onRetryAttempt={() => onRetry("attempt")}

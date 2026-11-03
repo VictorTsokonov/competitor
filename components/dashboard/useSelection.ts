@@ -32,7 +32,7 @@ function examplePages(example: ExampleSummary): PageImage[] {
     id: url,
     dataUrl: url,
     href: url,
-    label: example.source,
+    label: example.name,
   }));
 }
 

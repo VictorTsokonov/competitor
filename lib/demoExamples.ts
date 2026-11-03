@@ -30,11 +30,11 @@ export const ExampleSchema = z
 export type Example = z.infer<typeof ExampleSchema>;
 
 // What the demo library needs to list an example without its analysis.
+// Deliberately no source or recording date: the demo does not say where
+// a problem comes from (meta.source stays in the file for the recorder).
 export type ExampleSummary = {
   id: string; // "example-1": the library id /api/analyse serves it by
   name: string; // "Example 1"
-  source: string;
-  recorded: string; // "Recorded from a real Muse Spark 1.3 run on 3 November 2026"
   statement: string;
   pages: string[];
 };
@@ -62,32 +62,16 @@ export async function loadExampleById(id: string): Promise<Example | null> {
   return n === null ? null : loadExample(n);
 }
 
-// "muse-spark-1.3" -> "Muse Spark 1.3"
-function modelName(model: string): string {
-  return model
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
 export async function listExamples(): Promise<ExampleSummary[]> {
   const numbers = Object.keys(EXAMPLE_FILES).map(Number);
   const examples = await Promise.all(numbers.map(loadExample));
   return examples.flatMap((example, i) => {
     if (!example) return [];
     const { meta, analysis } = example;
-    const date = new Date(meta.recorded_at).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "Europe/London",
-    });
     return [
       {
         id: `example-${numbers[i]}`,
         name: `Example ${numbers[i]}`,
-        source: meta.source,
-        recorded: `Recorded from a real ${modelName(meta.model)} run on ${date}`,
         statement: analysis.problem.text,
         pages: meta.pages,
       },

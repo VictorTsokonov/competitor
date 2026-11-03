@@ -32,7 +32,7 @@ export default function ComparisonEmpty({
       ? "The comparison appears here after you submit your attempt."
       : data.comparison.first_divergence || "Submit your attempt to see the comparison.";
   return (
-    <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
+    <div className="break-words [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden px-[1.375rem] pb-7 pt-[0.875rem]">
       <ComparisonHeading />
       <p className="mt-3 text-[1.0625rem] text-muted">{emptyText}</p>
       {pages && pages.length > 0 && (

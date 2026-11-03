@@ -24,6 +24,16 @@ pages, and never the solution.
 
 ---
 
+## The aim
+
+A student who is stuck on a hard problem is usually handed a solution. A solution shows where the
+argument went, but not how anyone saw that route in the statement, and that reading is the skill
+that carries over to the next problem. Competitor teaches the reading itself: the student works the
+problem first and uploads their pages, then sees how an expert read the same statement, where their
+own reading parted from it, and the next step to try, all grounded in a privately verified solution
+that is never shown. The goal is students who read problems better, not students who copy solutions
+faster.
+
 ## What it measures
 
 Competition maths is decided before the first line of a proof: which phrases you weight, which
@@ -50,7 +60,7 @@ verdict on who did better.
 
 | | Demo (`USE_MOCK=true`) | Live (`USE_MOCK=false` + `MODEL_API_KEY`) |
 |---|---|---|
-| Library | One read-only folder, **Examples**: recorded real runs of the full pipeline on the author's own handwritten attempts at ICMC problems | Your own, empty at first: create problems, folders, drag and drop |
+| Library | One read-only folder, **Examples**: recorded real runs of the full pipeline on the author's own handwritten attempts at competition problems | Your own, empty at first: create problems, folders, drag and drop |
 | Model calls | None. Every API route refuses at the provider seam, and the Meta client refuses again, even if a key is set | The full pipeline below |
 | Browser storage | `competitor.demo.*` | `competitor.live.*` |
 
@@ -58,9 +68,8 @@ The mode is decided on the server from env and passed down to the UI; nothing in
 switch a demo deploy to live. Anything other than `USE_MOCK=false` means demo, so a deploy with a
 missing variable fails closed.
 
-The demo carries four examples: ICMC 2019 Problems 2, 1 and 3 and ICMC 2020 Problem 2. Each shows
-its source, when it was recorded, and the handwritten pages the model read (click a page to open
-it). Examples are written by
+The demo carries four examples, each a recorded run on a real handwritten attempt, with the pages
+the model read (click a page to open it). Examples are written by
 `scripts/record-example.ts`, which drives the same server code the app uses. Call S's solution is
 stripped before anything is written, and the script refuses to write a file if any of it survives.
 

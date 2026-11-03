@@ -27,7 +27,6 @@ function attemptCallState(job?: AnalysisJob): AttemptCallState {
 export default function ReadingView({
   analysis,
   label,
-  note,
   job,
   demo,
   onRetryAttempt,
@@ -36,7 +35,6 @@ export default function ReadingView({
 }: {
   analysis: Analysis;
   label: string;
-  note?: string;
   job?: AnalysisJob;
   demo: boolean;
   onRetryAttempt: () => void;
@@ -46,7 +44,7 @@ export default function ReadingView({
   const state = attemptCallState(job);
   return (
     <>
-      <ProblemReading data={analysis} label={label} note={note} />
+      <ProblemReading data={analysis} label={label} />
       <div className="mt-[26px]">
         <AttemptNotice
           state={state}

@@ -4,15 +4,12 @@ import LayeredReading from "@/components/reading/LayeredReading";
 
 const LEGEND: SpanCategory[] = ["setting", "definition", "rule", "goal", "informal"];
 
-// note: a recorded example's provenance (source, model, date).
 export default function ProblemReading({
   data,
   label,
-  note,
 }: {
   data: Analysis;
   label: string;
-  note?: string;
 }) {
   return (
     <div>
@@ -21,7 +18,6 @@ export default function ProblemReading({
           {label}
         </span>
       </div>
-      {note && <p className="mb-3 mt-0 text-[0.9375rem] text-muted">{note}</p>}
       <LayeredReading
         text={data.problem.text}
         expertSpans={data.expert.spans}

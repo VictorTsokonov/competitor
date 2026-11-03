@@ -45,8 +45,10 @@ export default function ComparisonPanel({
   // Grounded readings earn the stronger note; without a verified solution
   // the humbler wording stays. Recorded examples carry the verdict alone.
   const grounded = data.grounded ?? data.solution?.verified === true;
+  // The panel only ever scrolls down: long words break, and a display
+  // formula too wide to fit scrolls inside its own box.
   return (
-    <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
+    <div className="break-words [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden px-[1.375rem] pb-7 pt-[0.875rem]">
       <ComparisonHeading />
       <p className="mt-1 text-[0.9375rem] text-muted">
         {grounded
