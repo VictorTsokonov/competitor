@@ -58,8 +58,9 @@ The mode is decided on the server from env and passed down to the UI; nothing in
 switch a demo deploy to live. Anything other than `USE_MOCK=false` means demo, so a deploy with a
 missing variable fails closed.
 
-Each example shows its source (for instance ICMC 2019 Problem 2), when it was recorded, and the
-handwritten pages the model read (click a page to open it). Examples are written by
+The demo carries four examples: ICMC 2019 Problems 2, 1 and 3 and ICMC 2020 Problem 2. Each shows
+its source, when it was recorded, and the handwritten pages the model read (click a page to open
+it). Examples are written by
 `scripts/record-example.ts`, which drives the same server code the app uses. Call S's solution is
 stripped before anything is written, and the script refuses to write a file if any of it survives.
 
@@ -73,12 +74,12 @@ statement ──► S  solve + verify ──┬──► A  expert reading ─�
 | Step | What it does | Effort |
 |---|---|---|
 | **S** | Solves privately, then a sceptical verifier walks the steps and recomputes a small case from scratch; one corrected re-solve on a fail. The verdict is recorded; an unverified solution is dropped. | high, then medium |
-| **A** | The expert reading, grounded in S's verified route: the kept method is that route, weights follow what it uses, the simplification is its small case, nothing echoes the answer. Binding plain-language rules (`lib/providers/meta/plainStyle.ts`, shared with B, R, C and explain): written for a student who is stuck, words before symbols, no notation the statement does not already use, small worked numbers before general formulas, every technique explained in plain words, a performable "how to spot it". | high |
+| **A** | The expert reading, grounded in S's verified route: the kept method is that route, weights follow what it uses, the simplification is its small case, nothing echoes the answer. Binding writing rules (`lib/providers/meta/plainStyle.ts`, shared with B, R, C and explain): written for a student who is stuck, the statement's own notation always, new notation only where it is clearer than the sentence it replaces and then glossed in a few words where it first appears, small worked numbers first, every technique's effect said in one clause, short fields (typically 1–3 sentences), a performable "how to spot it". Small cases never pattern-match to the answer, and on a "prove" problem the decisive step stays a question. | high |
 | **B** | Second reading with the finished chain in hand: weights move, up to two spans join. If it fails, A stands. | medium |
-| **R** | Audit: a sceptical-student role-play checks every claim is true (patterns stated in words are recomputed on small cases), cues are faithful to the route (conditions such as signs carried in the same card), fields are plain and followable (unexplained notation or notation standing in for a sentence fails) and nothing leaks the answer. One targeted revision on a fail. | medium |
+| **R** | Audit: a sceptical-student role-play checks every claim is true (patterns stated in words are recomputed on small cases), cues are faithful to the route (conditions such as signs carried in the same card), fields are clear and followable (new notation with no gloss, the statement's notation paraphrased into words, notation standing in for reasoning, or padding fails) and nothing leaks the answer. One targeted revision on a fail. | medium |
 | **C** | Reads the attempt pages into the same schema: faithful, not charitable. Stages with no evidence stay empty, spans quote the statement verbatim, and a structure report says what was inferred or missing. | medium |
 | **compare.ts** | Set difference over located spans: missed heavy cues, unused marks, the route on each side. | no model |
-| **explain** | Writes the feedback from the solution, both chains and the computed facts, under the rules below, in the same plain language (the student's own working is quoted as written). If it fails, the compare.ts comparison is shown. | high |
+| **explain** | Writes the feedback from the solution, both chains and the computed facts, under the rules below, in the same writing style (the student's own working is quoted as written). The panel reads as a hint ladder: where you stand, then one next step, then the cards, each card's own next move folded until the student asks for it. If it fails, the compare.ts comparison is shown. | high |
 | **title** | Names a new problem in 2–6 plain words (never its answer or method). Until it lands, and if it fails, the name comes from the statement's opening words. | low |
 
 A, B and R run as three separate requests (`/api/expert`), so each shows as its own stage and is

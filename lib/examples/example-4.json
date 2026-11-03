@@ -1,0 +1,442 @@
+{
+  "meta": {
+    "source": "ICMC 2020 Problem 2",
+    "fixture": "icmc-2020-p2",
+    "recorded_at": "2026-11-03T16:39:20.110Z",
+    "model": "muse-spark-1.3",
+    "pages": [
+      "/examples/4/page-1.jpg",
+      "/examples/4/page-2.jpg"
+    ]
+  },
+  "analysis": {
+    "problem": {
+      "text": "Let $A$ be a square matrix with entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ such that $A^n - I$ is invertible for every positive integer $n$. Prove that there exists a positive integer $m$ such that $A^m = 0$.\n(A matrix having entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ means that two matrices are considered the same if each pair of corresponding entries differ by a multiple of $p$.)"
+    },
+    "expert": {
+      "problem": {
+        "text": "Let $A$ be a square matrix with entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ such that $A^n - I$ is invertible for every positive integer $n$. Prove that there exists a positive integer $m$ such that $A^m = 0$.\n(A matrix having entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ means that two matrices are considered the same if each pair of corresponding entries differ by a multiple of $p$.)"
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "square matrix",
+          "category": "setting",
+          "weight": 55,
+          "reason": "A fixed side length fixes how many entries each matrix has."
+        },
+        {
+          "id": "s2",
+          "text": "entries in the field $\\mathbb{Z}/p\\mathbb{Z}$",
+          "category": "setting",
+          "weight": 65,
+          "reason": "Entries come from a finite pool of residues, so only finitely many fillings exist."
+        },
+        {
+          "id": "s3",
+          "text": "such that",
+          "category": "informal",
+          "weight": 30,
+          "reason": "Quiet link that makes the next clause a permanent rule on A."
+        },
+        {
+          "id": "s4",
+          "text": "$A^n - I$ is invertible",
+          "category": "rule",
+          "weight": 90,
+          "reason": "A factor shaped like a power minus identity can always be cancelled."
+        },
+        {
+          "id": "s5",
+          "text": "for every positive integer $n$",
+          "category": "rule",
+          "weight": 85,
+          "reason": "The cancellation is available at every exponent, not just one."
+        },
+        {
+          "id": "s6",
+          "text": "Prove that there exists",
+          "category": "goal",
+          "weight": 50,
+          "reason": "An existence claim needs one example exponent, not a formula for all."
+        },
+        {
+          "id": "s7",
+          "text": "a positive integer $m$",
+          "category": "goal",
+          "weight": 45,
+          "reason": "The wanted exponent starts at 1, so A itself may already work."
+        },
+        {
+          "id": "s8",
+          "text": "$A^m = 0$",
+          "category": "goal",
+          "weight": 70,
+          "reason": "Zero matrix is the target, so look for a product that forces it."
+        },
+        {
+          "id": "s9",
+          "text": "two matrices are considered the same",
+          "category": "definition",
+          "weight": 60,
+          "reason": "Equality is taken mod p, so counting distinct matrices is finite."
+        },
+        {
+          "id": "s10",
+          "text": "differ by a multiple of $p$",
+          "category": "definition",
+          "weight": 95,
+          "reason": "Each entry has only p choices, which makes the whole matrix ring finite."
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s10",
+            "why_it_matters": "Each entry has $p$ choices, so for $p = 2$ a 2 by 2 matrix has $2^4 = 16$ possibilities. Infinitely many powers $A, A^2, \\dots$ cannot all be different.",
+            "how_spotted": "Count choices per entry from the mod-$p$ rule, then multiply across the fixed square shape to count matrices."
+          },
+          {
+            "id": "c2",
+            "span_id": "s4",
+            "why_it_matters": "A factor like $A^n - I$ can be cancelled from a product. The same holds for $I - A^n$, which differs only by a sign.",
+            "how_spotted": "Isolate the algebraic shape $A^n - I$ and ask what work an invertible matrix does inside a product equal to zero."
+          },
+          {
+            "id": "c3",
+            "span_id": "s5",
+            "why_it_matters": "Whatever gap appears between two repeated powers, say gap $n = 3$, the hypothesis already covers $A^3 - I$. No gap escapes the rule.",
+            "how_spotted": "Underline every universal word like every and test it against the unknown number the argument will produce later."
+          },
+          {
+            "id": "c4",
+            "span_id": "s8",
+            "why_it_matters": "To get $A^m = 0$, look for an equation $A^m$ times something $= 0$ where that something is known to be invertible.",
+            "how_spotted": "Read the goal $A^m = 0$ backwards and ask what factored form would leave $A^m$ alone after cancellation."
+          }
+        ],
+        "definitions": [
+          {
+            "term": "$\\mathbb{Z}/p\\mathbb{Z}$",
+            "meaning_latex": "the field with $p$ residues where numbers differing by a multiple of $p$ count as equal"
+          },
+          {
+            "term": "$I$",
+            "meaning_latex": "the identity matrix with $1$'s on the diagonal and $0$'s elsewhere"
+          },
+          {
+            "term": "invertible",
+            "meaning_latex": "can be cancelled from a matrix product by another matrix on either side"
+          },
+          {
+            "term": "square matrix",
+            "meaning_latex": "an array with the same number of rows and columns, so powers $A^n$ make sense"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "Do the two rules on $A$ force some positive power of $A$ to be the zero matrix?",
+        "answer_form": "A proof of existence: produce an exponent from the behaviour of $A$ and show that power equals zero.",
+        "final_line_would_say": "There is a positive integer $m$ for which $A^m = 0$ holds."
+      },
+      "informal_cues": [
+        {
+          "span_id": "s3",
+          "bearing": "Everything after 'such that' is a standing hypothesis on $A$, to be used wherever the proof needs it."
+        }
+      ],
+      "abstraction": {
+        "underneath": [
+          {
+            "object": "$A$ with entries in $\\mathbb{Z}/p\\mathbb{Z}$",
+            "really_is": "an element of a finite ring of matrices",
+            "implies": "only finitely many distinct matrices can ever appear"
+          },
+          {
+            "object": "$A^n - I$ invertible",
+            "really_is": "a difference of a power and the identity that can be cancelled",
+            "implies": "any product containing such a factor can drop it"
+          }
+        ],
+        "deeper_properties": [
+          "With $p$ choices per entry and a fixed square size, the total number of matrices is finite, so the infinite list $A, A^2, \\dots$ cannot avoid a repetition.",
+          "Up to sign, $I - A^n$ is the same shape as $A^n - I$, so the hypothesis makes every such $I$ minus a power cancellable too."
+        ]
+      },
+      "simplification": {
+        "instance": "Try the smallest case with $p = 2$ and a 2 by 2 matrix:",
+        "instance_latex": "A=\\begin{pmatrix}0 & 1 \\\\ 0 & 0\\end{pmatrix}\\text{ over }\\mathbb{Z}/2\\mathbb{Z}",
+        "what_to_try": "Compute $A, A^2, A^3$ over $\\mathbb{Z}/2\\mathbb{Z}$ and check $A^n - I$ for $n = 1, 2$ for invertibility, watching for two powers that coincide.",
+        "notice_prompt": "If two powers of $A$ coincide, how can the later one be rewritten with the earlier one factored out, and what does the hypothesis say about the remaining piece beside $I$?"
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Finite pigeonhole plus cancelling an invertible difference",
+            "deciding_span_ids": [
+              "s10",
+              "s4",
+              "s5"
+            ],
+            "from_first_principles": "Differing by a multiple of $p$ leaves only $p$ choices per entry, so there are only finitely many matrices while $A, A^2, \\dots$ runs forever. What must happen to two powers in that long list? If the later one is written using the earlier one, what does invertibility of every $A^n - I$ let you ask about the leftover factor?",
+            "kept": true,
+            "why": "It uses every heavy cue at once: finiteness forces the repeat and invertibility at every $n$ removes the leftover factor."
+          },
+          {
+            "name": "Eigenvalues over an extension field",
+            "deciding_span_ids": [
+              "s1",
+              "s4"
+            ],
+            "from_first_principles": "A square matrix suggests eigenvalues, and $A^n - I$ invertible suggests no eigenvalue is a root of unity.",
+            "kept": false,
+            "why": "Eigenvalues need not live in $\\mathbb{Z}/p\\mathbb{Z}$, and ruling them out does not by itself produce $A^m = 0$ without using finiteness."
+          },
+          {
+            "name": "Determinant chase on $A^n - I$",
+            "deciding_span_ids": [
+              "s4",
+              "s8"
+            ],
+            "from_first_principles": "Invertible means nonzero determinant, so each $A^n - I$ has nonzero determinant, which might restrict $A$.",
+            "kept": false,
+            "why": "Nonzero determinants alone do not force a power to vanish; without counting matrices over $\\mathbb{Z}/p\\mathbb{Z}$ the same determinant condition can hold with no zero power."
+          }
+        ],
+        "chosen": "Finite pigeonhole plus cancelling an invertible difference."
+      },
+      "prerequisites": [
+        {
+          "name": "Pigeonhole principle",
+          "needed_for": "Infinitely many powers in finitely many matrices force two powers to coincide.",
+          "flag": "needed"
+        },
+        {
+          "name": "Laws of matrix powers",
+          "needed_for": "It lets you write $A^s$ as $A^r$ times the remaining powers of $A$.",
+          "flag": "assumed"
+        },
+        {
+          "name": "Cancellation by invertible matrices",
+          "needed_for": "Dropping an invertible factor from a zero product leaves the other factor zero.",
+          "flag": "needed"
+        }
+      ],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [],
+        "what_changed": "Finiteness from entries in $\\mathbb{Z}/p\\mathbb{Z}$ now looks like the start of the proof, not background. The condition that $A^n - I$ is invertible for every positive integer $n$ now looks like the tool to be used once on the gap between two equal powers."
+      },
+      "domain": "maths"
+    },
+    "student": {
+      "problem": {
+        "text": "Let $A$ be a square matrix with entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ such that $A^n - I$ is invertible for every positive integer $n$. Prove that there exists a positive integer $m$ such that $A^m = 0$.\n(A matrix having entries in the field $\\mathbb{Z}/p\\mathbb{Z}$ means that two matrices are considered the same if each pair of corresponding entries differ by a multiple of $p$.)"
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "square matrix",
+          "category": "setting",
+          "weight": 30,
+          "reason": "wrote '$A \\in M_n(R)$' and '$B \\in M_n(R)$'",
+          "uncertain": true
+        },
+        {
+          "id": "s2",
+          "text": "with entries in the field $\\mathbb{Z}/p\\mathbb{Z}$",
+          "category": "setting",
+          "weight": 60,
+          "reason": "wrote 'Must use and understand clearly - $Z/pZ$' and '$Z/pZ$ such that'",
+          "uncertain": false
+        },
+        {
+          "id": "s3",
+          "text": "$A^n - I$ is invertible for every positive integer $n$",
+          "category": "rule",
+          "weight": 90,
+          "reason": "wrote '$B = A^n - I$, $B$ is invertible, $n \\in Z^+$'",
+          "uncertain": false
+        },
+        {
+          "id": "s4",
+          "text": "there exists a positive integer $m$ such that $A^m = 0$",
+          "category": "goal",
+          "weight": 80,
+          "reason": "wrote '∃ $m \\in Z$, $A^m = 0$' and 'Can we invert $A$ $k$ times such that we get $O$ matrix?!'",
+          "uncertain": false
+        },
+        {
+          "id": "s5",
+          "text": "two matrices are considered the same if each pair of corresponding entries differ by a multiple of $p$",
+          "category": "definition",
+          "weight": 50,
+          "reason": "wrote 'the same' with matrix example turning into $p$ multiples and '$C = pA$'",
+          "uncertain": false
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s1",
+            "why_it_matters": "took it to mean $A$ lives in $M_n(R)$",
+            "how_spotted": "page 1, top line writing '$A \\in M_n(R)$' and later '$B \\in M_n(R)$'"
+          },
+          {
+            "id": "c2",
+            "span_id": "s2",
+            "why_it_matters": "took it to mean must use $Z/pZ$ clearly, something to do with $pA$",
+            "how_spotted": "page 1, list 'Must use and understand clearly - $Z/pZ$' and line '$Z/pZ$ implies ∃ $C$ such that $C = pA$'"
+          },
+          {
+            "id": "c3",
+            "span_id": "s3",
+            "why_it_matters": "took it to mean $B = A^n - I$ is invertible, something about det and row operation properties",
+            "how_spotted": "page 1, lines '$B = A^n - I$, $B$ is invertible' and side note 'invertability properties -> Something about det!' and '$Z/pZ$ such that $A^n - I$ = invertible'"
+          },
+          {
+            "id": "c4",
+            "span_id": "s4",
+            "why_it_matters": "took it to mean look for $m$ with $A^m = 0$, asking if inverting $A$ $k$ times gives $0$ matrix",
+            "how_spotted": "page 1, line '∃ $m \\in Z$, $A^m = 0$' and bottom circled question 'Can we invert $A$ $k$ times such that we get $O$ matrix?!'"
+          },
+          {
+            "id": "c5",
+            "span_id": "s5",
+            "why_it_matters": "took it to mean the same, illustrated with matrices and $C = pA$, and should not concern with specific elements",
+            "how_spotted": "page 1, word 'the same' under goal, matrix arrow to $p$ multiples, and line 'For this problem we should not concern ourselves with specific elements'"
+          }
+        ],
+        "definitions": [
+          {
+            "term": "B",
+            "meaning_latex": "A^n - I"
+          },
+          {
+            "term": "m",
+            "meaning_latex": "n-k"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "find $m$ with $A^m = 0$",
+        "answer_form": "a positive integer $m$ with $A^m = 0$",
+        "final_line_would_say": "$A^m = 0$"
+      },
+      "informal_cues": [],
+      "abstraction": {
+        "underneath": [],
+        "deeper_properties": []
+      },
+      "simplification": {
+        "instance": "example with $2$ by $2$ matrices subtracting $I$",
+        "instance_latex": "\\begin{bmatrix}2 & 0 \\\\ 0 & 3\\end{bmatrix} - \\begin{bmatrix}1 & 0 \\\\ 0 & 1\\end{bmatrix} = \\begin{bmatrix}1 & 0 \\\\ 0 & 2\\end{bmatrix}",
+        "what_to_try": "subtract $I$ from a concrete matrix to see what happens",
+        "notice_prompt": ""
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Induction",
+            "deciding_span_ids": [],
+            "from_first_principles": "page 1: red margin note 'Induction' and 'Think about induction' with '$n=1$' and '$A - I =$' and nothing worked under it",
+            "kept": false,
+            "why": "abandoned on the page"
+          },
+          {
+            "name": "write m as n minus k and factor inverse powers",
+            "deciding_span_ids": [],
+            "from_first_principles": "page 1: wrote '$m = n-k$', '$A^{n-k} = (B+I)A^{-k}$' and '$A^m = (B+I)A^{-k} = 0$' circled in red with question 'Can we invert $A$ $k$ times such that we get $O$ matrix?!'",
+            "kept": false,
+            "why": "That doesn't make much sense actually, $n$ & $m$ should not be in the same equation"
+          }
+        ],
+        "chosen": ""
+      },
+      "prerequisites": [
+        {
+          "name": "det",
+          "needed_for": "to handle invertibility properties",
+          "flag": "needed"
+        },
+        {
+          "name": "rank",
+          "needed_for": "to describe $B$",
+          "flag": "assumed"
+        },
+        {
+          "name": "Induction",
+          "needed_for": "to start with $n=1$",
+          "flag": "needed"
+        }
+      ],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [
+          {
+            "span_id": "s4",
+            "old": 80,
+            "new": 40,
+            "why": "student wrote $n$ and $m$ should not be in the same equation"
+          }
+        ],
+        "what_changed": "student noted the circled $m = n-k$ work does not make sense because $n$ and $m$ should not be in the same equation"
+      },
+      "domain": "maths"
+    },
+    "comparison": {
+      "where_you_are": "Page 1 sets $B = A^n - I$ as invertible, sketches a $2$ by $2$ subtraction of $I$, notes 'Induction' with '$n=1$' and circles '$A^m = (B+I)A^{-k} = 0$'; how those notes give $A^m = 0$ is still open.",
+      "first_divergence": "On page 1 '$C = pA$' misreads the $\\mathbb{Z}/p\\mathbb{Z}$ rule, since the statement says two matrices count as the same when each pair of entries differs by a multiple of $p$. From there the margin tries 'Induction' with '$n=1$' instead of asking what that sameness forces on the list $A, A^2, \\dots$.",
+      "cards": [
+        {
+          "kind": "wrong_turn",
+          "evidence_student": "page 1: you wrote '$m = n-k$', '$A^{n-k} = (B+I)A^{-k}$' and circled '$A^m = (B+I)A^{-k} = 0$' with 'Can we invert $A$ $k$ times such that we get $O$ matrix?!'",
+          "expert_span_ids": [
+            "s4",
+            "s5"
+          ],
+          "diagnosis": "The pages already have $B = A^n - I$ invertible, but the $m = n-k$ line uses $A^{-k}$, which needs $A$ itself to have an inverse that the pages never establish. The pages flag this with 'Can we invert $A$ $k$ times such that we get $O$ matrix?!' and that $n$ and $m$ should not mix, so the line cannot turn $A^m = (B+I)A^{-k} = 0$ into a usable equation for $A^m = 0$.",
+          "redirection": "You already have $B = A^n - I$ invertible, so write two powers sharing an early factor and look at what $I$ minus a power does in that product.",
+          "self_check": "When I write $A^{-k}$, what inverse am I assuming that the hypothesis does not give me?"
+        },
+        {
+          "kind": "unused_mark",
+          "evidence_student": "page 1: you wrote 'Must use and understand clearly - $Z/pZ$' and '$Z/pZ$ implies ∃ $C$ such that $C = pA$' beside a matrix arrow turning entries into $p$ multiples",
+          "expert_span_ids": [
+            "s2",
+            "s10"
+          ],
+          "diagnosis": "The route keeps $\\mathbb{Z}/p\\mathbb{Z}$ as $C = pA$ with a single matrix in view, so different powers stay separate with no link between them. That leaves the list $A, A^2, \\dots$ with all terms possibly different and no joint equation to work on.",
+          "redirection": "Count how many different matrices the $p$ choices per entry allow and ask what that number forces on the infinite list $A, A^2, \\dots$.",
+          "self_check": "On the next problem over $\\mathbb{Z}/p\\mathbb{Z}$, what finite total should I count before letting a process run forever?"
+        }
+      ],
+      "unused_cues": [
+        "with entries in the field $\\mathbb{Z}/p\\mathbb{Z}$",
+        "$A^n - I$ is invertible for every positive integer $n$",
+        "two matrices are considered the same if each pair of corresponding entries differ by a multiple of $p$"
+      ],
+      "where_to_next": "Look again at the $B = A^n - I$ you already have and what an invertible factor does in a $0$ product."
+    },
+    "attempt_report": {
+      "structure": "unstructured",
+      "inferred_stages": [
+        "reading",
+        "goal",
+        "simplification",
+        "method"
+      ],
+      "missing_stages": [
+        "abstraction"
+      ],
+      "legibility": [
+        "page 1, matrix arrow line turning entries into p multiples",
+        "page 1, lower right lines about k being odd or even",
+        "page 2, cut off words after Thinking more"
+      ]
+    },
+    "grounded": true
+  }
+}

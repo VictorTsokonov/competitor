@@ -1,0 +1,428 @@
+{
+  "meta": {
+    "source": "ICMC 2019 Problem 1",
+    "fixture": "icmc-2019-p1",
+    "recorded_at": "2026-11-03T16:23:47.029Z",
+    "model": "muse-spark-1.3",
+    "pages": [
+      "/examples/2/page-1.jpg",
+      "/examples/2/page-2.jpg",
+      "/examples/2/page-3.jpg"
+    ]
+  },
+  "analysis": {
+    "problem": {
+      "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, $n$. She then marks another $n+1$ points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+    },
+    "expert": {
+      "problem": {
+        "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, $n$. She then marks another $n+1$ points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "a sphere",
+          "category": "setting",
+          "weight": 60,
+          "reason": "Every hemisphere is cut by a flat plane through the middle of the sphere"
+        },
+        {
+          "id": "s2",
+          "text": "finite number of points",
+          "category": "setting",
+          "weight": 52,
+          "reason": "A whole number count that drops each round cannot drop forever"
+        },
+        {
+          "id": "s3",
+          "text": "with Alice going first",
+          "category": "informal",
+          "weight": 30,
+          "reason": "Each round is Alice adding then Bob removing so watch the count after Bob"
+        },
+        {
+          "id": "s4",
+          "text": "counts the number of marked points on the sphere, $n$",
+          "category": "rule",
+          "weight": 68,
+          "reason": "Alice counts n then adds n plus one so track how the total grows"
+        },
+        {
+          "id": "s5",
+          "text": "marks another $n+1$ points",
+          "category": "rule",
+          "weight": 88,
+          "reason": "n points become 2n+1 with 5 becoming 11 so Bob must beat half each round"
+        },
+        {
+          "id": "s6",
+          "text": "chooses one hemisphere",
+          "category": "rule",
+          "weight": 72,
+          "reason": "Bob picks the side after seeing where the points are"
+        },
+        {
+          "id": "s7",
+          "text": "including any marked points on the boundary of the hemisphere",
+          "category": "rule",
+          "weight": 96,
+          "reason": "Points on the boundary go too so aiming the boundary at points is the lever"
+        },
+        {
+          "id": "s8",
+          "text": "always guarantee",
+          "category": "goal",
+          "weight": 80,
+          "reason": "Bobs plan must work wherever Alice puts her new points"
+        },
+        {
+          "id": "s9",
+          "text": "after a finite number of moves",
+          "category": "goal",
+          "weight": 82,
+          "reason": "To show the game ends find a whole number that falls each round"
+        },
+        {
+          "id": "s10",
+          "text": "the sphere contains no marked points",
+          "category": "goal",
+          "weight": 64,
+          "reason": "Clearing everything means zero points left on the whole sphere"
+        },
+        {
+          "id": "s11",
+          "text": "any plane passing through the centre",
+          "category": "definition",
+          "weight": 84,
+          "reason": "Any two points of the sphere lie on one plane through the middle"
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s5",
+            "why_it_matters": "Alice turns $n$ points into $n + (n+1) = 2n+1$: with $n = 5$, that is 11. To end the round below 5, Bob must remove at least 7 of the 11, more than half; taking just the bigger half, 6, leaves 5 again.",
+            "how_spotted": "Run the rule on a small count, say $n = 5$, and work out how many points Bob must remove to come out ahead."
+          },
+          {
+            "id": "c2",
+            "span_id": "s7",
+            "why_it_matters": "For $n = 1$ Alice makes $3$ points. If Bob can put $2$ of the $3$ on the boundary circle, those $2$ count for whichever closed side he takes, on top of its open-side share.",
+            "how_spotted": "When the statement settles a special case on purpose, like points on the boundary, ask how a player could create that case deliberately."
+          },
+          {
+            "id": "c3",
+            "span_id": "s11",
+            "why_it_matters": "For $3$ points, Bob needs a boundary circle through $2$ of them. The words any plane give him that freedom, since any $2$ points lie with the centre in some plane.",
+            "how_spotted": "Read a spelled-out definition word by word and ask what freedom each word gives: 'any plane' lets Bob pick the plane."
+          },
+          {
+            "id": "c4",
+            "span_id": "s8",
+            "why_it_matters": "Bob's plan must work however Alice places her $n+1$ points, so with $n = 5$ test every idea against her hardest placement of the $6$ new points for Bob.",
+            "how_spotted": "Underline 'always' and ask who chooses what: Alice chooses where the points go."
+          }
+        ],
+        "definitions": [
+          {
+            "term": "hemisphere",
+            "meaning_latex": "the half of the sphere on one side of a plane through the centre, together with its boundary, a circle as wide as the sphere"
+          },
+          {
+            "term": "count after a round",
+            "meaning_latex": "the number of marked points left just after Bob's move"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "The question is whether Bob has a way of choosing hemispheres that is sure to clear every marked point, whatever Alice does.",
+        "answer_form": "The answer is yes or no, with a proof: either a rule for Bob's choices and a proof that the points run out, or a way for Alice to place points so that one is always left.",
+        "final_line_would_say": "After every round there are fewer marked points than before, so after finitely many rounds there are none."
+      },
+      "informal_cues": [
+        {
+          "span_id": "s3",
+          "bearing": "Every round is 'Alice adds, then Bob removes', so track the count left after Bob's move."
+        }
+      ],
+      "abstraction": {
+        "underneath": [
+          {
+            "object": "a hemisphere",
+            "really_is": "everything on one side of a plane through the centre, including the circle where that plane cuts the sphere",
+            "implies": "marked points on that circle are removed whichever side Bob picks"
+          },
+          {
+            "object": "choosing a hemisphere",
+            "really_is": "choosing a plane through the centre, then one of its two sides",
+            "implies": "the two sides together hold every point, so the fuller side holds at least half of those off the boundary"
+          }
+        ],
+        "deeper_properties": [
+          "Marked points on the boundary are removed whichever side Bob takes, so each one he can put there counts on top of his side's share.",
+          "The bigger side alone is not enough: from 11 points, taking 6 leaves 5, where the round started. The boundary has to supply the extra."
+        ]
+      },
+      "simplification": {
+        "instance": "Try the round that starts with $n = 1$: Alice adds $2$ points to make $3$.",
+        "instance_latex": "Start from $3$ points spread out as far as possible.",
+        "what_to_try": "Try every plane through the centre that passes through two of the points and compare how many points lie on each closed side, boundary included.",
+        "notice_prompt": "With the boundary circle through two marked points, how many of the $3$ points must the fuller closed side hold?"
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Monovariant: the count falls every round",
+            "deciding_span_ids": [
+              "s5",
+              "s7",
+              "s9",
+              "s11"
+            ],
+            "from_first_principles": "To show the game ends, find a whole-number count that falls every round: the count left after Bob's move. Alice turns $n$ into $n + (n+1) = 2n+1$, so Bob must remove one more than the bigger half alone guarantees to leave fewer than $n$. Points on the boundary are removed whichever side Bob picks, and the freedom to use any plane lets him aim the boundary through marked points, so try the great circle through any two marked points and delete the fuller closed side.",
+            "kept": true,
+            "why": "It answers exactly the question asked: a whole-number count that falls every round must reach zero, and every step comes from a phrase of the statement."
+          },
+          {
+            "name": "Take the fuller open side",
+            "deciding_span_ids": [
+              "s6"
+            ],
+            "from_first_principles": "The two open sides together hold the points off the boundary, so one side holds at least half; taking it is the natural first try.",
+            "kept": false,
+            "why": "From $n = 5$ Alice makes 11, and the bigger half alone gives 6, leaving 5 where the round started; without the boundary points the count does not fall."
+          },
+          {
+            "name": "Find an Alice placement that survives forever",
+            "deciding_span_ids": [
+              "s8"
+            ],
+            "from_first_principles": "If the answer were no, Alice would need a spread of new points that no hemisphere can cover; spreading them evenly is the natural first try.",
+            "kept": false,
+            "why": "Bob chooses his plane after seeing the points, so he can aim the boundary at wherever Alice puts them; test any spread against that before trusting it."
+          }
+        ],
+        "chosen": "Monovariant: show the count left after Bob's move falls every round, with the extra points coming from the boundary rule."
+      },
+      "prerequisites": [
+        {
+          "name": "Pigeonhole principle",
+          "needed_for": "Points shared between two sides put at least half on one side: 9 points on two sides means one side has at least 5.",
+          "flag": "needed"
+        },
+        {
+          "name": "Great circles",
+          "needed_for": "The boundary of a hemisphere is a circle as wide as the sphere, and any two points of the sphere lie on one such circle.",
+          "flag": "assumed"
+        }
+      ],
+      "second_reading": {
+        "new_spans": [
+          "including any marked points on the boundary of the hemisphere",
+          "any plane passing through the centre"
+        ],
+        "reweighted": [],
+        "what_changed": "At first taking the fuller side looked enough, but with $n = 5$ it leaves $5$ points from $11$. On this pass the boundary points stood out as the extra beyond half, because any plane through the centre lets Bob aim the circle at marked points."
+      },
+      "domain": "maths"
+    },
+    "student": {
+      "problem": {
+        "text": "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:\n- On Alice's move, she counts the number of marked points on the sphere, $n$. She then marks another $n+1$ points on the sphere.\n- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.\nCan Bob always guarantee that after a finite number of moves, the sphere contains no marked points?\n(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)"
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "with Alice going first",
+          "category": "setting",
+          "weight": 60,
+          "reason": "wrote 'Alice going 1st' with 1st underlined on page 1",
+          "uncertain": false
+        },
+        {
+          "id": "s2",
+          "text": "she counts the number of marked points on the sphere, $n$.",
+          "category": "rule",
+          "weight": 50,
+          "reason": "wrote 'Alice creates new points (n+1) points' with '(n+1) points' circled on page 1",
+          "uncertain": true
+        },
+        {
+          "id": "s3",
+          "text": "She then marks another $n+1$ points on the sphere.",
+          "category": "rule",
+          "weight": 90,
+          "reason": "circled '(n+1) points' and wrote 'Alice creates new points (n+1) points' on page 1",
+          "uncertain": false
+        },
+        {
+          "id": "s4",
+          "text": "he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.",
+          "category": "rule",
+          "weight": 70,
+          "reason": "wrote 'Bob clears half the sphere each time, including the marked points on the boundary' on page 1",
+          "uncertain": false
+        },
+        {
+          "id": "s5",
+          "text": "after a finite number of moves, the sphere contains no marked points?",
+          "category": "goal",
+          "weight": 70,
+          "reason": "wrote 'Therefore the game can finish only if A -> ... -> B -> End (n=0)' on page 1",
+          "uncertain": false
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s1",
+            "why_it_matters": "Alice moves first then they take turns one after the other",
+            "how_spotted": "page 1, heading 'Alice going 1st' with 1st underlined and line '$A \\to B \\to A \\to B \\to A \\to B \\to ...$' underneath"
+          },
+          {
+            "id": "c2",
+            "span_id": "s2",
+            "why_it_matters": "Alice looks at how many points there are before she adds more",
+            "how_spotted": "page 1, arrow line 'Alice creates new points' next to circled '$(n+1)$ points'"
+          },
+          {
+            "id": "c3",
+            "span_id": "s3",
+            "why_it_matters": "Alice adds that many new points each time",
+            "how_spotted": "page 1, circled '(n+1) points' next to 'Alice creates new points'"
+          },
+          {
+            "id": "c4",
+            "span_id": "s4",
+            "why_it_matters": "Bob takes away one half of the sphere each time even points on the edge",
+            "how_spotted": "page 1, arrow line 'Bob clears half the sphere each time, including the marked points on the boundary'"
+          },
+          {
+            "id": "c5",
+            "span_id": "s5",
+            "why_it_matters": "the game only ends with a Bob move leaving nothing left",
+            "how_spotted": "page 1, line 'Therefore the game can finish only if $A \\to ... \\to B \\to End$ $(n=0)$'"
+          }
+        ],
+        "definitions": [
+          {
+            "term": "(->)",
+            "meaning_latex": "Person 1 does something, then Person 2 does something"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "can Bob always finish with no marked points left",
+        "answer_form": "a final Bob move ending with $n=0$",
+        "final_line_would_say": "Bob finishes the job and wins"
+      },
+      "informal_cues": [],
+      "abstraction": {
+        "underneath": [],
+        "deeper_properties": []
+      },
+      "simplification": {
+        "instance": "a cut that takes 4 new points and 1 old point",
+        "instance_latex": "Cuts 4 new points + 1 old point",
+        "what_to_try": "page 2 top right, drew two small square diagrams with dots and dashed cuts to try the cut",
+        "notice_prompt": ""
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Counter Example:",
+            "deciding_span_ids": [],
+            "from_first_principles": "page 1 bottom in red: wrote 'Counter Example:' with 'Allice' underneath and nothing else worked out",
+            "kept": false,
+            "why": "abandoned on the page"
+          },
+          {
+            "name": "keep cutting the same half",
+            "deciding_span_ids": [],
+            "from_first_principles": "page 2 middle right: wrote 'Select 1 half always until Alice doesn't put 2 points on opposite sides of the sphere or she has just reached the maximum amount of points on only one of the sides and it's Bobs turn' next to a grid diagram with shading",
+            "kept": false,
+            "why": "marked Unlike on the page"
+          },
+          {
+            "name": "rotate a little and cut opposite sides to shrink the gap",
+            "deciding_span_ids": [
+              "s4"
+            ],
+            "from_first_principles": "page 2 bottom in blue box: wrote 'Bob rotates the sphere a bit, cuts the hemisphere such that there are no marked points between the opposite distances where he has rotated, continuously cuts opposite hemispheres on each turn, decreases the distance between rotational cuts Eventually all of Alice's points will lie on one side or/and the boundary, Bob finishes the job and wins' with arrow from 'Yes! Bob can do this! and win!' and page 2 red oval 'Maybe Bob can have a system where he rotates the ball a small amount, then cuts?' with sphere diagrams and page 3 '$x_0$ > x_1 > x_2 > x_3 > ...'",
+            "kept": true,
+            "why": "pointed to by Yes Bob can do this and win on the page"
+          }
+        ],
+        "chosen": "rotate a little and cut opposite sides to shrink the gap"
+      },
+      "prerequisites": [],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [],
+        "what_changed": "crossed out the red 'Bob cannot guarantee' line on page 1 and wrote 'Yes! Bob can do this! and win!' on page 2, then on page 3 added doubt 'Feel like it could be explained better, Also not sure if we would be able to decrease the distance every single turn'"
+      },
+      "domain": "maths"
+    },
+    "comparison": {
+      "where_you_are": "Page 1 sets the turn order ending at $n=0$ and notes that Bob clears a hemisphere including the boundary, while page 2 tries shrinking cuts and page 3 records $x_0 > x_1 > x_2 > x_3 > \\cdots$ as a hope.",
+      "first_divergence": "Page 1 circles '$(n+1)$ points' for what Alice adds but never adds the $n$ already there, so the round total $n + (n+1)$ never appears on the pages.",
+      "cards": [
+        {
+          "kind": "wrong_turn",
+          "evidence_student": "page 2 in the blue box you wrote 'Bob rotates the sphere a bit, cuts the hemisphere such that there are no marked points between the opposite distances where he has rotated, continuously cuts opposite hemispheres on each turn, decreases the distance between rotational cuts Eventually all of Alice's points will lie on one side or/and the boundary, Bob finishes the job and wins' and on page 3 you wrote 'Feel like it could be explained better, Also not sure if we would be able to decrease the distance every single turn'.",
+          "expert_span_ids": [
+            "s8",
+            "s9"
+          ],
+          "diagnosis": "The route assumes the gap between opposite cuts keeps shrinking, but Alice chooses where the $n+1$ new points go each round. Your page 3 doubt names the gap: there is no reason on the pages why that distance must fall when Alice can place points on both sides. So the route states $x_0 > x_1 > x_2 > x_3 > \\cdots$ without producing the fall.",
+          "redirection": "Test your shrinking-gap picture against one concrete reply where Alice puts some of her $n+1$ new points on each side of your planned hemisphere.",
+          "self_check": "Does my plan still work if Alice uses her $n+1$ points to spoil the exact picture I drew?"
+        },
+        {
+          "kind": "missed_cue",
+          "evidence_student": "page 1 you wrote 'Alice creates new points' next to circled '$(n+1)$ points' with no line adding the $n$ already there.",
+          "expert_span_ids": [
+            "s4",
+            "s5"
+          ],
+          "diagnosis": "Without the round total the route cannot say what Bob must beat. With $n = 5$, Alice makes $5 + 6 = 11$. To end that round below $5$, Bob must clear at least $7$ of the $11$, which is more than the bigger hemisphere alone gives.",
+          "redirection": "Write the round total from $n$ and $n+1$ for $n = 1$ to get $3$, then work out how many of those $3$ Bob must clear to finish below $1$.",
+          "self_check": "Have I written the total from $n$ and $n+1$ before deciding what Bob must remove?"
+        },
+        {
+          "kind": "unused_mark",
+          "evidence_student": "page 1 you wrote 'Bob clears half the sphere each time, including the marked points on the boundary' and the page 2 blue-box method never aims that boundary through marked points.",
+          "expert_span_ids": [
+            "s7",
+            "s11"
+          ],
+          "diagnosis": "The page 1 line is right that points on the boundary go whichever hemisphere Bob takes, but the method never uses it to gain extra points. With $n = 1$, Alice makes $3$, and a hemisphere counted without the boundary can leave $1$ point standing. The boundary has to supply the extra beyond that open count, which the rotating cuts never try to force.",
+          "redirection": "For the $3$ points from $n = 1$, try every hemisphere whose boundary goes through two of the points and count what the hemisphere holds, boundary included.",
+          "self_check": "When the statement calls out the boundary on purpose, have I asked how to put points on it myself?"
+        }
+      ],
+      "unused_cues": [
+        "with Alice going first",
+        "She then marks another $n+1$ points on the sphere.",
+        "after a finite number of moves, the sphere contains no marked points?"
+      ],
+      "where_to_next": "Look again at what the $n$ plus $n+1$ points let Alice do to the picture your cut needs."
+    },
+    "attempt_report": {
+      "structure": "unstructured",
+      "inferred_stages": [
+        "reading",
+        "goal",
+        "simplification",
+        "method"
+      ],
+      "missing_stages": [
+        "abstraction"
+      ],
+      "legibility": []
+    },
+    "grounded": true
+  }
+}

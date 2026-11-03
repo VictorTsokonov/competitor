@@ -4,4 +4,7 @@
 
 export const EXAMPLE_FILES: Record<number, () => Promise<{ default: unknown }>> = {
   1: () => import("./example-1.json"),
+  2: () => import("./example-2.json"),
+  3: () => import("./example-3.json"),
+  4: () => import("./example-4.json"),
 };

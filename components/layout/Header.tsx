@@ -1,26 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Pill from "@/components/ui/Pill";
 
 export default function Header() {
   const pathname = usePathname();
-  const [toast, setToast] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
-  function signIn() {
-    setToast(true);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToast(false), 2500);
-  }
 
   function navClass(href: string): string {
     const active = href === "/" ? pathname === href : pathname.startsWith(href);
@@ -44,21 +28,7 @@ export default function Header() {
         <Link href="/guide" className={navClass("/guide")}>
           Guide
         </Link>
-        <Pill
-          onClick={signIn}
-          className="min-h-[2.625rem] gap-2.5 px-[1.375rem] text-[1.0625rem]"
-        >
-          <span aria-hidden="true">G</span> Continue with Google
-        </Pill>
       </nav>
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-card px-5 py-2 text-[1rem] font-bold shadow-[2px_3px_0_rgba(43,38,34,0.12)]"
-        >
-          Sign-in coming soon
-        </div>
-      )}
     </header>
   );
 }

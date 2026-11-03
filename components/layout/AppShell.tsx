@@ -7,7 +7,6 @@ import Panel from "@/components/layout/Panel";
 import Drawer from "@/components/layout/Drawer";
 import SetsPanel from "@/components/sets/SetsPanel";
 import PanelToggle from "@/components/PanelToggle";
-import Pill from "@/components/ui/Pill";
 import IconButton from "@/components/ui/IconButton";
 import { usePanelState } from "@/lib/usePanelState";
 
@@ -67,7 +66,6 @@ export default function AppShell({
   } = usePanelState();
   const isPhone = useIsPhone();
   const [drawer, setDrawer] = useState<"left" | "right" | null>(null);
-  const [toast, setToast] = useState(false);
 
   useEffect(() => {
     if (!isPhone) setDrawer(null);
@@ -175,24 +173,7 @@ export default function AppShell({
               <Link href="/guide" className="text-ink no-underline">
                 Guide
               </Link>
-              <Pill
-                onClick={() => {
-                  setToast(true);
-                  setTimeout(() => setToast(false), 2500);
-                }}
-                className="min-h-[2.625rem] gap-2.5 px-[1.375rem] text-[1.0625rem]"
-              >
-                <span aria-hidden="true">G</span> Continue with Google
-              </Pill>
             </nav>
-            {toast && (
-              <div
-                role="status"
-                className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-card px-5 py-2 text-[1rem] font-bold shadow-[2px_3px_0_rgba(43,38,34,0.12)]"
-              >
-                Sign-in coming soon
-              </div>
-            )}
           </Drawer>
         )}
         {isPhone && drawer === "right" && (

@@ -1,0 +1,464 @@
+{
+  "meta": {
+    "source": "ICMC 2019 Problem 3",
+    "fixture": "icmc-2019-p3",
+    "recorded_at": "2026-11-03T16:46:35.364Z",
+    "model": "muse-spark-1.3",
+    "pages": [
+      "/examples/3/page-1.jpg",
+      "/examples/3/page-2.jpg",
+      "/examples/3/page-3.jpg"
+    ]
+  },
+  "analysis": {
+    "problem": {
+      "text": "Consider a grid of points where each point is coloured either white or black, such that no two rows have the same sequence of colours and no two columns have the same sequence of colours. Let a table denote four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid. A table is called balanced if one diagonal pair of points are coloured white and the other diagonal pair black.\nDetermine all possible values of $k \\geq 2$ for which there exists a colouring of a $k \\times 2019$ grid with no balanced tables."
+    },
+    "expert": {
+      "problem": {
+        "text": "Consider a grid of points where each point is coloured either white or black, such that no two rows have the same sequence of colours and no two columns have the same sequence of colours. Let a table denote four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid. A table is called balanced if one diagonal pair of points are coloured white and the other diagonal pair black.\nDetermine all possible values of $k \\geq 2$ for which there exists a colouring of a $k \\times 2019$ grid with no balanced tables."
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "a grid of points",
+          "category": "setting",
+          "weight": 45,
+          "reason": "Sets the board where rows and columns are the objects to compare"
+        },
+        {
+          "id": "s2",
+          "text": "coloured either white or black",
+          "category": "definition",
+          "weight": 50,
+          "reason": "Fixes only two colours so each point has a binary choice"
+        },
+        {
+          "id": "s3",
+          "text": "no two rows have the same sequence of colours",
+          "category": "rule",
+          "weight": 85,
+          "reason": "Rows must all differ as whole strings limiting how many rows can fit"
+        },
+        {
+          "id": "s4",
+          "text": "no two columns have the same sequence of colours",
+          "category": "rule",
+          "weight": 80,
+          "reason": "Columns must all differ as whole strings limiting how many columns can fit"
+        },
+        {
+          "id": "s5",
+          "text": "four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid",
+          "category": "definition",
+          "weight": 75,
+          "reason": "A table is fixed by picking two rows and two columns"
+        },
+        {
+          "id": "s6",
+          "text": "one diagonal pair of points are coloured white and the other diagonal pair black",
+          "category": "definition",
+          "weight": 95,
+          "reason": "Opposite corners match while the two diagonals differ, the exact pattern that is forbidden"
+        },
+        {
+          "id": "s7",
+          "text": "Determine all possible values of $k \\geq 2$",
+          "category": "goal",
+          "weight": 80,
+          "reason": "Asks for every height that can occur needing both examples and impossibility"
+        },
+        {
+          "id": "s8",
+          "text": "there exists a colouring",
+          "category": "informal",
+          "weight": 60,
+          "reason": "One good colouring per height is enough not a claim about all colourings"
+        },
+        {
+          "id": "s9",
+          "text": "a $k \\times 2019$ grid",
+          "category": "setting",
+          "weight": 55,
+          "reason": "Fixes width while height varies so count how tall can stand"
+        },
+        {
+          "id": "s10",
+          "text": "with no balanced tables",
+          "category": "rule",
+          "weight": 90,
+          "reason": "The global ban that must force order on every pair of rows"
+        },
+        {
+          "id": "s11",
+          "text": "with sides parallel to those of the grid",
+          "category": "definition",
+          "weight": 70,
+          "reason": "Shows tables come from row and column pairs so ban is read on two rows"
+        },
+        {
+          "id": "s12",
+          "text": "diagonal pair of points",
+          "category": "definition",
+          "weight": 80,
+          "reason": "Names opposite corners whose colours decide if a table is banned"
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s6",
+            "why_it_matters": "Write white as $0$ and black as $1$ ($0$ is white, $1$ is black). Then a table is balanced exactly when one diagonal has $0$ at both ends and the other diagonal has $1$ at both ends, for example $0$ at top-left and bottom-right and $1$ at the other two corners.",
+            "how_spotted": "Copy the diagonal description into a $2$ by $2$ box and fill the two diagonals with opposite colours."
+          },
+          {
+            "id": "c2",
+            "span_id": "s10",
+            "why_it_matters": "The ban applies to every table in the $k \\times 2019$ grid, so it can be read on just two rows at a time: pick two rows and look at what pairs appear down the $2019$ columns.",
+            "how_spotted": "Underline no and ask what choice of two rows and two columns would break it."
+          },
+          {
+            "id": "c3",
+            "span_id": "s7",
+            "why_it_matters": "For $k \\geq 2$ the answer needs both directions: one colouring with distinct rows, distinct columns and no balanced table for each good $k$, and a reason no other $k$ works.",
+            "how_spotted": "Split determine all into two jobs: build one example where possible and rule out where impossible."
+          },
+          {
+            "id": "c4",
+            "span_id": "s8",
+            "why_it_matters": "Only one $k \\times 2019$ colouring with distinct rows, distinct columns and no balanced table is needed per $k$, so a staircase, meaning rows like $100$, $110$, $111$ that add $1$s step by step, can certify its $k$ in the $k \\times 2019$ grid even if most colourings fail. Keep $3$ columns only as a trial.",
+            "how_spotted": "Mark the words there exists and ask what you must build versus what you must forbid."
+          }
+        ],
+        "definitions": [
+          {
+            "term": "table",
+            "meaning_latex": "two distinct rows and two distinct columns of the $k \\times 2019$ grid with the four crossing points as corners"
+          },
+          {
+            "term": "balanced",
+            "meaning_latex": "a table whose one diagonal is white-white and the other is black-black"
+          },
+          {
+            "term": "sequence of colours",
+            "meaning_latex": "the left-to-right list of colours in a row or the top-to-bottom list in a column"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "What is asked is which heights $k \\geq 2$ admit a colouring of the $k \\times 2019$ grid with distinct rows, distinct columns and no balanced table.",
+        "answer_form": "A complete answer gives a list of good heights, each with one explicit colouring with distinct rows, distinct columns and no balanced table, plus a proof that no other height admits such a colouring.",
+        "final_line_would_say": "The final line would say the good heights are exactly those listed, each with its example and with all other heights ruled out."
+      },
+      "informal_cues": [
+        {
+          "span_id": "s8",
+          "bearing": "\"there exists a colouring\": one good colouring per $k$ is enough, so constructions can be very special."
+        }
+      ],
+      "abstraction": {
+        "underneath": [
+          {
+            "object": "a colouring",
+            "really_is": "a grid of entries $0$ or $1$",
+            "implies": "each row and each column can be compared entry by entry"
+          },
+          {
+            "object": "a balanced table",
+            "really_is": "a $2$ by $2$ table with $0$ on one diagonal and $1$ on the other",
+            "implies": "its two rows disagree in opposite directions in the two columns"
+          }
+        ],
+        "deeper_properties": [
+          "A table is fixed by two distinct rows and two distinct columns, and swapping the two columns does not change whether it is balanced.",
+          "Distinctness of rows and columns is about whole strings of length $2019$ or $k$, so two rows can agree in many places and still be distinct."
+        ]
+      },
+      "simplification": {
+        "instance": "Try the same problem with $2019$ replaced by $3$.",
+        "instance_latex": "Look at $3$ rows and $3$ columns, for instance the rows $100$, $110$ and $111$.",
+        "what_to_try": "Check the three column strings are distinct and look at the $2$ by $2$ tables from any two rows to see none is balanced.",
+        "notice_prompt": "What does the absence of any balanced table force about the mixed columns, meaning a $(0,1)$ or $(1,0)$ pair down two rows with white as $0$ and black as $1$, seen in any two rows?"
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Binary rows ordered pointwise",
+            "deciding_span_ids": [
+              "s6",
+              "s10",
+              "s3"
+            ],
+            "from_first_principles": "A balanced table on two rows $x$, $y$ is both $(0,1)$ and $(1,0)$ appearing down the $2019$ columns, so banning it misses one mixed pair for each pair of rows. That leaves $x[c]<=y[c]$ for every column $c$ or $y[c]<=x[c]$ for every column $c$. Then distinct rows ordered this way nest strictly while each column down the rows is $0^t1^{k-t}$ with $t$ the count of $0$s, and counting these row and column possibilities squeezes $k$ from both sides and points to staircase colourings.",
+            "kept": true,
+            "why": "It uses every lever: the diagonal pattern gives the two mixed column types, the global ban lines rows up, and distinct rows and columns turn the lining-up into a count with matching staircase examples."
+          },
+          {
+            "name": "Count whole rows and columns alone",
+            "deciding_span_ids": [
+              "s3",
+              "s4"
+            ],
+            "from_first_principles": "Distinct rows and distinct columns look like a counting problem about binary strings, so count them directly.",
+            "kept": false,
+            "why": "Counting strings alone ignores the ban on balanced tables, which is the only link between a pair of rows and a pair of columns."
+          },
+          {
+            "name": "Build freely for many rows",
+            "deciding_span_ids": [
+              "s9",
+              "s8"
+            ],
+            "from_first_principles": "Since only one colouring per $k$ is needed, try to extend examples to arbitrarily many rows while keeping columns distinct.",
+            "kept": false,
+            "why": "Two rows that disagree in both directions already make a balanced table, so free extension keeps hitting the forbidden diagonal pattern."
+          }
+        ],
+        "chosen": "Binary rows ordered pointwise; rows form a chain, counted by nested sets and column shapes, with staircase examples."
+      },
+      "prerequisites": [
+        {
+          "name": "Binary 0-1 encoding",
+          "needed_for": "Turns white-black patterns into entrywise comparison of rows.",
+          "flag": "needed"
+        },
+        {
+          "name": "Chains under pointwise order",
+          "needed_for": "Lets distinct comparable rows nest so row and column possibilities stay limited.",
+          "flag": "needed"
+        },
+        {
+          "name": "Distinct binary strings",
+          "needed_for": "Counts how many different rows or columns can appear at once.",
+          "flag": "assumed"
+        }
+      ],
+      "second_reading": {
+        "new_spans": [
+          "with sides parallel to those of the grid",
+          "diagonal pair of points"
+        ],
+        "reweighted": [
+          {
+            "span_id": "s3",
+            "old": 75,
+            "new": 85,
+            "why": "Strict nesting of distinct lined-up rows now decides the upper squeeze."
+          },
+          {
+            "span_id": "s4",
+            "old": 70,
+            "new": 80,
+            "why": "Distinct single-block columns now decide the lower squeeze."
+          },
+          {
+            "span_id": "s5",
+            "old": 65,
+            "new": 75,
+            "why": "Two rows and two columns fix a table so the ban is read on row pairs."
+          }
+        ],
+        "what_changed": "At first distinct rows and columns looked like separate counts. On rereading, the pair view shows the ban on the diagonal pattern lines up every two rows, so row distinctness and column distinctness together count the lined-up shapes from both sides."
+      },
+      "domain": "maths"
+    },
+    "student": {
+      "problem": {
+        "text": "Consider a grid of points where each point is coloured either white or black, such that no two rows have the same sequence of colours and no two columns have the same sequence of colours. Let a table denote four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid. A table is called balanced if one diagonal pair of points are coloured white and the other diagonal pair black.\nDetermine all possible values of $k \\geq 2$ for which there exists a colouring of a $k \\times 2019$ grid with no balanced tables."
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "each point is coloured either white or black",
+          "category": "setting",
+          "weight": 50,
+          "reason": "drew filled and open dots and wrote about 2 options and 1 option on page 1",
+          "uncertain": true
+        },
+        {
+          "id": "s2",
+          "text": "no two rows have the same sequence of colours",
+          "category": "rule",
+          "weight": 85,
+          "reason": "wrote has no 2 rows or cols having the same sequence on page 1 and wrote No rows and columns must be the same on page 2",
+          "uncertain": false
+        },
+        {
+          "id": "s3",
+          "text": "no two columns have the same sequence of colours",
+          "category": "rule",
+          "weight": 85,
+          "reason": "wrote has no 2 rows or cols having the same sequence on page 1 and wrote No rows and columns must be the same on page 2",
+          "uncertain": false
+        },
+        {
+          "id": "s4",
+          "text": "Let a table denote four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid.",
+          "category": "definition",
+          "weight": 60,
+          "reason": "wrote table is 2x2 on page 2 next to small square drawings",
+          "uncertain": false
+        },
+        {
+          "id": "s5",
+          "text": "A table is called balanced if one diagonal pair of points are coloured white and the other diagonal pair black.",
+          "category": "definition",
+          "weight": 90,
+          "reason": "wrote balanced tables under two small square drawings on page 2 and wrote forall tables equals unbalanced",
+          "uncertain": false
+        },
+        {
+          "id": "s6",
+          "text": "Determine all possible values of $k \\geq 2$ for which there exists a colouring of a $k \\times 2019$ grid with no balanced tables.",
+          "category": "goal",
+          "weight": 90,
+          "reason": "wrote Grid k x 2019 and wrote exists colouring of K x 2019 forall tables equals unbalanced and finished with So the only possible value for k must be k equals 2019",
+          "uncertain": false
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s1",
+            "why_it_matters": "took it to mean each spot has 2 options shown as filled dot and open dot",
+            "how_spotted": "page 1, top of middle writing with dot and circle symbols followed by wrote 2 options"
+          },
+          {
+            "id": "c2",
+            "span_id": "s2",
+            "why_it_matters": "took it to mean no 2 rows having the same sequence",
+            "how_spotted": "page 1, middle line wrote has no 2 rows or cols having the same sequence and page 2, top line wrote No rows and columns must be the same"
+          },
+          {
+            "id": "c3",
+            "span_id": "s3",
+            "why_it_matters": "took it to mean no 2 cols having the same sequence",
+            "how_spotted": "page 1, middle line wrote has no 2 rows or cols having the same sequence and page 2, top line wrote No rows and columns must be the same"
+          },
+          {
+            "id": "c4",
+            "span_id": "s4",
+            "why_it_matters": "took it to mean table is $2x2$",
+            "how_spotted": "page 2, under the two small square drawings wrote table is $2x2$"
+          },
+          {
+            "id": "c5",
+            "span_id": "s5",
+            "why_it_matters": "took it to mean the two balanced patterns drawn as small squares and later all tables equals unbalanced",
+            "how_spotted": "page 2, small square drawings labelled balanced tables and middle line wrote forall tables equals unbalanced with $\\forall$ and $K \\times 2019$"
+          },
+          {
+            "id": "c6",
+            "span_id": "s6",
+            "why_it_matters": "took it to mean find $k$ for a $k \\times 2019$ grid with no balanced tables",
+            "how_spotted": "page 2, wrote Grid $k \\times 2019$ and wrote exists colouring line, page 3 last line wrote So the only possible value for k must be $k=2019$"
+          }
+        ],
+        "definitions": [
+          {
+            "term": "table",
+            "meaning_latex": "table is $2x2$"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "find $k$ where there exists a colouring of a $K \\times 2019$ with $\\forall$ tables equals unbalanced",
+        "answer_form": "a value of $k$",
+        "final_line_would_say": "So the only possible value for k must be $k=2019$ ?"
+      },
+      "informal_cues": [],
+      "abstraction": {
+        "underneath": [],
+        "deeper_properties": []
+      },
+      "simplification": {
+        "instance": "a $2\\times3$ grid",
+        "instance_latex": "2\\times 3",
+        "what_to_try": "page 2 drew two small grids and wrote doesnt follow rule under one and wrote A $2\\times3$ is not possible under the other and wrote What about $2o$ $2019$",
+        "notice_prompt": ""
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "count row and column combinations",
+            "deciding_span_ids": [
+              "s2",
+              "s3"
+            ],
+            "from_first_principles": "page 1 wrote $2^{2019}$ op beside first row and $1$ op beside second and wrote $2^{2019}$ op and $2^{2019}-1$ for columns and wrote 1st col goes to 6 options and 2nd col goes to Max 5 options, page 2 wrote 1st row has $2^{2019}$ combinations and 2nd row has $2^{2019}-1$ combinations and columns must have $2^{2019-1}$ or more combinations",
+            "kept": true,
+            "why": "carried through to the last line about $k=2019$"
+          },
+          {
+            "name": "draw example grids to picture the rules",
+            "deciding_span_ids": [
+              "s2",
+              "s3"
+            ],
+            "from_first_principles": "page 2 wrote Let me try to picture a grid following the cols and rows rules and wrote Not sure what to do so I will draw some examples, then drew dot grids and a $6\\times4$ grid with a question mark",
+            "kept": false,
+            "why": "wrote Not a good example better to follow something like $2x2019$ $3x2019$"
+          }
+        ],
+        "chosen": "count row and column combinations"
+      },
+      "prerequisites": [],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [],
+        "what_changed": ""
+      },
+      "domain": "maths"
+    },
+    "comparison": {
+      "where_you_are": "The pages count strings like $2^{2019}$ for rows and columns in the $k \\times 2019$ grid and sketch $2 \\times 3$ grids to test distinct rows and columns, ending with $k=2019$ for the $k \\times 2019$ grid. How the diagonal pair of points in a balanced table limits pairs of rows is the question to open next.",
+      "first_divergence": "On page 1 you wrote \"$2^{2019}$ op\" to count possibilities for the $k \\times 2019$ grid, while the expert first copies the white-white against black-black diagonal pair of points into a condition on two rows.",
+      "cards": [
+        {
+          "kind": "wrong_turn",
+          "evidence_student": "page 1: you wrote \"$2^{2019}$ op\" beside the first row and page 2: you wrote \"1st row has $2^{2019}$ combinations\" and \"2nd row has $2^{2019}-1$ combinations\"",
+          "expert_span_ids": [
+            "s6",
+            "s10"
+          ],
+          "diagnosis": "Counting strings shows how many different sequences of colours fit, which your $2^{2019}$ on page 1 gets right for one row. The route treats each row on its own, so it cannot turn the white-white against black-black diagonal pair of points into a limit on $k$ in the $k \\times 2019$ grid.",
+          "redirection": "You already have $2 \\times 3$ sketches on page 2, so pick two rows there and list the two colours in each column side by side to see when both mixed pairs show up.",
+          "self_check": "On the next problem, what pair of objects must I compare entry by entry to see the forbidden pattern?"
+        },
+        {
+          "kind": "unused_mark",
+          "evidence_student": "page 2: you drew two small squares labelled \"balanced tables\" and wrote \"table is $2x2$\" beside them",
+          "expert_span_ids": [
+            "s5",
+            "s6"
+          ],
+          "diagnosis": "The squares record the white-white against black-black diagonal pair of points that defines a balanced table in the $k \\times 2019$ grid. That corner condition stays off the counting route, so the route cannot test whether two rows already hold those four corners.",
+          "redirection": "You already have the two squares labelled \"balanced tables\" on page 2, so copy one square and mark which two corners come from the upper row and which two come from the lower row.",
+          "self_check": "On the next problem, how will I use each definition I marked before I start counting?"
+        }
+      ],
+      "unused_cues": [
+        "Let a table denote four points on the grid that form the vertices of a rectangle with sides parallel to those of the grid.",
+        "A table is called balanced if one diagonal pair of points are coloured white and the other diagonal pair black.",
+        "Determine all possible values of $k \\geq 2$ for which there exists a colouring of a $k \\times 2019$ grid with no balanced tables."
+      ],
+      "where_to_next": "Look again at the two small squares on page 2 and ask what they say about any two rows in the $k \\times 2019$ grid."
+    },
+    "attempt_report": {
+      "structure": "unstructured",
+      "inferred_stages": [
+        "reading",
+        "goal",
+        "simplification",
+        "method"
+      ],
+      "missing_stages": [
+        "abstraction"
+      ],
+      "legibility": []
+    },
+    "grounded": true
+  }
+}

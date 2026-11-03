@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { Analysis } from "@/lib/schema";
 import FirstDivergence from "@/components/comparison/FirstDivergence";
 import FeedbackCardView from "@/components/comparison/FeedbackCardView";
@@ -9,53 +8,19 @@ import UnusedCues from "@/components/comparison/UnusedCues";
 import StudentMethod from "@/components/comparison/StudentMethod";
 import StudentSecondReading from "@/components/comparison/StudentSecondReading";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
+import ComparisonEmpty from "@/components/comparison/ComparisonEmpty";
+import NextStep from "@/components/comparison/NextStep";
+import PanelSection, { ComparisonHeading } from "@/components/comparison/PanelSection";
 import type { PageImage } from "@/lib/pages";
-
-function Section({
-  title,
-  defaultOpen,
-  first,
-  children,
-}: {
-  title: string;
-  defaultOpen: boolean;
-  first?: boolean;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className={first ? "py-[14px]" : "border-t-2 border-dashed border-rule py-[14px]"}>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full cursor-pointer items-baseline justify-between text-left text-[1.25rem] font-bold"
-      >
-        {title}
-        <span aria-hidden="true" className="text-muted">
-          {open ? "–" : "+"}
-        </span>
-      </button>
-      {open && <div>{children}</div>}
-    </div>
-  );
-}
-
-// What the empty panel says while a submitted attempt is on its way.
-function pendingText(attemptPhase: string): string {
-  if (attemptPhase === "error") {
-    return "Your attempt could not be read — try again from the centre panel.";
-  }
-  if (attemptPhase === "done") {
-    return "Your attempt has been read — the comparison appears once the expert reading is in.";
-  }
-  return "Your attempt is being read — the comparison appears once it and the expert reading are in.";
-}
 
 // data null is the unsolved state; an expert-only analysis (no attempt
 // extracted yet) keeps the empty state. Once the student chain is real the
 // comparison renders in full, even for a near-empty attempt with no marks
 // — the heading stays either way so the layout does not jump. pages are
 // this session's submitted attempt pages (or a recorded example's).
+// Order is a hint ladder: where the student stands, the one next step,
+// then the cards (each card's own next move folded until asked for), and
+// last what the student wrote themselves, folded.
 export default function ComparisonPanel({
   data,
   pages,
@@ -74,41 +39,15 @@ export default function ComparisonPanel({
 }) {
   const attempted = !!data && (!!data.attempt_report || data.student.spans.length > 0);
   if (!data || !attempted) {
-    const pending = attemptPhase && !(attemptPhase === "done" && data);
-    const emptyText = pending
-      ? pendingText(attemptPhase)
-      : !data
-        ? "The comparison appears here after you submit your attempt."
-        : data.comparison.first_divergence ||
-          "Submit your attempt to see the comparison.";
-    return (
-      <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
-        <div className="flex min-h-[36px] items-center pr-[46px]">
-          <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
-            Comparison
-          </span>
-        </div>
-        <p className="mt-3 text-[1.0625rem] text-muted">{emptyText}</p>
-        {pages && pages.length > 0 && (
-          <div className="mt-4">
-            <div className="text-[1.25rem] font-bold">Your pages</div>
-            <PageThumbnails pages={pages} />
-          </div>
-        )}
-      </div>
-    );
+    return <ComparisonEmpty data={data} pages={pages} attemptPhase={attemptPhase} />;
   }
-  const { cards, unused_cues: unused } = data.comparison;
+  const { cards, unused_cues: unused, where_you_are, where_to_next } = data.comparison;
   // Grounded readings earn the stronger note; without a verified solution
   // the humbler wording stays. Recorded examples carry the verdict alone.
   const grounded = data.grounded ?? data.solution?.verified === true;
   return (
     <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
-      <div className="flex min-h-[36px] items-center pr-[46px]">
-        <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
-          Comparison
-        </span>
-      </div>
+      <ComparisonHeading />
       <p className="mt-1 text-[0.9375rem] text-muted">
         {grounded
           ? "The expert reading is grounded in a route the expert solved and verified on a small case. The solution itself stays private."
@@ -131,16 +70,17 @@ export default function ComparisonPanel({
           </button>
         </p>
       )}
-      {data.comparison.where_you_are && (
+      {where_you_are && (
         <p className="mt-3 text-[1.0625rem]">
-          <RichTex tex={data.comparison.where_you_are} />
+          <RichTex tex={where_you_are} />
         </p>
       )}
+      {where_to_next && <NextStep text={where_to_next} />}
       <div className="h-3" />
-      <Section title="First divergence" defaultOpen={true} first>
+      <PanelSection title="First divergence" defaultOpen={true} first>
         <FirstDivergence text={data.comparison.first_divergence} />
-      </Section>
-      <Section title={`What to revisit · ${cards.length}`} defaultOpen={true}>
+      </PanelSection>
+      <PanelSection title={`What to revisit · ${cards.length}`} defaultOpen={true}>
         <div className="mt-[10px] grid gap-[10px]">
           {cards.map((card) => (
             <FeedbackCardView
@@ -150,26 +90,21 @@ export default function ComparisonPanel({
             />
           ))}
         </div>
-      </Section>
-      <Section title={`Marked but unused · ${unused.length}`} defaultOpen={true}>
-        <UnusedCues cues={unused} expert={data.expert} student={data.student} />
-      </Section>
-      <Section title="Your method" defaultOpen={true}>
-        <StudentMethod student={data.student} />
-      </Section>
-      <Section title="Your second reading" defaultOpen={false}>
-        <StudentSecondReading student={data.student} />
-      </Section>
-      {data.comparison.where_to_next && (
-        <Section title="Where to next" defaultOpen={true}>
-          <p className="mt-[10px] text-[1.0625rem]">
-            <RichTex tex={data.comparison.where_to_next} />
-          </p>
-        </Section>
+      </PanelSection>
+      {unused.length > 0 && (
+        <PanelSection title={`Marked but unused · ${unused.length}`} defaultOpen={true}>
+          <UnusedCues cues={unused} expert={data.expert} student={data.student} />
+        </PanelSection>
       )}
-      <Section title="Your pages" defaultOpen={true}>
+      <PanelSection title="Your method" defaultOpen={false}>
+        <StudentMethod student={data.student} />
+      </PanelSection>
+      <PanelSection title="Your second reading" defaultOpen={false}>
+        <StudentSecondReading student={data.student} />
+      </PanelSection>
+      <PanelSection title="Your pages" defaultOpen={true}>
         <PageThumbnails pages={pages} />
-      </Section>
+      </PanelSection>
     </div>
   );
 }
