@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Field from "@/components/ui/Field";
 import Pill from "@/components/ui/Pill";
 import LatexEditor from "@/components/latex/LatexEditor";
@@ -8,7 +8,9 @@ import LatexPreview from "@/components/latex/LatexPreview";
 import AttemptSection from "@/components/create/AttemptSection";
 import PhotoDropzone from "@/components/create/PhotoDropzone";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
-import { filesToPages, MAX_ATTEMPT_PAGES, type PageImage } from "@/lib/pages";
+import { pastedPageFiles } from "@/components/create/pastedFiles";
+import { usePageDrop } from "@/components/create/usePageDrop";
+import { MAX_ATTEMPT_PAGES, type PageImage } from "@/lib/pages";
 
 const STATEMENT_PLACEHOLDER =
   "Prove that among any $n+1$ distinct integers chosen from $\\{1, 2, \\dots, 2n\\}$, there are two that are coprime.";
@@ -42,12 +44,12 @@ function CameraIcon() {
   );
 }
 
+// Never blocked: problems are analysed side by side, so the form stays
+// usable while earlier ones are still running.
 export default function CreateProblemForm({
   onCreate,
-  busy,
 }: {
   onCreate: (req: CreateRequest) => void;
-  busy: boolean;
 }) {
   const [mode, setMode] = useState<"write" | "photo">("write");
   const [name, setName] = useState("");
@@ -55,50 +57,48 @@ export default function CreateProblemForm({
   const [photos, setPhotos] = useState<PageImage[]>([]);
   const [attemptPages, setAttemptPages] = useState<PageImage[]>([]);
   const [status, setStatus] = useState<string | null>(null);
+  // Each field's drop, owned here so a paste routed to it shows the same
+  // progress, page-limit note and errors as a drop on it.
+  const problemDrop = usePageDrop(photos, setPhotos, MAX_STATEMENT_PAGES);
+  const attemptDrop = usePageDrop(attemptPages, setAttemptPages, MAX_ATTEMPT_PAGES);
 
-  // Pasted screenshots land in the problem field until it has a source,
-  // then in the attempt; clicking a dropzone first targets that field.
+  // Pasted screenshots land in the problem field until the chosen way of
+  // giving the statement (typed text, or screenshots) has one, then in the
+  // attempt; clicking a dropzone first targets that field. This is the
+  // form's only paste listener: its dropzones leave acceptPaste off, so each
+  // paste lands in exactly one field. The listener calls the latest
+  // onPaste, so it sees the current fields.
+  function onPaste(e: ClipboardEvent) {
+    const files = pastedPageFiles(e);
+    if (files.length === 0) return;
+    e.preventDefault();
+    const focused = (document.activeElement as HTMLElement | null)
+      ?.closest?.("[data-paste-target]")
+      ?.getAttribute("data-paste-target");
+    const hasStatement = mode === "write" ? latex.trim() !== "" : photos.length > 0;
+    const dest =
+      focused === "problem" || focused === "attempt"
+        ? focused
+        : hasStatement
+          ? "attempt"
+          : "problem";
+    if (dest === "problem") setMode("photo");
+    setStatus(null);
+    void (dest === "problem" ? problemDrop : attemptDrop).add(files).then((added) => {
+      if (added > 0) setStatus(`Pasted into the ${dest} field.`);
+    });
+  }
+  const onPasteRef = useRef(onPaste);
   useEffect(() => {
-    function onPaste(e: ClipboardEvent) {
-      const files = Array.from(e.clipboardData?.files ?? []).filter((f) =>
-        f.type.startsWith("image/")
-      );
-      if (files.length === 0) return;
-      e.preventDefault();
-      const focused = (document.activeElement as HTMLElement | null)
-        ?.closest?.("[data-paste-target]")
-        ?.getAttribute("data-paste-target");
-      const hasStatement = latex.trim().length > 0 || photos.length > 0;
-      const dest =
-        focused === "problem" || focused === "attempt"
-          ? focused
-          : hasStatement
-            ? "attempt"
-            : "problem";
-      void filesToPages(files).then(({ pages, errors }) => {
-        if (pages.length > 0) {
-          if (dest === "problem") {
-            setMode("photo");
-            setPhotos((prev) => [...prev, ...pages].slice(0, MAX_STATEMENT_PAGES));
-          } else {
-            setAttemptPages((prev) =>
-              [...prev, ...pages].slice(0, MAX_ATTEMPT_PAGES)
-            );
-          }
-        }
-        setStatus(
-          errors.length > 0
-            ? errors.join(" ")
-            : `Pasted into the ${dest === "problem" ? "problem" : "attempt"} field.`
-        );
-      });
-    }
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-  }, [latex, photos.length]);
+    onPasteRef.current = onPaste;
+  });
+  useEffect(() => {
+    const listener = (e: ClipboardEvent) => onPasteRef.current(e);
+    window.addEventListener("paste", listener);
+    return () => window.removeEventListener("paste", listener);
+  }, []);
 
   function create(createMode: "submit" | "later") {
-    if (busy) return;
     const writtenText = latex.trim();
     if (mode === "write" && !writtenText) {
       setStatus(
@@ -159,7 +159,10 @@ export default function CreateProblemForm({
         htmlFor="pname"
         className="mb-[6px] block text-[1.0625rem] font-bold"
       >
-        Name <span className="font-normal text-muted">(optional)</span>
+        Name{" "}
+        <span className="font-normal text-muted">
+          (optional — left empty, it is named from the statement)
+        </span>
       </label>
       <div className="mb-[22px]">
         <Field
@@ -208,6 +211,7 @@ export default function CreateProblemForm({
             pages={photos}
             onPages={setPhotos}
             max={MAX_STATEMENT_PAGES}
+            drop={problemDrop}
             emptyLabel={
               <>
                 Drop or paste a screenshot of the problem here, or{" "}
@@ -229,7 +233,7 @@ export default function CreateProblemForm({
       )}
 
       <div data-paste-target="attempt">
-        <AttemptSection pages={attemptPages} onPages={setAttemptPages} />
+        <AttemptSection pages={attemptPages} onPages={setAttemptPages} drop={attemptDrop} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -238,13 +242,14 @@ export default function CreateProblemForm({
           onClick={() => create("submit")}
           className="min-h-[42px] text-[1.0625rem]"
         >
-          {busy ? "Working…" : "Create problem and submit solution"}
+          Create problem and submit solution
         </Pill>
         <Pill onClick={() => create("later")}>Create problem and solve later</Pill>
       </div>
       <p className="mt-3 text-[0.9375rem] text-muted">
-        Analysis takes about a minute; each stage reports itself as it
-        finishes.
+        A full analysis takes several minutes — usually 6 to 10. Each stage
+        reports itself as it finishes, and you can create or open other
+        problems meanwhile.
       </p>
       {status && (
         <p role="status" className="mt-3 text-[1.0625rem] text-muted">

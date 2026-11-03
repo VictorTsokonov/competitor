@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { errorResponse } from "@/lib/apiError";
 import { fetchAnalysis } from "@/lib/analysis";
 import { SolutionSchema } from "@/lib/schema";
 
@@ -24,8 +25,6 @@ export async function POST(req: Request) {
       })
     );
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "request failed";
-    const status = message.includes("not wired") ? 501 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return errorResponse(e);
   }
 }

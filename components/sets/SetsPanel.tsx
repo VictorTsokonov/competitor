@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react";
 import ProblemLibrary from "@/components/sets/ProblemLibrary";
 import IconButton from "@/components/ui/IconButton";
-import {
-  createFolder,
-  loadLibrary,
-  saveLibrary,
-  type LibraryState,
-} from "@/lib/problems";
+import { createFolder, saveLibrary, type LibraryState } from "@/lib/problems";
+import { useAppMode } from "@/lib/useAppMode";
 
 export default function SetsPanel({
   onSelectProblem,
@@ -19,30 +15,34 @@ export default function SetsPanel({
   selectedProblemId?: string | null;
   footer?: React.ReactNode;
 }) {
+  const { mode, local, readLibrary } = useAppMode();
+  // Demo mode's library is the recorded examples: no new sets, no edits.
+  const readOnly = mode === "demo";
   const [library, setLibrary] = useState<LibraryState>({ problems: [], folders: [] });
   const [newFolder, setNewFolder] = useState(false);
   const [folderDraft, setFolderDraft] = useState("");
 
   useEffect(() => {
-    const reload = () => setLibrary(loadLibrary(localStorage));
+    const reload = () => setLibrary(readLibrary());
     reload();
     window.addEventListener("competitor:library-changed", reload);
     return () => window.removeEventListener("competitor:library-changed", reload);
-  }, []);
+  }, [readLibrary]);
 
   function commitRootFolder() {
     if (folderDraft.trim()) {
       const { state: next } = createFolder(library, folderDraft, null);
       setLibrary(next);
-      saveLibrary(localStorage, next);
+      saveLibrary(local, next);
     }
     setFolderDraft("");
     setNewFolder(false);
   }
 
   function update(next: LibraryState) {
+    if (readOnly) return;
     setLibrary(next);
-    saveLibrary(localStorage, next);
+    saveLibrary(local, next);
   }
 
   return (
@@ -51,18 +51,20 @@ export default function SetsPanel({
         <span className="font-display text-[1.75rem] font-bold leading-none text-accent">
           Sets
         </span>
-        <IconButton size="sm" label="New set" onClick={() => setNewFolder(true)}>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            style={{ width: "0.875rem", height: "0.875rem" }}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </IconButton>
+        {!readOnly && (
+          <IconButton size="sm" label="New set" onClick={() => setNewFolder(true)}>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              style={{ width: "0.875rem", height: "0.875rem" }}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </IconButton>
+        )}
       </div>
       <div className="h-[10px]" />
       {newFolder && (
@@ -82,6 +84,7 @@ export default function SetsPanel({
       )}
       <ProblemLibrary
         state={library}
+        readOnly={readOnly}
         selectedId={selectedProblemId ?? null}
         onChange={update}
         onSelectProblem={(id) => onSelectProblem(id)}

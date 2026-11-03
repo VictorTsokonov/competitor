@@ -86,13 +86,18 @@ function renderText(value: string): string {
   out = out.replace(/\\noindent/g, "");
   out = out.replace(/\\vspace\{[^{}]*\}/g, "");
   // Bare commands outside $…$, e.g. \frac{a}{b}: render inline via KaTeX.
-  out = out.replace(
-    /\\[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^{}]*\})*/g,
-    (cmd) =>
-      katex.renderToString(unescapeHtml(cmd), {
-        throwOnError: false,
-        displayMode: false,
-      })
+  // Where such a command shows a $ was misplaced, a stray ^{…} or _{…} in
+  // the same text goes too; plain text like "3^{1010}" alone stays as
+  // typed. One pass, so the KaTeX markup is never matched again.
+  const bare = /\\[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^{}]*\})*/;
+  const pattern = bare.test(value)
+    ? /\\[a-zA-Z]+(?:\[[^\]]*\])?(?:\{[^{}]*\})*|[\^_]\{[^{}]*\}/g
+    : new RegExp(bare.source, "g");
+  out = out.replace(pattern, (cmd) =>
+    katex.renderToString(unescapeHtml(cmd.startsWith("\\") ? cmd : `{}${cmd}`), {
+      throwOnError: false,
+      displayMode: false,
+    })
   );
   out = out.replace(/\n/g, "<br/>");
   return out;

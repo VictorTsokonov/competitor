@@ -8,15 +8,18 @@ import {
 } from "../../schema";
 import { compareSkeleton } from "../../compare";
 import { requestValidatedJson, type JsonCall } from "./client";
+import { repairDollarsDeep } from "./dollars";
 import { EXPLAIN_SYSTEM_PROMPT } from "./explainPrompt";
 
 // The explain call: turns the computed comparison skeleton into
 // elaborated feedback, grounded in the verified solution when there is
-// one. lib/compare.ts remains the fallback if this call fails.
+// one. lib/compare.ts remains the fallback if this call fails. A dropped
+// closing $ in the prose is repaired (./dollars.ts); unused_cues copy
+// statement phrases verbatim and are left alone.
 
 function explainSchema(expert: Chain) {
   const ids = new Set(expert.spans.map((s) => s.id));
-  return ComparisonSchema.superRefine((c, ctx) => {
+  const checked = ComparisonSchema.superRefine((c, ctx) => {
     c.cards.forEach((card, i) =>
       card.expert_span_ids.forEach((id, j) => {
         if (!ids.has(id)) {
@@ -29,6 +32,10 @@ function explainSchema(expert: Chain) {
       })
     );
   });
+  return z.preprocess(
+    (raw) => repairDollarsDeep(raw, (path) => path[0] === "unused_cues"),
+    checked
+  );
 }
 
 export async function runExplain(input: {
@@ -62,6 +69,9 @@ export async function runExplain(input: {
     system: EXPLAIN_SYSTEM_PROMPT,
     user: blocks.join("\n\n"),
     schema: explainSchema(expert) as z.ZodType<Comparison>,
-    effort: "medium",
+    // high: judging what the student's own working already does is the
+    // hard part of this call; at medium it repeatedly contradicted correct
+    // lines on the pages (3 of 4 recorded runs, 3 Nov).
+    effort: "high",
   });
 }

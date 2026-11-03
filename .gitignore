@@ -36,8 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local agent notes
+# local agent notes and settings
 claude.md
+.claude/
 
 # private test data (handwriting, contest statements)
 fixtures/

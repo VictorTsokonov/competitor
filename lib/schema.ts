@@ -229,6 +229,9 @@ export const AnalysisSchema = z
     // Call S's private grounding. Carried so resubmits and the feedback
     // call can use it without re-solving; never rendered anywhere.
     solution: SolutionSchema.optional(),
+    // Set on recorded examples, whose solution is stripped before they are
+    // written: true when the reading was grounded in a verified solution.
+    grounded: z.boolean().optional(),
   })
   .superRefine((val, ctx) => {
     (["expert", "student"] as const).forEach((side) => {

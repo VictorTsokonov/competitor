@@ -4,128 +4,186 @@
 
 ### ~~Stop solving.~~ **Start reading.**
 
-A maths tutor for Putnam / ICMC students that **never gives you the solution**.
-Instead, it shows you — cue by cue — how an expert *reads* a problem versus how *you* read it.
+**Competitor is a platform that makes problem-solving in competition maths measurable.**
+
+It records how an expert reads a problem and how you read it, phrase by phrase, in one shared
+schema, and shows exactly where the two readings part: with evidence from your own handwritten
+pages, and never the solution.
+
+<!-- TODO: replace both links before submission -->
+**[Live demo →](#)** · **[Demo video →](#)**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![KaTeX](https://img.shields.io/badge/KaTeX-maths_rendering-329894)](https://katex.org)
 [![zod](https://img.shields.io/badge/zod-validated_at_the_boundary-blue)](https://zod.dev)
+[![KaTeX](https://img.shields.io/badge/KaTeX-maths_rendering-329894)](https://katex.org)
 
-*Built for the Meta Hackathon 2026.*
+*Built for the Meta Hackathon 2026 on Muse Spark 1.3.*
 
 </div>
 
 ---
 
-## The idea
+## What it measures
 
-Competition maths is lost or won **before the first line of the proof** — in how you read the statement. Which phrases you weight, which objects you recognise for what they really are, which methods those cues suggest.
+Competition maths is decided before the first line of a proof: which phrases you weight, which
+objects you recognise for what they really are, which method those cues trigger. A finished
+solution hides all of that, so it never gets measured. Competitor turns it into data:
 
-Most tutoring tools hand you a solution and call it teaching. Competitor runs the **ProofReader protocol** instead:
+- **One schema for both readings.** Spans of the statement (exact substrings, checked in code)
+  with a category, a 0–100 weight and a reason; cues and how to spot them; the goal; what the
+  objects really are; a smaller instance to try; method candidates tied to the spans that decided
+  them; prerequisites; a second reading. The expert and the student are read into the same shape.
+- **Set difference, not vibes.** Which heavy expert cues your pages never touch, and which of
+  your marks fed no method, is computed in TypeScript (`lib/compare.ts`). The model treats those
+  facts as authoritative and cannot contradict them.
+- **Feedback with evidence.** At most three ranked cards, each quoting and locating your own
+  working, saying why that route stalls, pointing at the next move, and ending with a question you
+  can reuse on the next problem.
+- **Never the solution.** The expert solves privately so its reading is grounded in a route that
+  was actually checked. The solution is never rendered.
 
-1. An expert model reads the problem and produces a structured *reading* — weighted spans of the statement, cues, the real objects underneath, candidate methods and why one was kept.
-2. You work the problem on paper and upload a photo of your attempt.
-3. Your reading is extracted into the **same schema** — faithful to your own words, not charitable.
-4. The dashboard lays the two readings side by side: cues you both caught, cues you missed (and what each one unlocks), where your weights diverged.
+The dashboard is a workflow document, not a message box: there is no free-text input, and no
+verdict on who did better.
 
-No verdict on who did better. No chat box. **Never a solution** — the product's one hard rule.
+## Two modes, one deploy
 
-## The dashboard
-
-A workflow document styled like a maths notebook — ruled paper, handwritten display type (Caveat + Kalam), one accent red that only ever carries meaning.
-
-| Page | What it does |
-|---|---|
-| `/` | Landing — the wordmark, the pitch, how it works |
-| `/dashboard` | The app: problem library (nestable folders, drag-and-drop), layered problem reading in 8 stages, side-by-side comparison panel |
-| `/createProblem` | LaTeX statement editor with live KaTeX preview, attempt photo dropzone |
-| `/guide` | The student protocol: *"Work the problem as if you won't solve it."* |
-
-Every problem lives in one of two states, persisted locally:
-
-- **Unsolved** — rendered statement, protocol reminders, photo dropzone, *Submit attempt*.
-- **Analysed** — the layered expert reading (span heatmap over the statement, cues, abstraction, simplification, method candidates, prerequisites, second reading) plus the comparison.
-
-Three real ICMC 2020 problems (1, 2 and 6) ship analysed out of the box, with hand-written analyses that double as the model's quality target.
-
-## How the analysis is structured
-
-Expert and student chains share **one schema** (`lib/schema.ts`, zod-validated at the boundary):
-
-- **Spans** — exact substrings of the statement, each with a category, a 0–100 weight and a reason. Checked in code: a span must quote the source verbatim, so the dashboard can slice the KaTeX-rendered statement into a highlight heatmap.
-- **Cues** — why each span matters and a plausible account of how an expert would spot it (the UI is honest that this is a narrative, not the model's cognition).
-- **Abstraction** — what each object *really is* and what that implies.
-- **Method candidates** — each anchored to the spans that decided it, with first-principles reasoning and why it was kept or dropped.
-- **Second reading** — how the weights shift once a method is chosen.
-
-The comparison itself is **plain TypeScript set difference** — no model call, no vibes. Missed cues come with `what_it_unlocks` and a `self_check`, never a grade.
-
-## Model pipeline
-
-| Call | Role | Effort |
+| | Demo (`USE_MOCK=true`) | Live (`USE_MOCK=false` + `MODEL_API_KEY`) |
 |---|---|---|
-| **A** | Expert first reading of the statement | high |
-| **C** | Student reading extracted from attempt photos — faithful, in the student's own words | medium |
-| **B** | Expert second reading, given A | — |
-| `compare.ts` | Deterministic comparison of the two readings | no model |
+| Library | One read-only folder, **Examples**: recorded real runs of the full pipeline on the author's own handwritten attempts at ICMC problems | Your own, empty at first: create problems, folders, drag and drop |
+| Model calls | None. Every API route refuses at the provider seam, and the Meta client refuses again, even if a key is set | The full pipeline below |
+| Browser storage | `competitor.demo.*` | `competitor.live.*` |
 
-Calls go through the OpenAI SDK to Meta's API (`muse-spark-1.3`); the browser never talks to the model directly. A provider seam in `lib/analysis.ts` switches between the real pipeline and mock mode.
+The mode is decided on the server from env and passed down to the UI; nothing in the browser can
+switch a demo deploy to live. Anything other than `USE_MOCK=false` means demo, so a deploy with a
+missing variable fails closed.
 
-## Getting started
+Each example shows its source (for instance ICMC 2019 Problem 2), when it was recorded, and the
+handwritten pages the model read (click a page to open it). Examples are written by
+`scripts/record-example.ts`, which drives the same server code the app uses. Call S's solution is
+stripped before anything is written, and the script refuses to write a file if any of it survives.
 
-```bash
-git clone <this-repo>
-cd competitor
-npm install
+## The pipeline
+
+```
+statement ──► S  solve + verify ──┬──► A  expert reading ──► B  second reading ──► R  audit ──┬──► compare.ts ──► explain ──► feedback
+              (kept private)      └──► C  student reading of the attempt pages ───────────────┘
 ```
 
-Create `.env.local`:
+| Step | What it does | Effort |
+|---|---|---|
+| **S** | Solves privately, then a sceptical verifier walks the steps and recomputes a small case from scratch; one corrected re-solve on a fail. The verdict is recorded; an unverified solution is dropped. | high, then medium |
+| **A** | The expert reading, grounded in S's verified route: the kept method is that route, weights follow what it uses, the simplification is its small case, nothing echoes the answer. Binding plain-language rules (`lib/providers/meta/plainStyle.ts`, shared with B, R, C and explain): written for a student who is stuck, words before symbols, no notation the statement does not already use, small worked numbers before general formulas, every technique explained in plain words, a performable "how to spot it". | high |
+| **B** | Second reading with the finished chain in hand: weights move, up to two spans join. If it fails, A stands. | medium |
+| **R** | Audit: a sceptical-student role-play checks every claim is true (patterns stated in words are recomputed on small cases), cues are faithful to the route (conditions such as signs carried in the same card), fields are plain and followable (unexplained notation or notation standing in for a sentence fails) and nothing leaks the answer. One targeted revision on a fail. | medium |
+| **C** | Reads the attempt pages into the same schema: faithful, not charitable. Stages with no evidence stay empty, spans quote the statement verbatim, and a structure report says what was inferred or missing. | medium |
+| **compare.ts** | Set difference over located spans: missed heavy cues, unused marks, the route on each side. | no model |
+| **explain** | Writes the feedback from the solution, both chains and the computed facts, under the rules below, in the same plain language (the student's own working is quoted as written). If it fails, the compare.ts comparison is shown. | high |
+| **title** | Names a new problem in 2–6 plain words (never its answer or method). Until it lands, and if it fails, the name comes from the statement's opening words. | low |
+
+A, B and R run as three separate requests (`/api/expert`), so each shows as its own stage and is
+kept as it lands. In the browser every problem's analysis is a job of its own: several run side by
+side, they keep going while you open other problems or pages, and if the tab is reloaded the
+finished stages are kept, so resubmitting runs only what is left.
+
+Every call goes through the OpenAI SDK to Meta's API (`muse-spark-1.3`) in JSON mode; every response
+is validated with zod and retried once with the errors appended. The browser never talks to the
+model: uploads (photos, HEIC, multi-page PDFs) become downscaled JPEG pages in the browser first.
+In live mode the solution is cached with the analysis in your own browser, so a resubmission skips
+the solve; it is never displayed.
+
+## Research basis of the feedback rules
+
+The explain call's writing rules are the feedback literature made binding:
+
+| Rule | Source |
+|---|---|
+| Feedback is about the process and self-regulation, never the person | Hattie & Timperley 2007; Kluger & DeNisi 1996 |
+| Elaborate rather than verify: few, specific, ranked cards (at most three) | Shute 2008 |
+| Make the gap visible in the student's own work: evidence quoted and page-located | Sadler 1989 |
+| Hint at the next move and stop short of the bottom-out answer | VanLehn 2011 |
+| A correct idea that was dropped is a control decision to revisit, not a lack of ability | Schoenfeld 1985; Mueller & Dweck 1998 |
+| Every card ends with a self-check question the student can carry to the next problem | Nicol & Macfarlane-Dick 2006 |
+
+<details>
+<summary>References</summary>
+
+- Hattie, J. & Timperley, H. (2007). *Review of Educational Research*, 77(1), 81–112.
+- Kluger, A. N. & DeNisi, A. (1996). *Psychological Bulletin*, 119(2), 254–284.
+- Shute, V. J. (2008). *Review of Educational Research*, 78(1), 153–189.
+- Sadler, D. R. (1989). *Instructional Science*, 18(2), 119–144.
+- VanLehn, K. (2011). *Educational Psychologist*, 46(4), 197–221.
+- Schoenfeld, A. H. (1985). *Mathematical Problem Solving*. Academic Press.
+- Mueller, C. M. & Dweck, C. S. (1998). *Journal of Personality and Social Psychology*, 75(1), 33–52.
+- Nicol, D. J. & Macfarlane-Dick, D. (2006). *Studies in Higher Education*, 31(2), 199–218.
+
+</details>
+
+## Run it with your own key
+
+1. Get a Meta Model API key.
+2. Clone and install:
+   ```bash
+   git clone https://github.com/VictorTsokonov/competitor.git
+   cd competitor
+   npm install
+   cp .env.example .env.local
+   ```
+3. In `.env.local`, set `USE_MOCK=false` and `MODEL_API_KEY=<your key>`.
+4. `npm run dev`, then open http://localhost:3000/dashboard. Your library starts empty.
+5. Create a problem: type the statement (LaTeX with `$…$`), or paste a screenshot and it is
+   transcribed for you. Leave the name empty and it is named for you.
+6. Work the problem on paper following the [guide](http://localhost:3000/guide), photograph the
+   pages or export a PDF (or paste screenshots of them), and submit the attempt. Each stage shows
+   as it runs, with a retry; a full run takes several minutes, and you can create or open other
+   problems meanwhile.
+
+## Recording a demo example
 
 ```bash
-USE_MOCK=true           # serve the bundled hand-written analyses
-# MODEL_API_KEY=...     # for real calls (USE_MOCK=false)
+npx tsx scripts/record-example.ts <fixture-id> [--n <number>]
 ```
 
-Then:
+Runs the full pipeline in live mode on `fixtures/statements/<id>.txt` and
+`fixtures/attempts/<id>/page-*.jpg` (`fixtures/` is private and git-ignored), then writes
+`lib/examples/example-<n>.json` and `public/examples/<n>/`. Add the line it prints to
+`lib/examples/index.ts` and the example appears in the demo.
 
-```bash
-npm run dev             # http://localhost:3000
-```
-
-With `USE_MOCK=true`, submitting an attempt on a bundled problem returns its hand-written analysis; unknown problems get an honest 501 rather than a fake result.
+Tuning scripts: `solve-pass.ts` (call S), `expert-pass.ts [--grounded]` (S → A → B → R with a
+pass/fail rubric against the hand-written targets in `lib/dummy/`), `attempt-pass.ts` (call C),
+`feedback-pass.ts` (the whole chain), all run with `npx tsx scripts/<name> <fixture-id>`.
 
 ## Project layout
 
 ```
-app/              Next.js 15 App Router — pages + API routes (no DB, no auth)
+app/                Next.js 15 App Router: pages and API routes (no DB, no auth)
+  dashboard/        page.tsx decides the mode on the server; Dashboard.tsx is the app
 components/
-  ui/             Pill, Tag, Card, Highlight, …  — the notebook primitives
-  layout/         Header, AppShell, Panel, Drawer
-  latex/          statement editor, live preview, LaTeX reference
-  sets/           problem library tree
-  reading/        the 8-stage layered reading
-  comparison/     expert-vs-student panel
+  ui/ layout/       notebook primitives, header, panels, drawers
+  sets/             the problem library tree
+  reading/          the layered reading in eight stages
+  comparison/       feedback cards and the student's side
+  create/ latex/    problem creation, attempt upload, LaTeX editor and reference
 lib/
-  schema.ts       the shared zod schema
-  statement.ts    slicing the KaTeX statement at span boundaries
-  marks.ts        highlight heatmap logic
-  dummy/          hand-written ICMC 2020 analyses (the quality bar)
-  providers/      the model provider seam
-design/           HTML mockups — the source of truth for layout and style
+  schema.ts         the shared zod schema
+  mode.ts           demo or live, from server env
+  analysis.ts       the provider seam every API route goes through
+  providers/        meta/ (the live calls and prompts), demo.ts (recorded examples)
+  compare.ts        the model-free comparison
+  examples/         recorded real runs served in demo mode
+  dummy/            hand-written analyses: the model's quality target
+scripts/            recording and tuning from the terminal
+design/             HTML mockups: the source of truth for layout and style
 ```
 
 ## Principles
 
-- **Never a chatbot.** The dashboard is a workflow document; there is no free-text input.
-- **Never a verdict.** Divergence is reported with evidence, not judged.
-- **Never a solution.** Reading is the product.
-- **Validate at the boundary.** Every model response passes zod before it touches the UI.
-- **Boring, readable code.** Each file does one thing; TypeScript strict, no `any`.
+- **Never the solution.** Reading is the product; the solution only grounds it.
+- **Never a verdict.** Divergence is reported with evidence, not graded.
+- **Validate at the boundary.** Every model response passes zod before it reaches the UI.
+- **Boring, readable code.** TypeScript strict, each file does one thing.
 
----
+## Built by
 
-<div align="center">
-<sub>Meta Hackathon 2026 · submission due Wed 4 Nov 2026</sub>
-</div>
+Solo build by Victor Tsokonov during the event (from 28 Oct 2026), using Muse Code and Claude
+Code as coding agents, with Muse Spark 1.3 in the product.

@@ -2,12 +2,15 @@
 // clicking through the UI:
 //   npx tsx scripts/expert-pass.ts icmc-2019-p1
 //   npx tsx scripts/expert-pass.ts path/to/problem.txt
-//   npx tsx scripts/expert-pass.ts icmc-2019-p2 --grounded
+//   npx tsx scripts/expert-pass.ts icmc-2019-p2 --grounded [--out chain.json]
 // --grounded runs the production chain: call S first, then A, B and the
 // audit R against the verified solution. Bundled ids also get a rubric
-// report (scripts/rubric.ts) so prompt changes are pass/fail, not vibes.
+// report (scripts/rubric.ts) so prompt changes are pass/fail, not vibes,
+// and every run ends with the plainness report (scripts/plainness.ts).
+// --out writes the validated chain, so `npx tsx scripts/plainness.ts`
+// can compare it with an earlier run later.
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { DUMMY_ANALYSES } from "../lib/dummy";
 import type { Chain, Solution } from "../lib/schema";
@@ -15,6 +18,7 @@ import { runExpertPass, runSecondReading } from "../lib/providers/meta";
 import { runChainAudit, type ChainAudit } from "../lib/providers/meta/audit";
 import { runSolve } from "../lib/providers/meta/solve";
 import { checkRubric } from "./rubric";
+import { printChainPlainness } from "./plainness";
 
 const ROOT = resolve(__dirname, "..");
 
@@ -31,7 +35,7 @@ function loadEnvLocal(): void {
 }
 
 function problemText(arg: string): string {
-  const byId = DUMMY_ANALYSES[arg] ?? DUMMY_ANALYSES[`seed-${arg}`];
+  const byId = DUMMY_ANALYSES[arg];
   if (byId) return (byId as { problem: { text: string } }).problem.text;
   const fixture = join(ROOT, "fixtures", "statements", `${arg}.txt`);
   if (existsSync(fixture)) return readFileSync(fixture, "utf8").trim();
@@ -93,15 +97,17 @@ function printReport(arg: string, text: string, r: Report): void {
     console.log(`rubric:         ${rubric.length - failed}/${rubric.length} checks pass`);
     for (const c of rubric) console.log(`  ${c.pass ? "PASS" : "FAIL"}  ${c.name}: ${c.detail}`);
   }
+  printChainPlainness("expert chain", r.chain);
 }
 
 async function main(): Promise<void> {
   loadEnvLocal();
   const args = process.argv.slice(2);
   const grounded = args.includes("--grounded");
-  const arg = args.find((a) => !a.startsWith("--"));
+  const out = args.includes("--out") ? args[args.indexOf("--out") + 1] : undefined;
+  const arg = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--out");
   if (!arg) {
-    console.error("usage: npx tsx scripts/expert-pass.ts <problem-id | text-file> [--grounded]");
+    console.error("usage: npx tsx scripts/expert-pass.ts <problem-id | text-file> [--grounded] [--out chain.json]");
     console.error(`bundled ids: ${Object.keys(DUMMY_ANALYSES).join(", ")}`);
     process.exit(1);
   }
@@ -110,6 +116,10 @@ async function main(): Promise<void> {
   const report = grounded ? await runGrounded(text) : await runUngrounded(text);
   printReport(arg, text, report);
   console.log(`duration:       ${((Date.now() - started) / 1000).toFixed(1)}s total`);
+  if (out) {
+    writeFileSync(out, `${JSON.stringify(report.chain, null, 2)}\n`);
+    console.log(`chain written:  ${out}`);
+  }
 }
 
 main().catch((e: unknown) => {

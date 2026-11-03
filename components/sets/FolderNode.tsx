@@ -53,7 +53,7 @@ export default function FolderNode({ folder, depth, cb }: {
   return (
     <div
       onDragOver={(e) => {
-        if (illegal) return;
+        if (illegal || cb.readOnly) return;
         e.preventDefault();
         e.stopPropagation();
         cb.setDropTarget(folder.id);
@@ -63,7 +63,7 @@ export default function FolderNode({ folder, depth, cb }: {
       className={illegal ? "opacity-50" : ""}
     >
       <div
-        draggable={!editing}
+        draggable={!editing && !cb.readOnly}
         onDragStart={(e) => {
           e.dataTransfer.setData("text/folder-id", folder.id);
           cb.setDragPayload({ kind: "folder", id: folder.id });
@@ -96,17 +96,19 @@ export default function FolderNode({ folder, depth, cb }: {
         ) : (
           <>
             <span className="min-w-0 flex-1 truncate font-semibold">{folder.name}</span>
-            <span className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
-              <ActionButton label={`Add subfolder to ${folder.name}`} title="Add subfolder" onClick={() => { setNewChild(true); setOpen(true); }}>
-                <PlusIcon />
-              </ActionButton>
-              <ActionButton label={`Rename ${folder.name}`} title="Rename" onClick={() => cb.setEditing({ kind: "folder", id: folder.id })}>
-                <PencilIcon />
-              </ActionButton>
-              <ActionButton label={`Delete ${folder.name}`} title="Delete" onClick={() => cb.onChange(deleteFolder(cb.state, folder.id))}>
-                <TrashIcon />
-              </ActionButton>
-            </span>
+            {!cb.readOnly && (
+              <span className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
+                <ActionButton label={`Add subfolder to ${folder.name}`} title="Add subfolder" onClick={() => { setNewChild(true); setOpen(true); }}>
+                  <PlusIcon />
+                </ActionButton>
+                <ActionButton label={`Rename ${folder.name}`} title="Rename" onClick={() => cb.setEditing({ kind: "folder", id: folder.id })}>
+                  <PencilIcon />
+                </ActionButton>
+                <ActionButton label={`Delete ${folder.name}`} title="Delete" onClick={() => cb.onChange(deleteFolder(cb.state, folder.id))}>
+                  <TrashIcon />
+                </ActionButton>
+              </span>
+            )}
           </>
         )}
       </div>

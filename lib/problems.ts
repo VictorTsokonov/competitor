@@ -1,4 +1,6 @@
-// Local-first problem library. No auth, no DB: one localStorage key.
+// Local-first problem library. No auth, no DB: one localStorage key per
+// mode (lib/useAppMode.tsx prefixes it). Live mode starts empty and holds
+// only what the user creates; demo mode shows the recorded examples.
 // Shapes keep a userId-shaped hole so post-submit auth slots in later.
 
 export type ProblemFolder = {
@@ -25,8 +27,6 @@ export type StoredProblem = {
 export type LibraryState = {
   problems: StoredProblem[];
   folders: ProblemFolder[];
-  // Highest seed version applied; keeps deleted seeds deleted.
-  seedVersion?: number;
 };
 
 export type KeyValueStorage = {
@@ -34,90 +34,34 @@ export type KeyValueStorage = {
   setItem(key: string, value: string): void;
 };
 
-export const LIBRARY_KEY = "competitor.problems.v1";
-export const SELECT_INTENT_KEY = "competitor.selected-problem";
+// Keys under the mode prefix: competitor.live.problems.v1, and so on.
+export const LIBRARY_KEY = "problems.v1";
 // Last problem viewed on /dashboard; restored after navigating away and back.
-export const LAST_VIEW_KEY = "competitor.dashboard.view";
+export const LAST_VIEW_KEY = "dashboard.view";
+// The problem whose "solve later" creation card is showing, restored likewise.
+export const LAST_CARD_KEY = "dashboard.card";
 
 const EMPTY: LibraryState = { problems: [], folders: [] };
 
-// Bundled archive problems ship Analysed: their hand-written readings live
-// in lib/dummy/ under the same ids (kept out of the client bundle; the
-// analysis itself still comes from /api/analyse).
-const SEED_VERSION = 2;
+export const EXAMPLES_FOLDER_ID = "examples";
 
-// Statement mirrors problem.text in lib/dummy/icmc-2019-p1.json.
-const ICMC_2019_P1_TEXT = [
-  "Alice and Bob play a game on a sphere which is initially marked with a finite number of points. Alice and Bob then take turns making moves, with Alice going first:",
-  "- On Alice's move, she counts the number of marked points on the sphere, n. She then marks another n+1 points on the sphere.",
-  "- On Bob's move, he chooses one hemisphere and removes all marked points on that hemisphere, including any marked points on the boundary of the hemisphere.",
-  "Can Bob always guarantee that after a finite number of moves, the sphere contains no marked points?",
-  "(A hemisphere is the region on a sphere that lies completely on one side of any plane passing through the centre of the sphere.)",
-].join("\n");
-
-const ICMC_2019_P2_LATEX =
-  "Find integers $a$ and $b$ such that $$a^b = 3^0\\binom{2020}{0} - 3^1\\binom{2020}{2} + 3^2\\binom{2020}{4} - \\cdots + 3^{1010}\\binom{2020}{2020}.$$";
-
-const ICMC_2020_P6_LATEX =
-  "Let $\\varepsilon < \\tfrac12$ be a positive real number and let $U_\\varepsilon$ denote the set of real numbers that differ from their nearest integer by at most $\\varepsilon$. Prove that there exists a positive integer $m$ such that for any real number $x$, the sets $\\{x, 2x, 3x, \\dots, mx\\}$ and $U_\\varepsilon$ have at least one element in common.";
-
-// Each seed carries the version that introduced it, so a library seeded at
-// an older version gains only the new problems and deleted seeds stay deleted.
-const SEED_PROBLEMS: { introducedIn: number; problem: StoredProblem }[] = [
-  {
-    introducedIn: 1,
-    problem: {
-      id: "seed-icmc-2019-p1",
-      name: "Problem 1",
-      latex: ICMC_2019_P1_TEXT,
-      folderId: "seed-icmc-2019",
+// Demo mode's whole library: one read-only Examples folder holding the
+// recorded runs, rebuilt from the server's list on every visit (never
+// stored, so a re-recorded example can't go stale in a browser).
+export function exampleLibrary(
+  examples: { id: string; name: string; statement: string }[]
+): LibraryState {
+  return {
+    folders: [{ id: EXAMPLES_FOLDER_ID, name: "Examples", parentId: null }],
+    problems: examples.map((e) => ({
+      id: e.id,
+      name: e.name,
+      latex: e.statement,
+      folderId: EXAMPLES_FOLDER_ID,
       createdAt: 0,
       state: "analysed",
-    },
-  },
-  {
-    introducedIn: 2,
-    problem: {
-      id: "seed-icmc-2019-p2",
-      name: "Problem 2",
-      latex: ICMC_2019_P2_LATEX,
-      folderId: "seed-icmc-2019",
-      createdAt: 0,
-      state: "analysed",
-    },
-  },
-  {
-    introducedIn: 2,
-    problem: {
-      id: "seed-icmc-2020-p6",
-      name: "Problem 6",
-      latex: ICMC_2020_P6_LATEX,
-      folderId: "seed-icmc-2020",
-      createdAt: 0,
-      state: "analysed",
-    },
-  },
-];
-
-const BUNDLED_IDS = new Set(SEED_PROBLEMS.map((s) => s.problem.id));
-
-// Real folders and real problems: rename, move, drag and delete like
-// anything the user creates. Seeded once per version, then owned by the library.
-function seedFolders(): ProblemFolder[] {
-  const folder = (id: string, name: string, parentId: string | null): ProblemFolder => ({
-    id,
-    name,
-    parentId,
-  });
-  return [
-    folder("seed-icmc", "ICMC", null),
-    folder("seed-icmc-2020", "2020", "seed-icmc"),
-    folder("seed-icmc-2019", "2019", "seed-icmc"),
-    folder("seed-icmc-2018", "2018", "seed-icmc"),
-    folder("seed-putnam", "Putnam", null),
-    folder("seed-putnam-2024", "2024", "seed-putnam"),
-    folder("seed-putnam-2023", "2023", "seed-putnam"),
-  ];
+    })),
+  };
 }
 
 function uid(): string {
@@ -127,54 +71,15 @@ function uid(): string {
   return `id-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
 }
 
+function normaliseState(state: unknown): ProblemState {
+  return state === "analysed" || state === "creating" ? state : "unsolved";
+}
+
 export function loadLibrary(storage: KeyValueStorage): LibraryState {
-  return seedArchive(storage, migrateSeedIds(readLibrary(storage)));
-}
-
-// The sphere and binomial problems were first seeded mislabelled as ICMC
-// 2020 P1/P2; they are ICMC 2019 P1/P2. Saved libraries may still hold the
-// old ids, so rename on read (idempotent; persisted on the next save) and
-// re-home problems the user left in the 2020 folder.
-const RENAMED_SEED_IDS: Record<string, string> = {
-  "seed-icmc-2020-p1": "seed-icmc-2019-p1",
-  "seed-icmc-2020-p2": "seed-icmc-2019-p2",
-};
-
-function migrateSeedIds(state: LibraryState): LibraryState {
-  if (!state.problems.some((p) => p.id in RENAMED_SEED_IDS)) return state;
-  const has2019 = state.folders.some((f) => f.id === "seed-icmc-2019");
-  return {
-    ...state,
-    problems: state.problems.map((p) => {
-      const renamed = RENAMED_SEED_IDS[p.id];
-      if (!renamed) return p;
-      const folderId =
-        p.folderId === "seed-icmc-2020"
-          ? has2019
-            ? "seed-icmc-2019"
-            : null
-          : p.folderId;
-      return { ...p, id: renamed, folderId };
-    }),
-  };
-}
-
-// Missing state (libraries saved before states existed) defaults to
-// analysed for bundled problems, which ship with a reading, else unsolved.
-function normaliseState(p: { id: string; state?: unknown }): ProblemState {
-  if (p.state === "analysed" || p.state === "unsolved" || p.state === "creating") {
-    return p.state;
-  }
-  return BUNDLED_IDS.has(p.id) ? "analysed" : "unsolved";
-}
-
-function readLibrary(storage: KeyValueStorage): LibraryState {
   try {
     const raw = storage.getItem(LIBRARY_KEY);
     if (!raw) return { ...EMPTY };
-    const parsed = JSON.parse(raw) as Partial<LibraryState> & {
-      seededArchive?: boolean; // pre-versioning flag, meant "version 1"
-    };
+    const parsed = JSON.parse(raw) as Partial<LibraryState>;
     if (!Array.isArray(parsed.problems) || !Array.isArray(parsed.folders)) {
       return { ...EMPTY };
     }
@@ -183,18 +88,12 @@ function readLibrary(storage: KeyValueStorage): LibraryState {
     );
     const ids = new Set(folders.map((f) => f.id));
     return {
-      seedVersion:
-        typeof parsed.seedVersion === "number"
-          ? parsed.seedVersion
-          : parsed.seededArchive === true
-            ? 1
-            : 0,
       problems: parsed.problems
         .filter(
           (p) =>
             p && typeof p.id === "string" && typeof p.name === "string" && typeof p.latex === "string"
         )
-        .map((p) => ({ ...p, state: normaliseState(p) })),
+        .map((p) => ({ ...p, state: normaliseState(p.state) })),
       folders: folders.map((f) => ({
         id: f.id,
         name: f.name,
@@ -207,27 +106,6 @@ function readLibrary(storage: KeyValueStorage): LibraryState {
   }
 }
 
-function seedArchive(storage: KeyValueStorage, state: LibraryState): LibraryState {
-  const version = state.seedVersion ?? 0;
-  if (version >= SEED_VERSION) return state;
-  const folders = version < 1 ? [...seedFolders(), ...state.folders] : state.folders;
-  const folderIds = new Set(folders.map((f) => f.id));
-  const additions = SEED_PROBLEMS.filter((s) => s.introducedIn > version).map(
-    // The target folder may have been deleted since the first seeding.
-    (s) => ({
-      ...s.problem,
-      folderId: s.problem.folderId && folderIds.has(s.problem.folderId) ? s.problem.folderId : null,
-    })
-  );
-  const seeded: LibraryState = {
-    seedVersion: SEED_VERSION,
-    folders,
-    problems: [...additions, ...state.problems],
-  };
-  saveLibrary(storage, seeded);
-  return seeded;
-}
-
 export function saveLibrary(storage: KeyValueStorage, state: LibraryState): void {
   try {
     storage.setItem(LIBRARY_KEY, JSON.stringify(state));
@@ -236,9 +114,11 @@ export function saveLibrary(storage: KeyValueStorage, state: LibraryState): void
   }
 }
 
-export function nextAutoName(state: LibraryState): string {
-  return `Problem ${state.problems.length + 1}`;
-}
+// A problem's name until something better exists: lib/autoName.ts swaps
+// it for provisionalName(statement) once the statement is known, then for
+// the model's short title. A name the user typed is never touched.
+export const PLACEHOLDER_NAME = "New problem";
+export { provisionalName } from "./provisionalName";
 
 export function createProblem(
   state: LibraryState,
@@ -251,7 +131,7 @@ export function createProblem(
 ): { state: LibraryState; problem: StoredProblem } {
   const problem: StoredProblem = {
     id: uid(),
-    name: input.name?.trim() || nextAutoName(state),
+    name: input.name?.trim() || PLACEHOLDER_NAME,
     latex: input.latex,
     folderId: input.folderId ?? null,
     createdAt: Date.now(),

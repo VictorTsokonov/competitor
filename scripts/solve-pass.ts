@@ -24,7 +24,7 @@ function loadEnvLocal(): void {
 }
 
 function problemText(arg: string): string {
-  const byId = DUMMY_ANALYSES[arg] ?? DUMMY_ANALYSES[`seed-${arg}`];
+  const byId = DUMMY_ANALYSES[arg];
   if (byId) return (byId as { problem: { text: string } }).problem.text;
   const fixture = join(ROOT, "fixtures", "statements", `${arg}.txt`);
   if (existsSync(fixture)) return readFileSync(fixture, "utf8").trim();

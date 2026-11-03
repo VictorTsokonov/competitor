@@ -1,11 +1,24 @@
 import { z } from "zod";
 import { ChainSchema, refineChainReferences } from "../../schema";
+import { repairDollarsDeep } from "./dollars";
+
+// Verbatim quotes of the statement: never repaired, the validator checks
+// them character for character.
+function quotesStatement(path: string[]): boolean {
+  return (
+    path[0] === "problem" ||
+    (path[0] === "spans" && path[2] === "text") ||
+    (path[0] === "second_reading" && path[1] === "new_spans")
+  );
+}
 
 // The model must echo problem.text verbatim; rather than fail on echo
 // drift, pin it to the source so spans are validated against the real
-// statement. Span ids referenced anywhere must exist. side "expert" also
-// demands the 8-12 spans the prompt asks for; a student chain carries only
-// what the pages evidence, so any count from 0 up is legal.
+// statement. A dropped closing $ in a prose field is repaired rather than
+// failed (./dollars.ts). Span ids referenced anywhere must exist. side
+// "expert" also demands the 8-12 spans the prompt asks for; a student
+// chain carries only what the pages evidence, so any count from 0 up is
+// legal.
 export function pinnedChainSchema(
   problemText: string,
   side: "expert" | "student"
@@ -13,7 +26,10 @@ export function pinnedChainSchema(
   return z.preprocess(
     (raw) =>
       typeof raw === "object" && raw !== null
-        ? { ...(raw as Record<string, unknown>), problem: { text: problemText } }
+        ? {
+            ...(repairDollarsDeep(raw, quotesStatement) as Record<string, unknown>),
+            problem: { text: problemText },
+          }
         : raw,
     ChainSchema.superRefine((chain, ctx) => {
       refineChainReferences(chain, ctx);

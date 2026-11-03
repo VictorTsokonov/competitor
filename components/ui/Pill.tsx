@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const HAND_CUT = "rounded-[255px_15px_225px_15px/15px_225px_15px_255px]";
 
 function pillClass(variant: "primary" | "secondary", extra?: string): string {
@@ -28,6 +30,15 @@ export default function Pill({
 }) {
   // Mockup default: min-height 3.25rem, 1.25rem type; callers shrink via className.
   const cls = pillClass(variant, `min-h-[3.25rem] px-7 text-[1.25rem]${className ? ` ${className}` : ""}`);
+  // An in-app route goes through next/link: a full page load would reset
+  // the running analysis jobs (lib/jobStore.ts lives in the page's memory).
+  if (href !== undefined && href.startsWith("/")) {
+    return (
+      <Link href={href} onClick={onClick} className={cls}>
+        {children}
+      </Link>
+    );
+  }
   if (href !== undefined) {
     return (
       <a href={href} onClick={onClick} className={cls}>

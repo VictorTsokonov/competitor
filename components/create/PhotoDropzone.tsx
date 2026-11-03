@@ -1,47 +1,52 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { filesToPages, type PageImage } from "@/lib/pages";
+import { useEffect, useRef, useState } from "react";
+import type { PageImage } from "@/lib/pages";
+import { pastedPageFiles } from "@/components/create/pastedFiles";
+import { usePageDrop, type PageDrop } from "@/components/create/usePageDrop";
 
 // Drop target + file input. Converts every drop (photos, HEIC, multi-page
-// PDFs) into ordered JPEG pages via lib/pages.ts; the parent renders the
-// resulting pages with PageThumbnails and owns reorder/remove.
+// PDFs) into ordered JPEG pages via ./usePageDrop.ts; the parent renders the
+// resulting pages with PageThumbnails and owns reorder/remove. With
+// acceptPaste, a pasted screenshot or PDF anywhere on the page is taken as a
+// drop here — only one dropzone on a page should accept pastes. A parent
+// that routes pastes itself (the creation form) passes its own drop.
 export default function PhotoDropzone({
   pages,
   onPages,
   max,
   emptyLabel,
+  acceptPaste = false,
+  drop,
 }: {
   pages: PageImage[];
   onPages: (pages: PageImage[]) => void;
   max: number;
   emptyLabel: React.ReactNode;
+  acceptPaste?: boolean;
+  drop?: PageDrop;
 }) {
   const [dragging, setDragging] = useState(false);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [notes, setNotes] = useState<string[]>([]);
+  const own = usePageDrop(pages, onPages, max);
+  const { busy, notes, add } = drop ?? own;
   const inputRef = useRef<HTMLInputElement>(null);
+  // The paste listener calls the latest add(), so it sees the current pages.
+  const addRef = useRef(add);
+  useEffect(() => {
+    addRef.current = add;
+  });
 
-  async function add(files: Iterable<File | undefined>) {
-    if (busy) return;
-    setNotes([]);
-    setBusy("Reading…");
-    try {
-      const { pages: fresh, errors } = await filesToPages(files, setBusy);
-      const kept = [...pages, ...fresh].slice(0, max);
-      const dropped = pages.length + fresh.length - max;
-      const allNotes = [...errors];
-      if (dropped > 0) {
-        allNotes.push(
-          `Only the first ${max} pages are kept — remove pages that aren't part of this problem.`
-        );
-      }
-      setNotes(allNotes);
-      if (fresh.length > 0) onPages(kept);
-    } finally {
-      setBusy(null);
+  useEffect(() => {
+    if (!acceptPaste) return;
+    function onPaste(e: ClipboardEvent) {
+      const files = pastedPageFiles(e);
+      if (files.length === 0) return;
+      e.preventDefault();
+      void addRef.current(files);
     }
-  }
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [acceptPaste]);
 
   return (
     <div>
@@ -56,7 +61,7 @@ export default function PhotoDropzone({
         onDrop={(e) => {
           e.preventDefault();
           setDragging(false);
-          void add(e.dataTransfer.files);
+          void add(Array.from(e.dataTransfer.files));
         }}
         className={`w-full cursor-pointer rounded-[0.625rem] border-2 border-dashed bg-card/60 px-6 py-[26px] text-center text-[1.125rem] text-muted ${
           dragging ? "border-accent" : "border-ink/40"
@@ -81,7 +86,9 @@ export default function PhotoDropzone({
         aria-label="Choose photo or PDF files"
         className="sr-only"
         onChange={(e) => {
-          void add(e.target.files ?? []);
+          // Copy first: clearing the input empties its live FileList, which
+          // would cut the async read off after the first file.
+          void add(Array.from(e.target.files ?? []));
           e.target.value = "";
         }}
       />

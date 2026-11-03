@@ -2,6 +2,7 @@
 
 import PhotoDropzone from "@/components/create/PhotoDropzone";
 import PageThumbnails from "@/components/comparison/PageThumbnails";
+import type { PageDrop } from "@/components/create/usePageDrop";
 import { MAX_ATTEMPT_PAGES, type PageImage } from "@/lib/pages";
 
 const STEPS = [
@@ -12,13 +13,21 @@ const STEPS = [
 
 const NUMERALS = ["(i)", "(ii)", "(iii)"];
 
+// acceptPaste: pasted screenshots and PDFs join the attempt. Leave it off
+// where the parent routes pastes itself (the creation form), which passes
+// its own drop instead; either way the label says pasting works.
 export default function AttemptSection({
   pages,
   onPages,
+  acceptPaste = false,
+  drop,
 }: {
   pages: PageImage[];
   onPages: (pages: PageImage[]) => void;
+  acceptPaste?: boolean;
+  drop?: PageDrop;
 }) {
+  const pastes = acceptPaste || drop !== undefined;
   function remove(id: string) {
     onPages(pages.filter((p) => p.id !== id));
   }
@@ -59,9 +68,12 @@ export default function AttemptSection({
           pages={pages}
           onPages={onPages}
           max={MAX_ATTEMPT_PAGES}
+          acceptPaste={acceptPaste}
+          drop={drop}
           emptyLabel={
             <>
-              Drop photos or a PDF here, or{" "}
+              Drop photos or a PDF here,{" "}
+              {pastes ? "paste a screenshot, " : ""}or{" "}
               <span className="underline">choose files</span> · up to{" "}
               {MAX_ATTEMPT_PAGES} pages
             </>

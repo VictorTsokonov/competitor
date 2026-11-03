@@ -5,7 +5,7 @@
 // which rewrites the prose as elaborated feedback; the facts here are
 // authoritative either way.
 
-import type { Chain, Comparison, FeedbackCard } from "./schema";
+import type { Analysis, AttemptReport, Chain, Comparison, FeedbackCard } from "./schema";
 import { locateMarks, type Mark } from "./marks";
 
 // Spans the expert leaned on hard enough that missing one changes the
@@ -106,5 +106,21 @@ export function compareChains(expert: Chain, student: Chain): Comparison {
       byWeight.length > 0
         ? `Take one fresh pass at the problem using only the cue above before reading any further.`
         : `Re-run your kept route and watch where it leans on the cues you marked but never used.`,
+  };
+}
+
+// The analysis the dashboard renders and caches once both readings are in:
+// the explain call's feedback when it landed, this skeleton's comparison
+// until then (or when it failed).
+export function mergeAnalysis(
+  expertAnalysis: Analysis,
+  attempt: { student: Chain; report: AttemptReport },
+  comparison?: Comparison
+): Analysis {
+  return {
+    ...expertAnalysis,
+    student: attempt.student,
+    attempt_report: attempt.report,
+    comparison: comparison ?? compareChains(expertAnalysis.expert, attempt.student),
   };
 }

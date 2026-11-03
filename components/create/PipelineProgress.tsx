@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Pill from "@/components/ui/Pill";
-import type { JobStageKey, Stage } from "@/lib/useAnalysisJob";
+import type { JobStageKey, Stage } from "@/lib/jobTypes";
 
 export type PipelineView = {
   startedAt: number;
@@ -10,33 +10,59 @@ export type PipelineView = {
     key: JobStageKey;
     label: string;
     stage: Stage;
+    // Running, or waiting with nothing it depends on failed.
+    open: boolean;
     onRetry?: () => void;
   }[];
+  // A failure stopped the job before its final reading: back to the
+  // attempt form, keeping the private solution and any finished expert
+  // reading (the attempt is read again).
+  onStartOver?: () => void;
 };
 
-// Measured on the fixtures (1 Nov): statement read ~15s, solve+verify
-// ~30-170s, expert pass with second reading ~50s, attempt read ~30s,
-// feedback ~25s; expert and attempt run in parallel, after the solve.
-const ESTIMATE_S = {
-  transcribe: 15,
-  solve: 75,
-  expert: 50,
-  attempt: 30,
-  explain: 25,
-} as const;
+// Typical seconds per stage, measured 3 Nov on live runs with the
+// plain-language prompts (a browser run through /api/expert, two scripted
+// runs, and the request trace of earlier runs). A solve that fails its
+// check and re-solves can take about four minutes. The expert's three
+// steps run one after another, alongside the attempt read; everything
+// else runs in sequence.
+const ESTIMATE_S: Record<JobStageKey, number> = {
+  transcribe: 12,
+  solve: 90,
+  first: 160,
+  second: 65,
+  audit: 90,
+  attempt: 85,
+  explain: 60,
+};
 
 function estimateSeconds(view: PipelineView): number {
-  const open = (key: keyof typeof ESTIMATE_S) =>
-    view.stages.some(
-      (s) => s.key === key && (s.stage.phase === "pending" || s.stage.phase === "running")
-    );
+  const open = (key: JobStageKey) =>
+    view.stages.some((s) => s.key === key && s.open) ? ESTIMATE_S[key] : 0;
   return (
-    (open("transcribe") ? ESTIMATE_S.transcribe : 0) +
-    (open("solve") ? ESTIMATE_S.solve : 0) +
-    Math.max(open("expert") ? ESTIMATE_S.expert : 0, open("attempt") ? ESTIMATE_S.attempt : 0) +
-    (open("explain") ? ESTIMATE_S.explain : 0)
+    open("transcribe") +
+    open("solve") +
+    Math.max(open("first") + open("second") + open("audit"), open("attempt")) +
+    open("explain")
   );
 }
+
+// "45 s" under a minute, then "2 min 10 s"; rough rounds to whole minutes.
+function duration(seconds: number, rough = false): string {
+  if (seconds < 60) return `${seconds} s`;
+  const minutes = rough ? Math.round(seconds / 60) : Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return rough || rest === 0 ? `${minutes} min` : `${minutes} min ${rest} s`;
+}
+
+// Each stage's state in words for screen readers; sighted readers get the
+// tick, the muted colour and the trailing " …".
+const STATE_WORD: Record<Exclude<Stage["phase"], "skipped">, string> = {
+  pending: "waiting",
+  running: "running",
+  done: "done",
+  error: "failed",
+};
 
 function StageRow({
   label,
@@ -54,8 +80,12 @@ function StageRow({
         {stage.phase === "done" ? "✓" : stage.phase === "error" ? "·" : ""}
       </span>
       <span className={stage.phase === "pending" ? "text-muted" : ""}>
+        <span className="sr-only">{STATE_WORD[stage.phase]}: </span>
         {label}
         {stage.phase === "running" && <span className="text-muted"> …</span>}
+        {stage.phase === "done" && stage.message && (
+          <span className="text-muted"> · {stage.message}</span>
+        )}
         {stage.phase === "error" && (
           <>
             <span className="text-muted"> — {stage.message}</span>
@@ -80,11 +110,15 @@ export default function PipelineProgress({ view }: { view: PipelineView }) {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  const running = view.stages.some(
-    (s) => s.stage.phase === "running" || s.stage.phase === "pending"
-  );
+  const running = view.stages.some((s) => s.open);
+  const failed = view.stages.some((s) => s.stage.phase === "error");
   const elapsed = Math.max(0, Math.round((now - view.startedAt) / 1000));
-  const estimate = estimateSeconds(view);
+  // Only the stage-driven part is a live region: the clock ticks every
+  // second and would be announced every second.
+  const status = running ? "" : failed ? "stopped — a step failed" : "done";
+  const timing = running
+    ? `usually about ${duration(estimateSeconds(view), true)} more · ${duration(elapsed)} elapsed`
+    : "";
   return (
     <div className="my-[30px] rounded-[0.625rem] border-2 border-dashed border-rule bg-card/60 p-6">
       <div className="mb-4 flex items-center gap-4">
@@ -101,10 +135,11 @@ export default function PipelineProgress({ view }: { view: PipelineView }) {
             ∅
           </span>
         </span>
-        <span role="status" className="text-[1.0625rem] text-muted">
-          {running
-            ? `usually about ${estimate}s more · ${elapsed}s elapsed`
-            : "done"}
+        <span className="text-[1.0625rem] text-muted">
+          <span role="status">
+            {running ? <span className="sr-only">Analysis running.</span> : status}
+          </span>
+          {timing}
         </span>
       </div>
       <ul className="grid list-none gap-2 p-0">
@@ -112,6 +147,17 @@ export default function PipelineProgress({ view }: { view: PipelineView }) {
           <StageRow key={s.key} label={s.label} stage={s.stage} onRetry={s.onRetry} />
         ))}
       </ul>
+      {view.onStartOver && (
+        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Pill onClick={view.onStartOver} className="min-h-[38px] text-[1rem]">
+            Start over
+          </Pill>
+          <span className="text-[0.9375rem] text-muted">
+            Back to your attempt. The private solution and any finished
+            expert reading are kept; your pages are read again.
+          </span>
+        </div>
+      )}
     </div>
   );
 }

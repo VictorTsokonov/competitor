@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { errorResponse } from "@/lib/apiError";
 import { fetchSolution } from "@/lib/analysis";
 
 // Call S: the private solution that grounds the expert reading and the
 // feedback. The response is cached client-side with the analysis but
-// never rendered; solution is null in mock mode (no solver to run).
+// never rendered; demo mode refuses (lib/analysis.ts).
 export async function POST(req: Request) {
   try {
     const body: unknown = await req.json().catch(() => ({}));
@@ -14,8 +15,6 @@ export async function POST(req: Request) {
         : "";
     return NextResponse.json({ solution: await fetchSolution(problemText) });
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "request failed";
-    const status = message.includes("not wired") ? 501 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return errorResponse(e);
   }
 }

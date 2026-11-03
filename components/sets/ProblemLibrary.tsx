@@ -9,11 +9,13 @@ import type { DragPayload, TreeCallbacks } from "@/components/sets/TreeRow";
 
 export default function ProblemLibrary({
   state,
+  readOnly,
   selectedId,
   onChange,
   onSelectProblem,
 }: {
   state: LibraryState;
+  readOnly: boolean;
   selectedId: string | null;
   onChange: (next: LibraryState) => void;
   onSelectProblem: (problemId: string) => void;
@@ -24,6 +26,7 @@ export default function ProblemLibrary({
 
   const cb: TreeCallbacks = {
     state,
+    readOnly,
     selectedId,
     editing,
     setEditing,
@@ -43,6 +46,7 @@ export default function ProblemLibrary({
       <FolderTree cb={cb} />
       <div
         onDragOver={(e) => {
+          if (readOnly) return;
           e.preventDefault();
           setDropTarget("root");
         }}

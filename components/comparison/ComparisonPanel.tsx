@@ -40,28 +40,47 @@ function Section({
   );
 }
 
+// What the empty panel says while a submitted attempt is on its way.
+function pendingText(attemptPhase: string): string {
+  if (attemptPhase === "error") {
+    return "Your attempt could not be read — try again from the centre panel.";
+  }
+  if (attemptPhase === "done") {
+    return "Your attempt has been read — the comparison appears once the expert reading is in.";
+  }
+  return "Your attempt is being read — the comparison appears once it and the expert reading are in.";
+}
+
 // data null is the unsolved state; an expert-only analysis (no attempt
 // extracted yet) keeps the empty state. Once the student chain is real the
-// comparison from lib/compare.ts renders in full — the heading stays
-// either way so the layout does not jump. pages are this session's
-// submitted attempt pages, shown while they are known.
+// comparison renders in full, even for a near-empty attempt with no marks
+// — the heading stays either way so the layout does not jump. pages are
+// this session's submitted attempt pages (or a recorded example's).
 export default function ComparisonPanel({
   data,
   pages,
   explain,
+  attemptPhase,
 }: {
   data: Analysis | null;
   pages?: PageImage[];
+  // The attempt read's phase, while a job holds submitted attempt pages,
+  // so the empty panel never asks for an attempt already submitted.
+  attemptPhase?: string;
   // The explain stage's live state, while a job runs: the panel shows
   // the TypeScript comparison first and this line says the upgrade is
   // coming (or failed, with a retry).
   explain?: { phase: string; message?: string; onRetry: () => void };
 }) {
-  if (!data || data.student.spans.length === 0) {
-    const emptyText = !data
-      ? "The comparison appears here after you submit your attempt."
-      : data.comparison.first_divergence ||
-        "Submit your attempt to see the comparison.";
+  const attempted = !!data && (!!data.attempt_report || data.student.spans.length > 0);
+  if (!data || !attempted) {
+    const pending = attemptPhase && !(attemptPhase === "done" && data);
+    const emptyText = pending
+      ? pendingText(attemptPhase)
+      : !data
+        ? "The comparison appears here after you submit your attempt."
+        : data.comparison.first_divergence ||
+          "Submit your attempt to see the comparison.";
     return (
       <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
         <div className="flex min-h-[36px] items-center pr-[46px]">
@@ -81,8 +100,8 @@ export default function ComparisonPanel({
   }
   const { cards, unused_cues: unused } = data.comparison;
   // Grounded readings earn the stronger note; without a verified solution
-  // the humbler wording stays.
-  const grounded = data.solution?.verified === true;
+  // the humbler wording stays. Recorded examples carry the verdict alone.
+  const grounded = data.grounded ?? data.solution?.verified === true;
   return (
     <div className="px-[1.375rem] pb-7 pt-[0.875rem]">
       <div className="flex min-h-[36px] items-center pr-[46px]">

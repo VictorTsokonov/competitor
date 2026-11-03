@@ -8,6 +8,8 @@ export type DragPayload = { kind: "problem" | "folder"; id: string } | null;
 
 export type TreeCallbacks = {
   state: LibraryState;
+  // Demo mode: rows select, nothing renames, deletes or drags.
+  readOnly: boolean;
   selectedId: string | null;
   editing: { kind: "folder" | "problem"; id: string } | null;
   setEditing: React.Dispatch<
@@ -54,15 +56,20 @@ export function RenameInput({ initial, onCommit, onCancel }: {
   onCommit: (name: string) => void;
   onCancel: () => void;
 }) {
+  const [opened] = useState(initial);
   const [draft, setDraft] = useState(initial);
+  // An untouched draft commits nothing, so a name that changed while the
+  // input was open (the model's title landing) is never overwritten by
+  // the one the input opened with.
+  const commit = () => (draft.trim() !== opened.trim() ? onCommit(draft) : onCancel());
   return (
     <input
       autoFocus
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => onCommit(draft)}
+      onBlur={commit}
       onKeyDown={(e) => {
-        if (e.key === "Enter") onCommit(draft);
+        if (e.key === "Enter") commit();
         if (e.key === "Escape") onCancel();
       }}
       onClick={(e) => e.stopPropagation()}

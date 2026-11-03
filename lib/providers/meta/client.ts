@@ -1,11 +1,21 @@
 import OpenAI from "openai";
 import type { z } from "zod";
+import { appMode, DemoModeError } from "../../mode";
 
 // Meta Model API, OpenAI-compatible (dev.meta.ai/docs). Chat completions
 // take a top-level reasoning_effort; "none" is rejected by Muse Spark.
 // Server side only: the key never reaches the browser.
 const BASE_URL = "https://api.meta.ai/v1";
-const MODEL = "muse-spark-1.3";
+export const META_MODEL = "muse-spark-1.3";
+
+// Explicit limits for every model call. The SDK defaults are a 10-minute
+// timeout with 2 silent retries, so one stuck call could hold a stage for
+// half an hour with nothing to show for it; Node's fetch already gives up
+// on a response whose headers take more than 300 s, so 5 minutes is the
+// real ceiling anyway. One retry still covers a dropped connection or a
+// 429/5xx; a call that times out twice fails with a readable message.
+export const MODEL_CALL_TIMEOUT_MS = 5 * 60 * 1000;
+const MODEL_CALL_MAX_RETRIES = 1;
 
 export type MetaEffort = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
@@ -43,13 +53,21 @@ export async function requestValidatedJson<T>(opts: {
   schema: z.ZodType<T>;
   effort: MetaEffort;
 }): Promise<JsonCall<T>> {
+  // Second lock behind the seam in lib/analysis.ts: in demo mode nothing
+  // reaches the model, whatever keys are set.
+  if (appMode() === "demo") throw new DemoModeError();
   const apiKey = process.env.MODEL_API_KEY;
   if (!apiKey) {
     throw new Error(
       "MODEL_API_KEY is not set: add it to .env.local and restart the server."
     );
   }
-  const client = new OpenAI({ apiKey, baseURL: BASE_URL });
+  const client = new OpenAI({
+    apiKey,
+    baseURL: BASE_URL,
+    timeout: MODEL_CALL_TIMEOUT_MS,
+    maxRetries: MODEL_CALL_MAX_RETRIES,
+  });
   const messages: OpenAI.ChatCompletionMessageParam[] = [
     { role: "system", content: opts.system },
     { role: "user", content: opts.user },
@@ -62,12 +80,19 @@ export async function requestValidatedJson<T>(opts: {
     let completion: OpenAI.ChatCompletion;
     try {
       completion = await client.chat.completions.create({
-        model: MODEL,
+        model: META_MODEL,
         reasoning_effort: opts.effort,
         response_format: { type: "json_object" },
         messages,
       });
     } catch (e: unknown) {
+      // The timeout error extends the connection error: check it first.
+      if (e instanceof OpenAI.APIConnectionTimeoutError) {
+        throw new Error(
+          `${opts.label}: the model did not answer within ${MODEL_CALL_TIMEOUT_MS / 60_000} minutes, ` +
+            "even after one retry. It may be overloaded; try this stage again."
+        );
+      }
       if (e instanceof OpenAI.APIConnectionError) {
         throw new Error(
           `Could not reach the Meta Model API: ${e.message}. Check your network and try again.`

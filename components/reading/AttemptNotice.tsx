@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Pill from "@/components/ui/Pill";
+import { RichTex } from "@/components/reading/Tex";
 import type { AttemptReport, GuideStage } from "@/lib/schema";
 
 export type AttemptCallState =
@@ -74,8 +75,11 @@ export default function AttemptNotice({
         <div className={`text-[0.9375rem] text-muted ${unguided ? "mt-2" : ""}`}>
           Hard to read:
           <ul className="mt-1 list-disc pl-5">
+            {/* Notes may quote the student's maths as $…$. */}
             {report.legibility.map((note) => (
-              <li key={note}>{note}</li>
+              <li key={note}>
+                <RichTex tex={note} />
+              </li>
             ))}
           </ul>
         </div>

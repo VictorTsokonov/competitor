@@ -4,15 +4,20 @@ import type { KeyValueStorage } from "./problems";
 // Client-side cache of analyses keyed by problem id, so selecting an
 // analysed problem or resubmitting an attempt never re-runs call A for an
 // unchanged statement. Entries are validated on read and the newest few
-// are kept; the attempt page images are never stored.
-const KEY = "competitor.analyses.v1";
+// are kept; the attempt page images are never stored. Live mode only: the
+// demo fetches its recorded examples fresh. The key sits under the mode
+// prefix (lib/useAppMode.tsx).
+const KEY = "analyses.v1";
 const MAX_ENTRIES = 12;
 
 type Entry = { hash: string; savedAt: number; analysis: unknown };
 type Cache = Record<string, Entry>;
 
-// djb2 — tiny, and enough to notice an edited statement.
-function hashText(text: string): string {
+// djb2 — tiny, and enough to notice an edited statement. Analyses quote
+// the statement trimmed (the API trims it), so it is hashed trimmed; the
+// job records (lib/jobRecord.ts) key to the statement the same way.
+export function statementHash(statement: string): string {
+  const text = statement.trim();
   let h = 5381;
   for (let i = 0; i < text.length; i++) {
     h = ((h << 5) + h + text.charCodeAt(i)) >>> 0;
@@ -36,7 +41,7 @@ export function loadCachedAnalysis(
   problemText: string
 ): Analysis | null {
   const entry = readCache(storage)[problemId];
-  if (!entry || entry.hash !== hashText(problemText)) return null;
+  if (!entry || entry.hash !== statementHash(problemText)) return null;
   const parsed = AnalysisSchema.safeParse(entry.analysis);
   return parsed.success ? parsed.data : null;
 }
@@ -62,7 +67,7 @@ export function saveCachedAnalysis(
   try {
     const cache = readCache(storage);
     cache[problemId] = {
-      hash: hashText(analysis.problem.text),
+      hash: statementHash(analysis.problem.text),
       savedAt: Date.now(),
       analysis,
     };

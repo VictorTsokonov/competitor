@@ -12,6 +12,12 @@ const KIND_LABEL: Record<FeedbackCard["kind"], string> = {
   unused_mark: "unused mark",
 };
 
+// The card prints its own "Next:" / "Self-check:" labels; a model that
+// wrote the label into the field as well would show it twice.
+function withoutLabel(text: string, label: string): string {
+  return text.replace(new RegExp(`^\\s*\\**${label}\\**\\s*:\\**\\s*`, "i"), "");
+}
+
 // One elaborated feedback card: the student's own evidence, the
 // process-level diagnosis, the next move, the self-check. A near miss is
 // the one kind that gets the red tag — it marks the student's own right
@@ -43,10 +49,11 @@ export default function FeedbackCardView({
         <RichTex tex={card.diagnosis} />
       </div>
       <div className="mt-1">
-        <strong>Next:</strong> <RichTex tex={card.redirection} />
+        <strong>Next:</strong> <RichTex tex={withoutLabel(card.redirection, "Next")} />
       </div>
       <div className="mt-1 text-[0.9375rem] text-muted">
-        <strong>Self-check:</strong> <RichTex tex={card.self_check} />
+        <strong>Self-check:</strong>{" "}
+        <RichTex tex={withoutLabel(card.self_check, "Self-check")} />
       </div>
     </Card>
   );

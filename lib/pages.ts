@@ -8,13 +8,17 @@ export type PageImage = {
   id: string;
   dataUrl: string; // JPEG, long edge ≤ LONG_EDGE px
   label: string; // "scan.pdf · p3" or the file name
+  // Recorded example pages are served from public/; the full page opens
+  // from its thumbnail so the handwriting can be read.
+  href?: string;
 };
 
 export const MAX_PAGES_PER_PDF = 20;
 export const MAX_ATTEMPT_PAGES = 8;
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
-const LONG_EDGE = 1600;
-const JPEG_QUALITY = 0.8;
+// Shared with scripts/record-example.ts, which prepares pages the same way.
+export const LONG_EDGE = 1600;
+export const JPEG_QUALITY = 0.8;
 
 export type PagesResult = {
   pages: PageImage[];

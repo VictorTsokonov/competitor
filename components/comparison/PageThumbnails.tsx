@@ -4,6 +4,17 @@ import type { PageImage } from "@/lib/pages";
 
 const TILTS = ["rotate-[-2deg]", "rotate-[1.5deg]", "rotate-[-1deg]", "rotate-[2deg]"];
 
+function Thumbnail({ page, index }: { page: PageImage; index: number }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- local data URL, next/image cannot optimise it
+    <img
+      src={page.dataUrl}
+      alt={`Page ${index + 1} · ${page.label}`}
+      className="h-[104px] w-auto rounded-[3px] bg-card p-[3px] shadow-[2px_3px_0_rgba(43,38,34,0.12)]"
+    />
+  );
+}
+
 // Ordered strip of attempt pages, notebook-photo style. With onRemove /
 // onMove it is the pre-submit editor (remove pages that belong to another
 // problem, fix the order); without them it is a read-only record. With no
@@ -30,12 +41,13 @@ export default function PageThumbnails({
       {pages.map((page, i) => (
         <li key={page.id} className="flex flex-col items-center gap-1">
           <div className={`relative ${TILTS[i % TILTS.length]}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- local data URL, next/image cannot optimise it */}
-            <img
-              src={page.dataUrl}
-              alt={`Page ${i + 1} · ${page.label}`}
-              className="h-[104px] w-auto rounded-[3px] bg-card p-[3px] shadow-[2px_3px_0_rgba(43,38,34,0.12)]"
-            />
+            {page.href ? (
+              <a href={page.href} target="_blank" rel="noreferrer" title="Open the full page">
+                <Thumbnail page={page} index={i} />
+              </a>
+            ) : (
+              <Thumbnail page={page} index={i} />
+            )}
             {onRemove && (
               <button
                 type="button"

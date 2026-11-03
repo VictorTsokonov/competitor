@@ -1,6 +1,12 @@
 import type { z } from "zod";
 import { AnalysisSchema, type Analysis, type Chain, type Solution } from "../schema";
-import type { AnalysisInput, AttemptInput, AttemptResult } from "./types";
+import type {
+  AnalysisInput,
+  AttemptInput,
+  AttemptResult,
+  ExpertStepInput,
+  ExpertStepResult,
+} from "./types";
 import { requestValidatedJson, type JsonCall } from "./meta/client";
 import { pinnedChainSchema } from "./meta/chainSchema";
 import { readPages } from "./meta/vision";
@@ -10,7 +16,9 @@ import { runChainAudit } from "./meta/audit";
 
 // Call A (expert pass, grounded in call S's verified solution when one is
 // supplied), call B (second reading, ./meta/reweighPrompt) and call C
-// (student extraction, ./meta/vision) are live.
+// (student extraction, ./meta/vision) are live. The expert reading runs
+// either in one go (fetchMetaAnalysis, for the scripts and /api/analyse)
+// or one step per request (runExpertStep, for /api/expert).
 
 export const NOT_MATHS_MESSAGE =
   "The model read this as not a well-posed maths problem, so there is no expert reading to build. Edit the statement and resubmit.";
@@ -129,15 +137,18 @@ function emptyStudentChain(problemText: string): Chain {
   };
 }
 
-export async function fetchMetaAnalysis(input: AnalysisInput): Promise<Analysis> {
-  const text = input.problemText.trim();
-  if (!text) throw new Error("The problem statement is empty: nothing to analyse.");
-  const expert = await requestExpertPass(text, input.solution);
+// An expert chain as a full Analysis: the student side empty and an
+// honest placeholder comparison until call C provides a student chain.
+// problemText must already be trimmed, as the chain's spans quote it.
+export function analysisFromExpertChain(
+  problemText: string,
+  expert: Chain,
+  solution?: Solution | null
+): Analysis {
   return AnalysisSchema.parse({
-    problem: { text },
+    problem: { text: problemText },
     expert,
-    student: emptyStudentChain(text),
-    // Honest placeholder until call C provides a student chain.
+    student: emptyStudentChain(problemText),
     comparison: {
       where_you_are: "",
       first_divergence: "Submit your attempt to see the comparison.",
@@ -145,6 +156,42 @@ export async function fetchMetaAnalysis(input: AnalysisInput): Promise<Analysis>
       unused_cues: [],
       where_to_next: "",
     },
-    solution: input.solution ?? undefined,
+    solution: solution ?? undefined,
   });
+}
+
+export async function fetchMetaAnalysis(input: AnalysisInput): Promise<Analysis> {
+  const text = input.problemText.trim();
+  if (!text) throw new Error("The problem statement is empty: nothing to analyse.");
+  const expert = await requestExpertPass(text, input.solution);
+  return analysisFromExpertChain(text, expert, input.solution);
+}
+
+// One step of the expert reading per request. Unlike requestExpertPass,
+// a failing call B or R throws here: the client decides that those two
+// are non-fatal and keeps the chain it already holds.
+export async function runExpertStep(input: ExpertStepInput): Promise<ExpertStepResult> {
+  const text = input.problemText.trim();
+  if (!text) throw new Error("The problem statement is empty: nothing to analyse.");
+  const solution = input.solution ?? null;
+  if (input.step === "first") {
+    const chain = (await runExpertPass(text, solution)).data;
+    return { analysis: analysisFromExpertChain(text, chain, solution) };
+  }
+  const chain = input.chain;
+  if (!chain) {
+    throw new Error(`The ${input.step} step needs the reading from the step before it.`);
+  }
+  if (input.step === "second") {
+    const updated = (await runSecondReading(text, chain, solution)).data;
+    return { analysis: analysisFromExpertChain(text, updated, solution) };
+  }
+  if (!solution?.verified) {
+    throw new Error("The audit needs a verified solution to check the reading against.");
+  }
+  const { chain: audited, audit } = await runChainAudit(text, chain, solution);
+  return {
+    analysis: analysisFromExpertChain(text, audited, solution),
+    audit: { verdict: audit.verdict, revised: audit.revised },
+  };
 }

@@ -1,0 +1,390 @@
+{
+  "meta": {
+    "source": "ICMC 2019 Problem 2",
+    "fixture": "icmc-2019-p2",
+    "recorded_at": "2026-11-03T05:20:22.362Z",
+    "model": "muse-spark-1.3",
+    "pages": [
+      "/examples/1/page-1.jpg",
+      "/examples/1/page-2.jpg",
+      "/examples/1/page-3.jpg"
+    ]
+  },
+  "analysis": {
+    "problem": {
+      "text": "Find integers a and b such that a^b = 3^0 C(2020,0) − 3^1 C(2020,2) + 3^2 C(2020,4) − ⋯ + 3^{1010} C(2020,2020)."
+    },
+    "expert": {
+      "problem": {
+        "text": "Find integers a and b such that a^b = 3^0 C(2020,0) − 3^1 C(2020,2) + 3^2 C(2020,4) − ⋯ + 3^{1010} C(2020,2020)."
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "Find integers",
+          "category": "setting",
+          "weight": 45,
+          "reason": "Integers allow a negative base, so the sign of the sum matters for the final power"
+        },
+        {
+          "id": "s2",
+          "text": "a and b",
+          "category": "goal",
+          "weight": 60,
+          "reason": "Names the two whole numbers to find, the base and the exponent"
+        },
+        {
+          "id": "s3",
+          "text": "such that",
+          "category": "informal",
+          "weight": 28,
+          "reason": "Quiet linking words carry no math, just that equality is required"
+        },
+        {
+          "id": "s4",
+          "text": "a^b =",
+          "category": "goal",
+          "weight": 65,
+          "reason": "Single power on the left promises the long sum collapses to one repeated product"
+        },
+        {
+          "id": "s5",
+          "text": "3^0 C(2020,0)",
+          "category": "definition",
+          "weight": 70,
+          "reason": "First term fixes the shape, a power of three times a choose number with even bottom"
+        },
+        {
+          "id": "s6",
+          "text": "− 3^1 C(2020,2)",
+          "category": "rule",
+          "weight": 95,
+          "reason": "Sign flips while power of three climbs by one, so each term carries a power of minus three"
+        },
+        {
+          "id": "s7",
+          "text": "+ 3^2 C(2020,4)",
+          "category": "rule",
+          "weight": 58,
+          "reason": "Next plus confirms the flip every term and bottom numbers go up by two each time"
+        },
+        {
+          "id": "s8",
+          "text": "− ⋯ +",
+          "category": "informal",
+          "weight": 52,
+          "reason": "Dots hide the middle terms, so the pattern must be checked on the last written term"
+        },
+        {
+          "id": "s9",
+          "text": "3^{1010} C(2020,2020)",
+          "category": "rule",
+          "weight": 78,
+          "reason": "Last term is number 1010 with a plus sign, matching an even position in the flip pattern"
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s6",
+            "why_it_matters": "Read the first two terms in order: plus $3^0 C(2020,0)$, minus $3^1 C(2020,2)$. The bottom number jumps from $0$ to $2$, so only even bottoms appear. The power of $3$ climbs from $0$ to $1$ while the sign flips from plus to minus. A climbing power with a flipping sign together mean multiplying by a negative number each step, here $-3$.",
+            "how_spotted": "Copy the first three terms one under another and say in words what changes from each term to the next, sign, top power and bottom number."
+          },
+          {
+            "id": "c2",
+            "span_id": "s9",
+            "why_it_matters": "Counting the first term as number $0$, the last term $3^{1010} C(2020,2020)$ is number $1010$, which is even. The flip rule predicts plus on even-numbered terms, and the statement shows plus. So the plus minus plus pattern holds all the way to the end.",
+            "how_spotted": "When a sum uses dots, test the rule you guessed on the last term the statement writes out in full."
+          },
+          {
+            "id": "c3",
+            "span_id": "s4",
+            "why_it_matters": "The problem promises $1011$ terms add to one single power $a^b$. Sums that collapse like that usually come from multiplying out one bracket raised to a power, such as $(1+x)^{2020}$ where $x$ means any number, here the number whose square is $-3$. So look for one bracket whose expansion gives these terms.",
+            "how_spotted": "Write the bottom numbers $0$, $2$, $4$ next to the first three terms and $2020$ next to the last to see $1011$ even-bottom terms set against one power."
+          },
+          {
+            "id": "c4",
+            "span_id": "s8",
+            "why_it_matters": "The dots hide most terms and the sign rule with them. With $0$, $2$, $4$ seen and then dots, do not trust plus minus plus until the last term confirms it.",
+            "how_spotted": "Underline every dots symbol and check the terms on both sides of it for sign and shape."
+          }
+        ],
+        "definitions": [
+          {
+            "term": "integers",
+            "meaning_latex": "whole numbers like $2$, $0$ and $-5$, positive and negative with no fractions"
+          },
+          {
+            "term": "C(2020,2)",
+            "meaning_latex": "read $2020$ choose $2$, the number of ways to choose $2$ things out of $2020$ and also the number in front of $x^2$ when $(1+x)^{2020}$ is multiplied out where $x$ means any number"
+          },
+          {
+            "term": "general term",
+            "meaning_latex": "term number $k$ counting the first term as number $0$ is $(-3)^k$ times $C(2020,2k)$ for $k$ from $0$ to $1010$"
+          },
+          {
+            "term": "$i$",
+            "meaning_latex": "the number whose square is $-1$ so that $(i\\sqrt{3})^2$ equals $-3$"
+          }
+        ]
+      },
+      "goal": {
+        "asked": "This asks whether this long alternating sum can be written as one integer power and which integers $a$ and $b$ do it.",
+        "answer_form": "The answer gives a specific pair $a$ and $b$ with a working that turns the whole sum into one power and checks its sign.",
+        "final_line_would_say": "The whole sum equals one explicit power, and the pair $a$, $b$ written down gives exactly that power, sign included."
+      },
+      "informal_cues": [
+        {
+          "span_id": "s3",
+          "bearing": "\"such that\" just links the two sides and adds no extra condition. Read it as the match between $a^b$ and the sum must hold exactly."
+        },
+        {
+          "span_id": "s8",
+          "bearing": "The dots hide most of the terms, and with them the sign rule. Trust plus minus plus only after checking it on the last term, where the statement writes the sign out again."
+        }
+      ],
+      "abstraction": {
+        "underneath": [
+          {
+            "object": "the alternating sum",
+            "really_is": "the part of $(1+x)^{2020}$ multiplied out that uses only even powers of $x$, where $x$ is a number whose square is $-3$",
+            "implies": "the terms with an odd power of $x$ each still contain $x$ and these do not, so adding the pair with $x$ and with $-x$ cancels the odd ones and leaves twice this sum"
+          },
+          {
+            "object": "$1+i\\sqrt{3}$",
+            "really_is": "the point $1$ to the right of zero and $\\sqrt{3}$ up, at distance $2$ from zero and one sixth of a full turn round from the direction of $1$",
+            "implies": "multiplying by it doubles the distance from zero and turns another sixth of a turn, so raising it to a power raises the distance to that power and multiplies the turn"
+          }
+        ],
+        "deeper_properties": [
+          "When only even bottom numbers $0$, $2$, $4$ up to $2020$ appear, flipping signs need a square that is negative. Since $(\\sqrt{3})^2$ equals $3$ is positive, all signs would stay plus, while $(i\\sqrt{3})^2$ equals $-3$ is negative, so its even powers go $1$, $-3$, $9$ and the sign flips each time.",
+          "In $(1+i\\sqrt{3})^{2020}$ multiplied out, every term with an odd power still contains one $i$. Keeping only the part without $i$ throws exactly those away, which is why the statement shows only even bottom numbers."
+        ]
+      },
+      "simplification": {
+        "instance": "Keep the same shape but use $4$ instead of $2020$, so the sum has only $3$ terms:",
+        "instance_latex": "3^0 C(4,0) - 3^1 C(4,2) + 3^2 C(4,4)",
+        "what_to_try": "Work this three-term sum out by hand from the choose numbers and look separately at how big the answer is and whether it is plus or minus.",
+        "notice_prompt": "If you do the same with $2$ and with $6$ in place of $2020$, how do the sizes and the plus-or-minus signs change as the top number grows?"
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Even part of $(1+x)^{2020}$ with $x^2=-3$ by distance and angle",
+            "deciding_span_ids": [
+              "s6",
+              "s9",
+              "s4"
+            ],
+            "from_first_principles": "The middle terms give the pattern and the last term confirms it: term number $k$ is $C(2020,2k)$ times $(-3)^k$. Since $(i\\sqrt{3})^2$ equals $-3$, which is negative, that is $C(2020,2k)$ times $(i\\sqrt{3})^{2k}$, exactly the even-power terms when $(1+i\\sqrt{3})^{2020}$ is multiplied out. Adding the same bracket with $-i\\sqrt{3}$ cancels the odd-power terms, which still contain $i$, and leaves twice the sum, so the sum is half that pair. De Moivre's theorem, raising a complex number to a power raises its distance from zero to that power and multiplies its angle by it, then replaces $2020$ multiplications by one distance and one angle, and the final angle decides how much of that distance the part without $i$ keeps, sign included.",
+            "kept": true,
+            "why": "It wins because every step comes from the statement: the first terms give the pattern, the last term confirms the sign, and the promise of a single power is what the distance-and-angle picture delivers."
+          },
+          {
+            "name": "Binomial theorem with $x=\\sqrt{3}$, expanding $(1+\\sqrt{3})^{2020}$",
+            "deciding_span_ids": [
+              "s5"
+            ],
+            "from_first_principles": "The powers of $3$ sit next to even bottom numbers $0$, $2$, $4$, and $3$ equals $(\\sqrt{3})^2$, so they look like even powers of $\\sqrt{3}$ in $(1+\\sqrt{3})^{2020}$ multiplied out.",
+            "kept": false,
+            "why": "The signs rule it out: every term with $\\sqrt{3}$ is positive, because $(\\sqrt{3})^2$ equals $3$ is positive, but this sum alternates plus and minus. With only even powers, alternating signs need a number whose square is negative, and that is where $i$ comes in."
+          },
+          {
+            "name": "Compute small cases and guess",
+            "deciding_span_ids": [
+              "s8"
+            ],
+            "from_first_principles": "Replace $2020$ by small even numbers such as $2$, $4$ and $6$ and work each sum out by hand, a pattern in size and sign shows up quickly.",
+            "kept": false,
+            "why": "It finds the pattern but proves nothing about $2020$: a pattern seen in three small cases still needs a reason why it continues to $2020$."
+          }
+        ],
+        "chosen": "Read the sum as the even part of $(1+i\\sqrt{3})^{2020}$ and work that power out by distance and angle (de Moivre's theorem)."
+      },
+      "prerequisites": [
+        {
+          "name": "Binomial theorem with a complex number",
+          "needed_for": "Seeing the sum inside $(1+i\\sqrt{3})^{2020}$: the theorem multiplies out $(1+x)^{2020}$ term by term, with $C(2020,2)$ in front of $x^2$ and $C(2020,4)$ in front of $x^4$ and so on, here with $x$ equal to $i\\sqrt{3}$.",
+          "flag": "needed"
+        },
+        {
+          "name": "Polar form and de Moivre's theorem",
+          "needed_for": "Working out a huge power in one step: describe $1+i\\sqrt{3}$ by distance from zero and angle from the direction of $1$, raising to a power raises the distance to that power and multiplies the angle.",
+          "flag": "needed"
+        }
+      ],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [],
+        "what_changed": "At first the sum looked like many separate terms to add one by one. On this pass the flipping sign and the even bottom numbers show it is the part without $i$ of $(1+i\\sqrt{3})^{2020}$ multiplied out, and the last term checks the sign rule holds through the dots."
+      },
+      "domain": "maths"
+    },
+    "student": {
+      "problem": {
+        "text": "Find integers a and b such that a^b = 3^0 C(2020,0) − 3^1 C(2020,2) + 3^2 C(2020,4) − ⋯ + 3^{1010} C(2020,2020)."
+      },
+      "spans": [
+        {
+          "id": "s1",
+          "text": "Find integers a and b",
+          "category": "goal",
+          "weight": 20,
+          "reason": "student wrote \"$a,b \\in Z !$\" in red on page 2",
+          "uncertain": false
+        },
+        {
+          "id": "s2",
+          "text": "a^b = 3^0 C(2020,0) − 3^1 C(2020,2) + 3^2 C(2020,4) − ⋯ + 3^{1010} C(2020,2020).",
+          "category": "setting",
+          "weight": 95,
+          "reason": "student copied \"$a^b = 3^0 \\binom{2020}{0} - 3^1 \\binom{2020}{2} + ...$\" at top of page 1 and again at top of page 2",
+          "uncertain": false
+        }
+      ],
+      "reading": {
+        "cues": [
+          {
+            "id": "c1",
+            "span_id": "s1",
+            "why_it_matters": "student took it to mean $a$ and $b$ are whole numbers",
+            "how_spotted": "page 2 middle in red where student wrote \"$a,b \\in Z !$\""
+          },
+          {
+            "id": "c2",
+            "span_id": "s2",
+            "why_it_matters": "student took it as the starting sum to copy out and work from",
+            "how_spotted": "page 1 top line copied out and page 2 top line copied out again with red notes above"
+          }
+        ],
+        "definitions": []
+      },
+      "goal": {
+        "asked": "",
+        "answer_form": "",
+        "final_line_would_say": ""
+      },
+      "informal_cues": [],
+      "abstraction": {
+        "underneath": [
+          {
+            "object": "alternating plus and minus with powers of three",
+            "really_is": "$(-3)^n$",
+            "implies": "the sign can be put together with the three"
+          },
+          {
+            "object": "the long sum",
+            "really_is": "$(y-1)^{1010}$ times something",
+            "implies": "it can be lined up with the $(y-1)$ lines they wrote"
+          }
+        ],
+        "deeper_properties": [
+          "$n=2k, k\\in Z$"
+        ]
+      },
+      "simplification": {
+        "instance": "first choose numbers to look for a pattern",
+        "instance_latex": "\\binom{2020}{2} = \\frac{2020 \\times 2019}{2!} = 1010 \\times 2019",
+        "what_to_try": "work out the first few choose numbers to find $x_1$ and $x_2$",
+        "notice_prompt": ""
+      },
+      "method": {
+        "candidates": [
+          {
+            "name": "Maybe we can form geometric series ?",
+            "deciding_span_ids": [
+              "s2"
+            ],
+            "from_first_principles": "page 1 top right margin note with those words and nothing worked under it",
+            "kept": false,
+            "why": "abandoned on the page"
+          },
+          {
+            "name": "expand first choose numbers and track powers of $2$ and $3$",
+            "deciding_span_ids": [
+              "s2"
+            ],
+            "from_first_principles": "page 1 middle where student computed $\\binom{2020}{0}$, $\\binom{2020}{2}$, $\\binom{2020}{4}$ and $2!$, $4!$, $6!$, $8!$ leading to $2^3 \\times 3$ and $2^4 \\times 3^2 \\times 5$",
+            "kept": false,
+            "why": "student wrote this way looks way too complex and wrote Skip this approach"
+          },
+          {
+            "name": "Complex Numbers",
+            "deciding_span_ids": [],
+            "from_first_principles": "page 1 bottom where a heading Complex Numbers in purple with an arrow under it has no working under it on that page",
+            "kept": false,
+            "why": "abandoned on the page"
+          },
+          {
+            "name": "match sum to $(y-1)$ power expansion",
+            "deciding_span_ids": [
+              "s2"
+            ],
+            "from_first_principles": "page 2 to page 3 where student wrote $(y+x)^n$, $(y-1)^{2020}$ and $(y-1)^{1010}$ and solved $x_1 = \\frac{1}{2019}$ and $x_2 = \\frac{3}{2019 \\times 2017}$ and wrote We need $(y-1)^{1010}$ times something equals $a^b$",
+            "kept": false,
+            "why": "student wrote 45 Min Passed Going to Problem 1"
+          }
+        ],
+        "chosen": "match sum to $(y-1)$ power expansion"
+      },
+      "prerequisites": [],
+      "second_reading": {
+        "new_spans": [],
+        "reweighted": [],
+        "what_changed": ""
+      },
+      "domain": "maths"
+    },
+    "comparison": {
+      "where_you_are": "The pages copy the long sum and work out the first choose numbers by direct arithmetic. The kept working tries to fit the sum to a power of a difference, while the purple heading about complex numbers sits with nothing under it.",
+      "first_divergence": "The earliest split is on page 1 in the middle, where the working expands the first choose numbers to chase a separate multiplier for each term. The expert reading stays with the first two terms side by side, where the sign flips while the power of 3 climbs by one and the bottom number goes up by two, and looks for one bracket that gives all the terms at once.",
+      "cards": [
+        {
+          "kind": "near_miss",
+          "evidence_student": "page 1: heading \"Complex Numbers\" in purple with an arrow under it and no working under it",
+          "expert_span_ids": [
+            "s6",
+            "s4",
+            "s9"
+          ],
+          "diagnosis": "The pages already put the flipping sign together with the power of 3 as one minus number per step. That start handles the even bottom numbers correctly. The route stalls because the purple heading is left empty, so that minus number never gets a number that gives it when multiplied by itself, and without it the working cannot produce all the even-only terms in one go.",
+          "redirection": "You already have the sign together with the 3 as one minus number per step, so go back to the purple heading and ask what number multiplied by itself gives that minus number for the even steps.",
+          "self_check": "When signs flip on every term, what number multiplied by itself could give that flip in one step?"
+        },
+        {
+          "kind": "wrong_turn",
+          "evidence_student": "page 2 to page 3: work with $(y+x)^n$, $(y-1)^{2020}$ and $(y-1)^{1010}$ that gets $x_1 = \\frac{1}{2019}$ and $x_2 = \\frac{3}{2019 \\times 2017}$, with a note that $(y-1)^{1010}$ times something equals $a^b$",
+          "expert_span_ids": [
+            "s6",
+            "s4"
+          ],
+          "diagnosis": "The pages get the first choose numbers right by direct arithmetic. The fitting route stalls because the multiplier it solves for does not stay fixed, the first value and the second value come out different. One fixed difference to one power cannot produce all the different choose numbers at once.",
+          "redirection": "You already have the two different values for the multiplier side by side, so write in words why one fixed difference cannot give both at once and set that fitting attempt aside.",
+          "self_check": "When I fit terms to one bracket power, do the solved parts stay the same on the first two cases?"
+        }
+      ],
+      "unused_cues": [
+        "Find integers a and b"
+      ],
+      "where_to_next": "Return to the purple heading on page 1 and test what number multiplied by itself gives the minus number for each step, using the first two terms to check it."
+    },
+    "attempt_report": {
+      "structure": "unstructured",
+      "inferred_stages": [
+        "reading",
+        "abstraction",
+        "simplification",
+        "method"
+      ],
+      "missing_stages": [
+        "goal"
+      ],
+      "legibility": [
+        "page 2 red line to the right of the circled expansion, first letter before the cross sign",
+        "page 1 middle line under the four choose working where 2020 is underlined"
+      ]
+    },
+    "grounded": true
+  }
+}

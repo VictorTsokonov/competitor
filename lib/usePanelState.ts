@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 export type PanelSide = "left" | "right";
 
@@ -25,20 +25,22 @@ function clampWidth(px: number): number {
   return Math.min(PANEL_MAX, Math.max(PANEL_MIN, Math.round(px)));
 }
 
+// What the server renders, and so what the first client render must match.
+const SERVER_STATE: PanelState = {
+  leftOpen: true,
+  rightOpen: true,
+  leftWidth: DEFAULT_LEFT_WIDTH,
+  rightWidth: DEFAULT_RIGHT_WIDTH,
+};
+
 function viewportDefaults(): PanelState {
-  const w = typeof window === "undefined" ? 1440 : window.innerWidth;
-  return {
-    leftOpen: w >= 1024,
-    rightOpen: w >= 1280,
-    leftWidth: DEFAULT_LEFT_WIDTH,
-    rightWidth: DEFAULT_RIGHT_WIDTH,
-  };
+  const w = window.innerWidth;
+  return { ...SERVER_STATE, leftOpen: w >= 1024, rightOpen: w >= 1280 };
 }
 
 function load(): PanelState {
   const fallback = viewportDefaults();
   try {
-    if (typeof window === "undefined") return fallback;
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
     const p = JSON.parse(raw) as Partial<PanelState>;
@@ -54,9 +56,14 @@ function load(): PanelState {
 }
 
 export function usePanelState() {
-  const [state, setState] = useState<PanelState>(load);
+  const [state, setState] = useState<PanelState>(SERVER_STATE);
+
+  // Stored panels apply after hydration but before paint: reading
+  // localStorage in the first render made server and client markup differ.
+  useLayoutEffect(() => setState(load()), []);
 
   useEffect(() => {
+    if (state === SERVER_STATE) return; // not loaded yet: keep what's stored
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
